@@ -268,9 +268,9 @@ function renderFoodLog(entries) {
         <div class="food-name">${escHtml(e.name)}</div>
         <div class="food-macros">
           <span class="food-macro-tag calories-color">🔥 ${e.calories} kcal</span>
-          <span class="food-macro-tag protein-color">🥩 ${e.protein}g P</span>
-          <span class="food-macro-tag carbs-color">🌾 ${e.carbs}g C</span>
-          <span class="food-macro-tag fat-color">💧 ${e.fat}g F</span>
+          <span class="food-macro-tag protein-color">🥩 ${e.protein}g Protein</span>
+          <span class="food-macro-tag carbs-color">🌾 ${e.carbs}g Carbs</span>
+          <span class="food-macro-tag fat-color">💧 ${e.fat}g Fat</span>
         </div>
       </div>
       <button class="btn-icon delete-btn" onclick="deleteFood(${e.id})">
