@@ -467,7 +467,6 @@ function deleteExercise(id) {
 }
 
 function startEdit(id) {
-  // Close any open panel first
   document.querySelectorAll(".ex-edit-panel.open").forEach((p) => p.classList.remove("open"));
   const panel = document.getElementById(`edit-row-${id}`);
   if (panel) panel.classList.add("open");
@@ -729,14 +728,10 @@ function escHtml(s) {
 renderDashboard();
 updateExerciseSuggestions();
 
-// ============================================================
-//  WORKOUT PROGRAMS — Sub-target muscle overlap prevention
-// ============================================================
 
 const WP_STATE = { gender: 'male', level: 'beginner', goal: 'build_muscle', muscle: 'chest' };
 const WP_MUSCLE_TO_GYM = { chest:'Chest', back:'Back', legs:'Legs', shoulders:'Shoulders', arms:'Arms', core:'Core / Abs', glutes:'Glutes' };
 
-// ── Sub-target labels (what the user sees) ───────────────────
 const SUB_TARGET_LABELS = {
   // Chest
   'mid-chest':    'Mid Chest',
@@ -782,7 +777,6 @@ const SUB_TARGET_LABELS = {
   'abductors':    'Abductors',
 };
 
-// Sub-target color map (subtle pill colors)
 const SUB_TARGET_COLORS = {
   // Chest
   'mid-chest':    '#0ea5e9','upper-chest':'#7c3aed','lower-chest':'#ea580c',
@@ -807,7 +801,6 @@ const SUB_TARGET_COLORS = {
   'hamstring-glute':'#16a34a','abductors':'#db2777',
 };
 
-// ── Goal config ──────────────────────────────────────────────
 const GOAL_CONFIG = {
   build_muscle: {
     label: '\uD83D\uDCAA Build Muscle',
@@ -851,9 +844,6 @@ const GOAL_CONFIG = {
   },
 };
 
-// ── Exercise database ────────────────────────────────────────
-// Each entry: { name, sub } where sub is the sub-target key.
-// One exercise per sub-target will be selected per plan.
 const EXERCISE_DB = {
   chest: {
     male: {
@@ -2033,20 +2023,16 @@ const EXERCISE_DB = {
   },
 };
 
-// ── Smart picker: one exercise per sub-target ────────────────
 function wpPickExercises(muscle, gender, level, goal) {
   const pool = ((EXERCISE_DB[muscle] || {})[gender] || {})[level] || [];
   const gc = GOAL_CONFIG[goal];
   const [minCount, maxCount] = gc.exCount[level];
 
-  // Apply goal filter (keep exercises matching the goal style)
   let filtered = gc.filter ? pool.filter(e => gc.filter(e.name)) : pool;
-  if (filtered.length < minCount) filtered = pool; // fallback if filter is too strict
+  if (filtered.length < minCount) filtered = pool;
 
-  // Shuffle to randomize which exercise is picked from each sub-target
   const shuffled = [...filtered].sort(() => Math.random() - 0.5);
 
-  // Pick one exercise per sub-target, stop when we hit maxCount
   const usedSubs = new Set();
   const selected = [];
   for (const ex of shuffled) {
@@ -2057,7 +2043,6 @@ function wpPickExercises(muscle, gender, level, goal) {
     }
   }
 
-  // If we didn't reach minCount (unlikely but safe), fill from remaining pool
   if (selected.length < minCount) {
     for (const ex of shuffled) {
       if (!selected.includes(ex)) {
@@ -2070,7 +2055,6 @@ function wpPickExercises(muscle, gender, level, goal) {
   return selected;
 }
 
-// ── Goal styles ──────────────────────────────────────────────
 const GOAL_STYLES = {
   build_muscle: { color:'#7c3aed', bg:'rgba(139,92,246,.08)', border:'rgba(139,92,246,.25)' },
   lose_fat:     { color:'#ea580c', bg:'rgba(249,115,22,.08)',  border:'rgba(249,115,22,.25)'  },
