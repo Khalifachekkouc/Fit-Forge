@@ -852,63 +852,129 @@ main {
     box-shadow: 0 2px 8px rgba(0, 150, 120, .2);
 }
 
-.exercises-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0 .6rem;
+/* ── Responsive exercise list (replaces table) ── */
+.ex-list {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
     margin-top: .5rem;
 }
 
-.exercises-table th {
-    text-align: left;
-    font-size: .75rem;
-    font-weight: 600;
+.ex-list-header {
+    display: flex;
+    align-items: center;
+    padding: .3rem .75rem;
+    gap: .5rem;
+}
+
+.ex-list-header span {
+    font-size: .72rem;
+    font-weight: 700;
     color: #65758b;
     text-transform: uppercase;
     letter-spacing: .07em;
-    padding: .4rem .75rem;
 }
 
-.exercise-row td {
-    padding: .8rem .75rem;
+.ex-col-name   { flex: 1; min-width: 0; }
+.ex-col-stat   { width: 44px; text-align: center; flex-shrink: 0; font-size: .9rem; font-weight: 600; }
+.ex-col-actions { width: 64px; flex-shrink: 0; display: flex; justify-content: flex-end; align-items: center; gap: .2rem; }
+
+.ex-row {
+    border-radius: 14px;
     background: rgba(210, 224, 240, .18);
+    overflow: hidden;
+    animation: slideIn .3s ease both;
 }
 
-.exercise-row td:first-child {
-    border-radius: 12px 0 0 12px;
+.ex-row-main {
+    display: flex;
+    align-items: center;
+    padding: .75rem .75rem;
+    gap: .5rem;
+    cursor: default;
 }
 
-.exercise-row td:last-child {
-    border-radius: 0 12px 12px 0;
-}
-
-.exercise-row:hover td {
-    background: rgba(210, 224, 240, .35);
+.ex-row:hover .ex-row-main {
+    background: rgba(210, 224, 240, .28);
 }
 
 .exercise-name {
     font-weight: 600;
-    font-size: .95rem;
+    font-size: .92rem;
+    line-height: 1.3;
+    word-break: break-word;
 }
 
 .exercise-notes {
-    font-size: .75rem;
+    font-size: .72rem;
     color: #65758b;
     margin-top: .15rem;
 }
 
-.edit-row {
+/* Edit / delete icon buttons */
+.ex-btn-edit,
+.ex-btn-delete {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .18s, color .18s;
+    flex-shrink: 0;
+}
+
+.ex-btn-edit svg,
+.ex-btn-delete svg {
+    width: 15px;
+    height: 15px;
+}
+
+.ex-btn-edit { color: #64748b; }
+.ex-btn-edit:hover { background: #f1f5f9; color: #1fad96; }
+
+.ex-btn-delete { color: #94a3b8; }
+.ex-btn-delete:hover { background: rgba(239,68,68,.1); color: #ef4444; }
+
+/* Inline edit panel */
+.ex-edit-panel {
     display: none;
+    padding: .75rem;
+    background: rgba(0,150,120,.04);
+    border-top: 1px solid rgba(0,150,120,.1);
 }
 
-.edit-row.open {
-    display: table-row;
+.ex-edit-panel.open { display: block; }
+
+.ex-edit-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: .5rem;
+    align-items: end;
 }
 
-.edit-row td {
-    background: rgba(0, 150, 120, .04);
-    border-radius: 12px;
+@media (max-width: 480px) {
+    .ex-edit-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .ex-edit-grid .form-group:first-child {
+        grid-column: 1 / -1;
+    }
+    .ex-col-stat {
+        width: 36px;
+        font-size: .82rem;
+    }
+    .ex-col-actions {
+        width: 56px;
+    }
 }
+
+/* Keep old .edit-row / .exercises-table selectors harmless */
+.edit-row { display: none; }
+.exercises-table { width: 100%; }
 
 .progress-section {
     padding: 1.5rem;
@@ -1093,6 +1159,16 @@ main {
     .macros-grid {
         grid-template-columns: 1fr 1fr;
     }
+
+    /* Prevent any card content from overflowing on mobile */
+    .card {
+        overflow: hidden;
+    }
+
+    main {
+        padding-left: .85rem;
+        padding-right: .85rem;
+    }
 }
 
 .mt-6 {
@@ -1198,7 +1274,7 @@ main {
 .wp-ex-meta { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; margin-top:.25rem; }
 .wp-sub-badge { display:inline-flex; align-items:center; gap:.3rem; padding:.18rem .55rem; border-radius:999px; font-size:.7rem; font-weight:600; white-space:nowrap; }
 .wp-sub-badge svg { flex-shrink:0; }
-.wp-ex-sets-label { font-size:.75rem; color:#65758b; }
+.wp-ex-sets-label { font-size:.75rem; color:#65748b; }
 .wp-ex-actions { flex-shrink:0; }
 .wp-save-btn { padding:.35rem .85rem; border-radius:999px; border:1.5px solid rgba(31,173,150,.3); background:rgba(31,173,150,.06); color:#1fad96; font-family:'DM Sans',sans-serif; font-size:.78rem; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; }
 .wp-save-btn:hover { background:rgba(31,173,150,.14); }

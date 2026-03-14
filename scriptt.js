@@ -375,49 +375,53 @@ function renderExercises(exercises) {
     el.innerHTML = `<div class="empty-state"><p>No exercises logged yet</p><p>Add your first exercise to track your workout.</p></div>`;
     return;
   }
+
   el.innerHTML = `
-    <table class="exercises-table">
-      <thead><tr>
-        <th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th></th>
-      </tr></thead>
-      <tbody>
+    <div class="ex-list">
+      <div class="ex-list-header">
+        <span class="ex-col-name">Exercise</span>
+        <span class="ex-col-stat">Sets</span>
+        <span class="ex-col-stat">Reps</span>
+        <span class="ex-col-stat">Weight</span>
+        <span class="ex-col-actions"></span>
+      </div>
       ${exercises.map((ex) => {
-            const safeId = String(ex.id).replace(/[^a-zA-Z0-9_-]/g, '_');
-            // Hide auto-generated program notes (they contain the • bullet marker)
-            const showNote = ex.notes && !ex.notes.includes('\u2022');
-            return `
-        <tr class="exercise-row" id="ex-row-${safeId}">
-          <td>
+        const safeId = String(ex.id).replace(/[^a-zA-Z0-9_-]/g, '_');
+        const showNote = ex.notes && !ex.notes.includes('\u2022');
+        return `
+      <div class="ex-row" id="ex-row-${safeId}">
+        <div class="ex-row-main">
+          <div class="ex-col-name">
             <div class="exercise-name">${escHtml(ex.name)}</div>
             ${showNote ? `<div class="exercise-notes">${escHtml(ex.notes)}</div>` : ""}
-          </td>
-          <td>${ex.sets}</td>
-          <td>${ex.reps}</td>
-          <td>${ex.weight} kg</td>
-          <td style="text-align:right;white-space:nowrap">
-            <button class="btn btn-ghost" style="padding:.3rem .6rem;border-radius:8px;font-size:.78rem" onclick="startEdit('${safeId}')">✏️</button>
-            <button class="btn-icon" onclick="deleteExercise('${safeId}')" style="display:inline-flex">
+          </div>
+          <div class="ex-col-stat">${ex.sets}</div>
+          <div class="ex-col-stat">${ex.reps}</div>
+          <div class="ex-col-stat">${ex.weight} kg</div>
+          <div class="ex-col-actions">
+            <button class="ex-btn-edit" onclick="startEdit('${safeId}')" title="Edit">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="ex-btn-delete" onclick="deleteExercise('${safeId}')" title="Delete">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
             </button>
-          </td>
-        </tr>
-        <tr class="edit-row" id="edit-row-${safeId}">
-          <td colspan="5" style="padding:.75rem">
-            <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:.6rem;align-items:end">
-              <div class="form-group"><label class="form-label">Name</label><input id="ee-name-${safeId}" class="form-input" style="height:38px" value="${escHtml(ex.name)}"></div>
-              <div class="form-group"><label class="form-label">Sets</label><input id="ee-sets-${safeId}" type="number" class="form-input" style="height:38px;text-align:center" value="${ex.sets}"></div>
-              <div class="form-group"><label class="form-label">Reps</label><input id="ee-reps-${safeId}" type="number" class="form-input" style="height:38px;text-align:center" value="${ex.reps}"></div>
-              <div class="form-group"><label class="form-label">Weight</label><input id="ee-weight-${safeId}" type="number" step="0.5" class="form-input" style="height:38px;text-align:center" value="${ex.weight}"></div>
-            </div>
-            <div style="display:flex;gap:.5rem;margin-top:.5rem">
-              <button class="btn btn-primary" style="height:36px" onclick="saveEdit('${safeId}')">✓ Save</button>
-              <button class="btn btn-ghost" style="height:36px" onclick="cancelEdit('${safeId}')">Cancel</button>
-            </div>
-          </td>
-        </tr>`;
-          }).join("")}
-      </tbody>
-    </table>`;
+          </div>
+        </div>
+        <div class="ex-edit-panel" id="edit-row-${safeId}">
+          <div class="ex-edit-grid">
+            <div class="form-group"><label class="form-label">Name</label><input id="ee-name-${safeId}" class="form-input" style="height:38px" value="${escHtml(ex.name)}"></div>
+            <div class="form-group"><label class="form-label">Sets</label><input id="ee-sets-${safeId}" type="number" class="form-input" style="height:38px;text-align:center" value="${ex.sets}"></div>
+            <div class="form-group"><label class="form-label">Reps</label><input id="ee-reps-${safeId}" type="number" class="form-input" style="height:38px;text-align:center" value="${ex.reps}"></div>
+            <div class="form-group"><label class="form-label">Weight (kg)</label><input id="ee-weight-${safeId}" type="number" step="0.5" class="form-input" style="height:38px;text-align:center" value="${ex.weight}"></div>
+          </div>
+          <div style="display:flex;gap:.5rem;margin-top:.6rem">
+            <button class="btn btn-primary" style="height:36px" onclick="saveEdit('${safeId}')">✓ Save</button>
+            <button class="btn btn-ghost" style="height:36px" onclick="cancelEdit('${safeId}')">Cancel</button>
+          </div>
+        </div>
+      </div>`;
+      }).join("")}
+    </div>`;
 }
 
 function addExercise() {
@@ -463,12 +467,15 @@ function deleteExercise(id) {
 }
 
 function startEdit(id) {
-  document.querySelectorAll(".edit-row").forEach((r) => r.classList.remove("open"));
-  document.getElementById(`edit-row-${id}`).classList.add("open");
+  // Close any open panel first
+  document.querySelectorAll(".ex-edit-panel.open").forEach((p) => p.classList.remove("open"));
+  const panel = document.getElementById(`edit-row-${id}`);
+  if (panel) panel.classList.add("open");
 }
 
 function cancelEdit(id) {
-  document.getElementById(`edit-row-${id}`).classList.remove("open");
+  const panel = document.getElementById(`edit-row-${id}`);
+  if (panel) panel.classList.remove("open");
 }
 
 function saveEdit(id) {
