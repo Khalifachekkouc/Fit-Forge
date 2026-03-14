@@ -56,7 +56,6 @@ Possible improvements:
 * Add user profiles
 * Add automatic calorie and macro calculations
 * Improve the UI design
-* Add a food database
 
 ## 👨‍💻 Author
 
