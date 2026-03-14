@@ -246,12 +246,12 @@ main {
 .macro-card {
     padding: 1.25rem;
     animation: slideUp .4s ease both;
+    position: relative;
 }
 
 .macro-header {
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
+    flex-direction: column;
     margin-bottom: 1rem;
 }
 
@@ -283,14 +283,17 @@ main {
 }
 
 .macro-badge {
-    width: 40px;
-    height: 40px;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: .7rem;
+    font-size: .68rem;
 }
 
 .macro-bar-track {
@@ -447,8 +450,9 @@ main {
 
 .food-entry {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
+    gap: .75rem;
     padding: 1rem;
     border-radius: 16px;
     background: rgba(210, 224, 240, .15);
@@ -493,6 +497,14 @@ main {
 .delete-btn {
     opacity: 0;
     transition: opacity .2s;
+    flex-shrink: 0;
+}
+
+/* Always show delete on touch/mobile */
+@media (hover: none) {
+    .delete-btn {
+        opacity: 1 !important;
+    }
 }
 
 .empty-state {

@@ -6,6 +6,11 @@ const KEYS = {
   profile: "ns_profile",
 };
 
+let _uidCounter = 0;
+function uniqueId() {
+  return Date.now() * 1000 + (++_uidCounter % 1000);
+}
+
 function load(key) {
   try {
     return JSON.parse(localStorage.getItem(key) || "null");
@@ -289,7 +294,7 @@ function addFood() {
   }
   document.getElementById("f-name-err").style.display = "none";
   const entry = {
-    id: Date.now(),
+    id: uniqueId(),
     name,
     calories: +document.getElementById("f-cal").value || 0,
     protein: +document.getElementById("f-pro").value || 0,
@@ -311,7 +316,8 @@ function addFood() {
 
 function deleteFood(id) {
   const dateStr = fmt(dashDate);
-  const entries = getFoodLog(dateStr).filter((e) => e.id !== id);
+  const numId = Number(id);
+  const entries = getFoodLog(dateStr).filter((e) => Number(e.id) !== numId);
   saveFoodLog(dateStr, entries);
   renderDashboard();
 }
@@ -436,7 +442,7 @@ function addExercise() {
   if (!wd.muscleGroup) wd.muscleGroup = "Full Body";
   wd.exercises = wd.exercises || [];
   wd.exercises.push({
-    id: Date.now(),
+    id: uniqueId(),
     name,
     sets: +document.getElementById("e-sets").value || 3,
     reps: +document.getElementById("e-reps").value || 10,
@@ -2082,7 +2088,7 @@ function generateWorkoutPlan() {
   const gc = GOAL_CONFIG[goal];
   const exercises = wpPickExercises(muscle, gender, level, goal);
   wpCurrentPlan = exercises.map((ex, i) => ({
-    id: Date.now() + i,
+    id: uniqueId(),
     name: ex.name,
     sub: ex.sub,
     sets: wpGetSets(goal, level),
@@ -2184,7 +2190,7 @@ function wpSaveOne(id) {
     // ── SAVE ──
     const wd = getGymDay(dateStr);
     const repsNum = parseInt(String(ex.reps).split('\u2013')[0]) || 10;
-    const newId = Date.now() + Math.floor(Math.random() * 9999);
+    const newId = uniqueId();
     ex.gymEntryId = newId;
     wd.exercises.push({
       id: newId, name: ex.name, sets: ex.sets, reps: repsNum, weight: 0,
@@ -2691,7 +2697,7 @@ function mpGeneratePlan() {
 
   mpCurrentPlan = gc.mealTypes.map(type => {
     const meal = mpPickMeal(mpCurrentGoal, type);
-    return meal ? { ...meal, type, id: Date.now() + Math.random(), logged: false } : null;
+    return meal ? { ...meal, type, id: uniqueId(), logged: false } : null;
   }).filter(Boolean);
 
   mpRenderTargetBanner();
@@ -2795,7 +2801,7 @@ function mpLogMeal(idStr) {
 
   if (!meal.logged) {
     // ── LOG ──
-    const logId = Date.now();
+    const logId = uniqueId();
     meal.logEntryId = logId;
     const entries = getFoodLog(dateStr);
     entries.push({
