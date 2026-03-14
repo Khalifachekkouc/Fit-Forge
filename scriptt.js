@@ -270,7 +270,7 @@ function renderFoodLog(entries) {
           <span class="food-macro-tag calories-color">🔥 ${e.calories} kcal</span>
           <span class="food-macro-tag protein-color">🥩 ${e.protein}g Protein</span>
           <span class="food-macro-tag carbs-color">🌾 ${e.carbs}g Carbs</span>
-          <span class="food-macro-tag fat-color">💧 ${e.fat}g Fat</span>
+          <span class="food-macro-tag fat-color">🥑 ${e.fat}g Fat</span>
         </div>
       </div>
       <button class="btn-icon delete-btn" onclick="deleteFood(${e.id})">
@@ -2176,21 +2176,35 @@ function wpRenderPlan(gender, level, goal, muscle) {
 function wpSaveOne(id) {
   if (!wpCurrentPlan) return;
   const ex = wpCurrentPlan.find(e => e.id === id);
-  if (!ex || ex.saved) return;
+  if (!ex) return;
   const dateStr = fmt(gymDate);
-  const wd = getGymDay(dateStr);
-  const repsNum = parseInt(String(ex.reps).split('\u2013')[0]) || 10;
-  const newId = Date.now() + Math.floor(Math.random() * 9999);
-  wd.exercises.push({
-    id: newId, name: ex.name, sets: ex.sets, reps: repsNum, weight: 0,
-    notes: (SUB_TARGET_LABELS[ex.sub] || ex.sub) + ' \u2022 ' + ex.sets + '\xD7' + ex.reps,
-  });
-  wd.muscleGroup = WP_MUSCLE_TO_GYM[WP_STATE.muscle] || WP_STATE.muscle;
-  saveGymDay(dateStr, wd);
-  ex.saved = true;
   const btn = document.getElementById('wp-save-' + id);
-  if (btn) { btn.textContent = '\u2713 Saved'; btn.classList.add('saved'); }
-  showToast(ex.name + ' added to gym log!');
+
+  if (!ex.saved) {
+    // ── SAVE ──
+    const wd = getGymDay(dateStr);
+    const repsNum = parseInt(String(ex.reps).split('\u2013')[0]) || 10;
+    const newId = Date.now() + Math.floor(Math.random() * 9999);
+    ex.gymEntryId = newId;
+    wd.exercises.push({
+      id: newId, name: ex.name, sets: ex.sets, reps: repsNum, weight: 0,
+      notes: (SUB_TARGET_LABELS[ex.sub] || ex.sub) + ' \u2022 ' + ex.sets + '\xD7' + ex.reps,
+    });
+    wd.muscleGroup = WP_MUSCLE_TO_GYM[WP_STATE.muscle] || WP_STATE.muscle;
+    saveGymDay(dateStr, wd);
+    ex.saved = true;
+    if (btn) { btn.textContent = '\u2713 Saved'; btn.classList.add('saved'); }
+    showToast(ex.name + ' added to gym log!');
+  } else {
+    // ── UNDO ──
+    const wd = getGymDay(dateStr);
+    wd.exercises = wd.exercises.filter(e => e.id !== ex.gymEntryId);
+    saveGymDay(dateStr, wd);
+    ex.saved = false;
+    ex.gymEntryId = null;
+    if (btn) { btn.textContent = '+ Log'; btn.classList.remove('saved'); }
+    showToast(ex.name + ' removed from gym log.');
+  }
 }
 
 function wpSaveAllToLog() {
@@ -2200,4 +2214,634 @@ function wpSaveAllToLog() {
   if (count === 0) showToast('All exercises already saved!');
   else showToast(count + ' exercise' + (count > 1 ? 's' : '') + ' saved to gym log!');
 }
-ENDJS
+
+const MEAL_DB = {
+
+  weight_gain: {
+    breakfast: [
+      { name:'Peanut Butter Banana Oatmeal',  ingredients:'100g oats, 1 banana, 2 tbsp peanut butter, 250ml whole milk, 1 tbsp honey',                         cal:620, pro:22, carb:88, fat:18 },
+      { name:'Egg & Avocado Toast Stack',     ingredients:'2 slices whole wheat toast, 3 eggs, ½ avocado, 1 tomato, 1 tbsp olive oil',                         cal:580, pro:25, carb:42, fat:32 },
+      { name:'Greek Yogurt Granola Bowl',     ingredients:'200g full-fat Greek yogurt, 60g granola, 80g mixed berries, 1 tbsp honey',                          cal:540, pro:24, carb:72, fat:14 },
+      { name:'Cheese Omelette & Toast',       ingredients:'3 eggs, 40g cheddar, 1 tsp butter, 2 slices whole wheat toast, 200ml OJ',                           cal:600, pro:28, carb:44, fat:30 },
+      { name:'Cottage Cheese Pancakes',       ingredients:'150g cottage cheese, 2 eggs, 80g oats, 1 banana, 2 tbsp maple syrup',                               cal:560, pro:30, carb:68, fat:12 },
+      { name:'Whole Milk Smoothie Bowl',      ingredients:'300ml whole milk, 100g frozen mango, 1 banana, 1 tbsp chia seeds, 20g almonds',                     cal:590, pro:20, carb:78, fat:16 },
+      { name:'Full English Breakfast',        ingredients:'2 eggs, 2 rashers bacon, 2 sausages, 100g baked beans, 2 toast slices, 1 tomato',                   cal:700, pro:35, carb:48, fat:34 },
+      { name:'Nut Butter Banana Crepes',      ingredients:'100g flour, 2 eggs, 200ml milk, 3 tbsp almond butter, 1 banana, 2 tbsp syrup',                      cal:620, pro:22, carb:80, fat:20 },
+      { name:'Quinoa Breakfast Bowl',         ingredients:'100g quinoa, 250ml whole milk, 30g almonds, 30g dried cranberries, 1 tbsp honey',                   cal:560, pro:18, carb:82, fat:14 },
+      { name:'Smoked Salmon Bagel',           ingredients:'1 bagel, 60g cream cheese, 80g smoked salmon, 1 tbsp capers, ¼ red onion',                          cal:580, pro:30, carb:52, fat:22 },
+      { name:'Baked Oatmeal Casserole',       ingredients:'100g oats, 1 banana, 30g walnuts, 2 tbsp brown sugar, 1 tsp cinnamon, 200ml milk',                  cal:550, pro:16, carb:80, fat:16 },
+      { name:'Breakfast Burrito',             ingredients:'1 large tortilla, 3 scrambled eggs, 40g cheese, 80g black beans, 2 tbsp salsa',                     cal:640, pro:30, carb:65, fat:26 },
+      { name:'French Toast with Berries',     ingredients:'2 slices brioche, 2 eggs, 50ml cream, ½ tsp vanilla, 80g berries, 2 tbsp syrup',                    cal:600, pro:20, carb:82, fat:18 },
+      { name:'High-Cal Muesli Bowl',          ingredients:'80g muesli, 250ml whole milk, 40g dried fruit, 30g almonds, 1 banana',                              cal:610, pro:16, carb:90, fat:16 },
+      { name:'Protein Waffles Stack',         ingredients:'150g waffle mix, 1 scoop protein powder, 1 banana, 1 tbsp butter, 3 tbsp syrup',                    cal:660, pro:34, carb:84, fat:14 },
+      { name:'Avocado & Egg Skillet',         ingredients:'3 eggs, ½ avocado, 60g spinach, 1 tbsp olive oil, 30g feta, 2 toast slices',                        cal:570, pro:26, carb:38, fat:34 },
+      { name:'Banana Nut Porridge',           ingredients:'100g oats, 1 banana, 30g walnuts, 250ml milk, 1 tbsp honey, ½ tsp cinnamon',                        cal:530, pro:14, carb:76, fat:18 },
+      { name:'Breakfast Quesadilla',          ingredients:'1 large flour tortilla, 3 eggs, 40g cheese, ½ bell pepper, 2 tbsp salsa',                           cal:620, pro:28, carb:58, fat:28 },
+      { name:'Overnight Oats Deluxe',         ingredients:'100g oats, 250ml milk, 1 tbsp chia seeds, 2 tbsp peanut butter, 1 banana, 1 tbsp honey',            cal:580, pro:20, carb:80, fat:18 },
+      { name:'Steak & Egg Plate',             ingredients:'150g sirloin steak, 2 fried eggs, 150g roasted potatoes, 2 toast slices',                           cal:720, pro:42, carb:48, fat:32 },
+      { name:'Chocolate Protein Smoothie',    ingredients:'1 banana, 300ml whole milk, 1 tbsp cocoa, 1 scoop protein powder, 1 tbsp almond butter',            cal:600, pro:35, carb:68, fat:18 },
+      { name:'Chickpea Scramble',             ingredients:'120g chickpeas, 2 eggs, ¼ tsp turmeric, 60g spinach, 2 toast slices, 1 tbsp olive oil',             cal:520, pro:26, carb:52, fat:18 },
+      { name:'Ricotta Toast & Honey',         ingredients:'2 slices sourdough, 80g ricotta, 1 tbsp honey, 20g walnuts, 2 fresh figs',                          cal:540, pro:22, carb:64, fat:18 },
+      { name:'Blueberry Protein Pancakes',    ingredients:'80g oats, 2 eggs, 1 scoop protein powder, 80g blueberries, 2 tbsp syrup',                           cal:580, pro:36, carb:72, fat:10 },
+      { name:'Hash Brown Egg Muffins',        ingredients:'150g shredded potato, 3 eggs, 40g cheese, 2 rashers bacon, 1 tbsp chives',                          cal:560, pro:26, carb:40, fat:30 },
+    ],
+    lunch: [
+      { name:'Beef & Rice Power Bowl',        ingredients:'150g ground beef, 150g basmati rice, 100g broccoli, 2 tbsp soy sauce, 1 tsp sesame oil',            cal:720, pro:40, carb:78, fat:22 },
+      { name:'Chicken Alfredo Pasta',         ingredients:'150g fettuccine, 150g chicken breast, 100ml heavy cream, 40g parmesan, 1 tbsp butter',              cal:780, pro:42, carb:72, fat:34 },
+      { name:'Tuna Melt Sub',                 ingredients:'1 sub roll, 150g tuna, 2 tbsp mayo, 40g cheddar, 2 lettuce leaves, 2 tomato slices',                cal:680, pro:36, carb:56, fat:30 },
+      { name:'Loaded Burrito Bowl',           ingredients:'150g rice, 100g black beans, 130g chicken, 2 tbsp guacamole, 2 tbsp sour cream, 30g cheese',        cal:750, pro:38, carb:80, fat:28 },
+      { name:'Pulled Pork Sandwich',          ingredients:'1 brioche bun, 150g pulled pork, 60g coleslaw, 2 tbsp BBQ sauce, pickles',                          cal:760, pro:36, carb:78, fat:28 },
+      { name:'Salmon Rice Bowl',              ingredients:'150g salmon fillet, 150g white rice, 50g edamame, ½ avocado, 2 tbsp soy sauce',                     cal:700, pro:44, carb:64, fat:26 },
+      { name:'Beef Stir-Fry Noodles',         ingredients:'150g udon noodles, 130g beef strips, 100g broccoli, 2 tbsp oyster sauce, 1 tsp sesame oil',         cal:730, pro:38, carb:84, fat:20 },
+      { name:'Double Cheese Burger',          ingredients:'2×100g beef patties, 2 cheese slices, 1 brioche bun, lettuce, 150g fries',                          cal:820, pro:44, carb:72, fat:38 },
+      { name:'Creamy Chicken Pasta',          ingredients:'150g rigatoni, 130g chicken, 60g spinach, 100ml cream sauce, 30g parmesan',                         cal:760, pro:40, carb:74, fat:30 },
+      { name:'BBQ Chicken Flatbread',         ingredients:'1 flatbread, 130g chicken, 3 tbsp BBQ sauce, 50g cheese, ¼ red onion',                              cal:680, pro:38, carb:66, fat:24 },
+      { name:'Shrimp Fried Rice',             ingredients:'150g shrimp, 200g white rice, 50g peas, 50g carrots, 2 eggs, 2 tbsp soy sauce',                     cal:660, pro:34, carb:82, fat:16 },
+      { name:'Lamb & Couscous Bowl',          ingredients:'130g ground lamb, 150g couscous, ½ cucumber, 40g feta, 3 tbsp tzatziki',                            cal:700, pro:38, carb:68, fat:26 },
+      { name:'Turkey & Avocado Wrap',         ingredients:'1 large flour tortilla, 130g turkey, ½ avocado, 2 rashers bacon, 1 swiss slice, 1 tbsp mayo',       cal:650, pro:36, carb:52, fat:30 },
+      { name:'Pork Loin & Mash',              ingredients:'150g pork loin, 200g mashed potato, 80ml gravy, 80g carrots, 60g peas',                             cal:740, pro:42, carb:66, fat:28 },
+      { name:'Mac & Cheese Deluxe',           ingredients:'150g macaroni, 80g cheddar, 100ml cream, 30g breadcrumbs, 50g bacon',                               cal:780, pro:28, carb:88, fat:34 },
+      { name:'Beef Tacos ×3',                 ingredients:'3 corn tortillas, 150g ground beef, 40g cheese, 60g pico de gallo, 2 tbsp sour cream',              cal:720, pro:36, carb:64, fat:30 },
+      { name:'Chicken Caesar Salad Sub',      ingredients:'1 sub roll, 130g grilled chicken, 60g romaine, 20g parmesan, 2 tbsp Caesar dressing',               cal:640, pro:38, carb:54, fat:24 },
+      { name:'Egg Fried Noodles & Pork',      ingredients:'150g egg noodles, 130g pork mince, 2 eggs, 2 tbsp soy sauce, 2 spring onions',                      cal:700, pro:36, carb:76, fat:22 },
+      { name:'Baked Potato with Fillings',    ingredients:'1 large russet potato (300g), 120g tuna, 40g cheese, 2 tbsp sour cream, 80g broccoli',              cal:680, pro:32, carb:80, fat:22 },
+      { name:'Chickpea & Spinach Curry',      ingredients:'200g chickpeas, 80g spinach, 100g tomato, 100ml coconut milk, 1 naan, 150g rice',                   cal:720, pro:24, carb:94, fat:22 },
+      { name:'Steak Sandwich',                ingredients:'1 ciabatta roll, 150g sirloin, 50g caramelised onion, 30g rocket, 1 tsp mustard',                   cal:760, pro:44, carb:58, fat:34 },
+      { name:'Lentil & Sausage Stew',         ingredients:'150g red lentils, 2 pork sausages, 100g tomato, 60g spinach, 1 bread roll',                         cal:700, pro:34, carb:72, fat:24 },
+      { name:'Grilled Chicken Wrap',          ingredients:'1 tortilla, 130g grilled chicken, 3 tbsp hummus, 50g roasted pepper, 30g feta',                     cal:640, pro:38, carb:56, fat:20 },
+      { name:'Spaghetti Bolognese',           ingredients:'150g spaghetti, 130g beef mince, 120g tomato sauce, 20g parmesan, fresh basil',                     cal:760, pro:38, carb:82, fat:24 },
+      { name:'Sweet Potato & Beef Bowl',      ingredients:'200g sweet potato, 130g beef, 80g black beans, 30g cheese, 2 tbsp salsa, ½ avocado',                cal:740, pro:38, carb:80, fat:26 },
+    ],
+    post_workout: [
+      { name:'Chicken & Sweet Potato Bowl',   ingredients:'150g grilled chicken, 200g sweet potato, 100g broccoli, 1 tbsp olive oil',                          cal:600, pro:42, carb:62, fat:12 },
+      { name:'Protein Shake & Banana',        ingredients:'2 scoops whey protein, 300ml whole milk, 1 banana, 60g oats, 1 tbsp peanut butter',                 cal:560, pro:40, carb:68, fat:12 },
+      { name:'Tuna & Rice Cake Stack',        ingredients:'150g canned tuna, 6 rice cakes, ½ avocado, juice of ½ lemon, black pepper',                         cal:440, pro:36, carb:40, fat:12 },
+      { name:'Beef & Veggie Stir-Fry',        ingredients:'150g lean beef, ½ bell pepper, 100g broccoli, 2 tbsp oyster sauce, 150g rice',                      cal:580, pro:38, carb:56, fat:14 },
+      { name:'Greek Yogurt & Berries',        ingredients:'200g full-fat Greek yogurt, 50g granola, 80g strawberries, 1 tbsp honey',                           cal:480, pro:28, carb:62, fat:10 },
+      { name:'Egg White Omelette & Potato',   ingredients:'5 egg whites, 150g diced potato, 60g spinach, 30g feta, 1 tsp olive oil',                           cal:440, pro:34, carb:44, fat:10 },
+      { name:'Cottage Cheese & Crackers',     ingredients:'150g cottage cheese, 10 whole grain crackers, 2 tomatoes, ½ cucumber',                              cal:420, pro:32, carb:38, fat:8  },
+      { name:'Turkey & Rice Bowl',            ingredients:'150g ground turkey, 150g white rice, 100g broccoli, 3 tbsp teriyaki sauce',                         cal:560, pro:44, carb:60, fat:10 },
+      { name:'Salmon & Quinoa Plate',         ingredients:'150g baked salmon, 100g quinoa, 80g asparagus, juice of ½ lemon, 1 tsp olive oil',                  cal:580, pro:46, carb:44, fat:18 },
+      { name:'High-Protein Smoothie',         ingredients:'1 scoop protein powder, 1 banana, 300ml whole milk, 60g oats, 1 tbsp nut butter',                   cal:600, pro:44, carb:70, fat:14 },
+      { name:'Shrimp & Brown Rice',           ingredients:'150g shrimp, 150g brown rice, 50g edamame, 1 tsp ginger, 2 tbsp soy sauce',                         cal:520, pro:42, carb:56, fat:8  },
+      { name:'Chicken Quesadilla',            ingredients:'1 large tortilla, 130g shredded chicken, 40g cheese, ½ pepper, 2 tbsp salsa',                       cal:560, pro:38, carb:50, fat:18 },
+      { name:'Peanut Butter Rice Cakes',      ingredients:'6 rice cakes, 3 tbsp peanut butter, 1 banana, 1 tbsp honey',                                        cal:480, pro:14, carb:66, fat:14 },
+      { name:'Hard-Boiled Eggs & Oats',       ingredients:'100g oats, 200ml milk, 1 tbsp honey, 3 hard-boiled eggs, 20g almonds',                              cal:540, pro:32, carb:62, fat:16 },
+      { name:'Chocolate Milk & Banana',       ingredients:'350ml whole chocolate milk, 1 banana, 20g almonds',                                                  cal:500, pro:18, carb:70, fat:16 },
+      { name:'Lean Mince & Pasta',            ingredients:'120g whole wheat pasta, 130g lean mince, 100g tomato sauce, 20g parmesan',                          cal:600, pro:40, carb:64, fat:16 },
+      { name:'Edamame & Tuna Bowl',           ingredients:'100g edamame, 150g tuna, 150g brown rice, 2 tbsp soy sauce, 1 tsp sesame oil',                      cal:520, pro:46, carb:46, fat:10 },
+      { name:'Protein Pancake Stack',         ingredients:'80g oats, 4 egg whites, 1 scoop protein powder, 1 banana, 2 tbsp maple syrup',                      cal:540, pro:38, carb:68, fat:8  },
+      { name:'Baked Cod & Veggie Rice',       ingredients:'150g cod fillet, 150g white rice, 80g green beans, juice of ½ lemon, 1 tsp olive oil',              cal:500, pro:44, carb:48, fat:10 },
+      { name:'Chocolate Protein Pudding',     ingredients:'1 scoop casein protein, 1 tbsp cocoa, 1 tbsp peanut butter, 200ml almond milk, 50g oats',           cal:540, pro:42, carb:52, fat:14 },
+      { name:'Chicken Salad Pita',            ingredients:'1 pita bread, 130g chicken, 3 tbsp Greek yogurt, ½ cucumber, juice of ½ lemon',                     cal:480, pro:36, carb:46, fat:10 },
+      { name:'Beef Jerky & Trail Mix',        ingredients:'50g beef jerky, 30g mixed nuts, 30g dried mango, 1 oat bar',                                        cal:460, pro:28, carb:44, fat:16 },
+      { name:'Turkey Meatballs & Rice',       ingredients:'4 turkey meatballs (130g), 150g white rice, 80g marinara, 15g parmesan',                            cal:560, pro:40, carb:56, fat:14 },
+      { name:'Lentil Soup & Bread',           ingredients:'150g red lentils, 100g tomato, 60g spinach, 1 tsp cumin, 1 slice sourdough',                        cal:520, pro:24, carb:72, fat:10 },
+      { name:'Pork Tenderloin & Potato',      ingredients:'150g lean pork tenderloin, 200g baked potato, 80g green beans, 1 tsp olive oil',                    cal:580, pro:44, carb:52, fat:14 },
+    ],
+    dinner: [
+      { name:'Ribeye Steak & Fries',          ingredients:'220g ribeye steak, 200g thick-cut fries, 1 tbsp garlic butter, 60g side salad',                     cal:880, pro:52, carb:60, fat:44 },
+      { name:'Creamy Chicken Casserole',      ingredients:'200g chicken thighs, 120ml cream, 200g potatoes, 100g mushrooms, fresh herbs',                      cal:820, pro:46, carb:56, fat:38 },
+      { name:'Pork Belly & Fried Rice',       ingredients:'150g pork belly, 200g fried rice, 80g bok choy, 1 egg, 2 tbsp soy sauce',                           cal:860, pro:36, carb:80, fat:38 },
+      { name:'Lamb Chops & Mash',             ingredients:'2 lamb chops (200g), 200g mashed potato, 80g peas, 2 tbsp mint sauce, 1 tsp butter',                cal:840, pro:46, carb:58, fat:42 },
+      { name:'Pasta Carbonara',               ingredients:'150g spaghetti, 80g guanciale, 2 eggs, 40g pecorino, black pepper',                                  cal:800, pro:36, carb:86, fat:30 },
+      { name:'Chicken Tikka Masala & Rice',   ingredients:'180g chicken, 150ml tikka masala sauce, 200g basmati rice, 1 naan bread',                           cal:860, pro:42, carb:92, fat:28 },
+      { name:'BBQ Pulled Beef & Potato',      ingredients:'200g beef brisket, 3 tbsp BBQ sauce, 250g baked potato, 80g coleslaw',                              cal:880, pro:48, carb:82, fat:34 },
+      { name:'Salmon & Pesto Pasta',          ingredients:'150g pappardelle, 150g salmon, 3 tbsp basil pesto, 80g cherry tomatoes, 50ml cream',                cal:820, pro:44, carb:74, fat:34 },
+      { name:'Thai Green Curry & Rice',       ingredients:'180g chicken, 150ml coconut milk, 2 tbsp green curry paste, 200g rice, fresh basil',                cal:800, pro:38, carb:84, fat:30 },
+      { name:'Beef Lasagne',                  ingredients:'150g lasagne sheets, 150g beef mince, 100ml béchamel, 100g tomato sauce, 30g parmesan',             cal:840, pro:42, carb:78, fat:36 },
+      { name:'Roast Chicken & Veggies',       ingredients:'1 chicken leg (250g), 200g roasted potatoes, 100g carrots, 100ml gravy',                            cal:780, pro:52, carb:60, fat:34 },
+      { name:'Sausage & Lentil Casserole',    ingredients:'3 Italian sausages, 150g lentils, 100g tomato, 50ml red wine, 1 crusty roll',                       cal:820, pro:38, carb:80, fat:32 },
+      { name:'Duck Breast & Potato Gratin',   ingredients:'180g duck breast, 200g potato gratin, 100g green beans, 80ml red wine jus',                         cal:860, pro:42, carb:64, fat:44 },
+      { name:'Beef Enchiladas',               ingredients:'2 flour tortillas, 150g beef, 100ml enchilada sauce, 50g cheese, 2 tbsp sour cream',                cal:840, pro:44, carb:80, fat:34 },
+      { name:'Prawn Butter Pasta',            ingredients:'150g linguine, 150g king prawns, 2 tbsp garlic butter, ½ tsp chilli flakes, 20g parmesan',          cal:760, pro:36, carb:80, fat:28 },
+      { name:'Chicken Shawarma & Rice',       ingredients:'180g chicken thigh, 1 tsp shawarma spice, 200g rice, 3 tbsp tzatziki, 1 pita',                      cal:820, pro:46, carb:84, fat:26 },
+      { name:'Pork Schnitzel & Potatoes',     ingredients:'180g pork schnitzel, 200g roasted potatoes, 80g sauerkraut, 1 tbsp mustard',                        cal:800, pro:44, carb:70, fat:34 },
+      { name:'Beef & Black Bean Stew',        ingredients:'150g beef chunks, 120g black beans, 100g tomato, 1 tsp cumin, 150g rice, 1 cornbread slice',        cal:860, pro:48, carb:86, fat:26 },
+      { name:'Coconut Shrimp Curry',          ingredients:'180g shrimp, 150ml coconut milk, 80g tomato, 1 tsp ginger, 200g basmati, 1 naan',                   cal:780, pro:38, carb:80, fat:28 },
+      { name:'Tuna Noodle Casserole',         ingredients:'150g egg noodles, 150g tuna, 100ml cream of mushroom, 60g peas, 40g cheese',                        cal:760, pro:40, carb:76, fat:26 },
+      { name:'Stuffed Bell Peppers',          ingredients:'2 bell peppers, 130g beef mince, 100g rice, 80g tomato sauce, 40g mozzarella',                      cal:740, pro:40, carb:70, fat:28 },
+      { name:'Gnocchi & Sausage Ragu',        ingredients:'200g potato gnocchi, 2 Italian sausages, 100g tomato, fresh basil, 20g parmesan',                   cal:820, pro:34, carb:88, fat:30 },
+      { name:'Teriyaki Chicken Bowl',         ingredients:'180g chicken thigh, 3 tbsp teriyaki sauce, 200g white rice, 100g broccoli, 1 tsp sesame',           cal:780, pro:44, carb:82, fat:22 },
+      { name:'Moussaka',                      ingredients:'150g aubergine, 130g lamb mince, 80ml béchamel, 100g tomato, 150g potato, cinnamon',                cal:800, pro:36, carb:68, fat:40 },
+      { name:'Cheesy Chicken Rice Bake',      ingredients:'180g chicken, 150g white rice, 100ml cream of chicken, 50g cheese, 80g broccoli',                   cal:820, pro:46, carb:78, fat:30 },
+    ],
+  },
+
+  build_muscle: {
+    breakfast: [
+      { name:'Protein Oat Bowl',              ingredients:'100g oats, 1 scoop whey protein, 1 banana, 250ml almond milk, 1 tbsp chia seeds',                   cal:480, pro:40, carb:58, fat:8  },
+      { name:'4-Egg White Omelette',          ingredients:'5 egg whites, 1 whole egg, 60g spinach, 80g mushrooms, 30g feta, 2 toast slices',                   cal:440, pro:38, carb:32, fat:14 },
+      { name:'Cottage Cheese & Berries',      ingredients:'200g cottage cheese, 80g mixed berries, 40g granola, 1 tbsp honey, 1 tbsp flaxseed',               cal:420, pro:32, carb:48, fat:6  },
+      { name:'Greek Yogurt Parfait',          ingredients:'200g Greek yogurt, 50g protein granola, 80g blueberries, 1 tbsp honey',                             cal:460, pro:34, carb:52, fat:8  },
+      { name:'Chicken & Egg Breakfast Bowl',  ingredients:'100g grilled chicken, 2 scrambled eggs, 60g spinach, 2 tbsp salsa, 2 toast slices',                 cal:500, pro:44, carb:34, fat:14 },
+      { name:'Protein Pancakes',              ingredients:'80g oats, 1 scoop protein powder, 2 eggs, 1 banana, 100ml almond milk',                             cal:480, pro:40, carb:52, fat:8  },
+      { name:'Smoked Salmon Egg Wrap',        ingredients:'1 whole wheat wrap, 80g smoked salmon, 2 eggs, 2 tbsp cream cheese, 1 tbsp capers',                 cal:440, pro:38, carb:30, fat:16 },
+      { name:'Quinoa Protein Bowl',           ingredients:'100g quinoa, 150g Greek yogurt, 20g almonds, 1 tbsp honey, 1 banana, 1 tbsp chia',                  cal:500, pro:30, carb:58, fat:12 },
+      { name:'Turkey Scramble',               ingredients:'100g ground turkey, 2 eggs, 60g spinach, 80g cherry tomatoes, 2 whole wheat toast slices',          cal:460, pro:42, carb:32, fat:14 },
+      { name:'Overnight Protein Oats',        ingredients:'80g oats, 1 scoop casein, 250ml almond milk, 1 banana, 1 tbsp peanut butter, 50g berries',          cal:500, pro:36, carb:56, fat:12 },
+      { name:'Egg Muffin Cups',               ingredients:'4 eggs, 2 turkey bacon rashers, ½ bell pepper, 30g cheese, 30g spinach',                            cal:400, pro:36, carb:12, fat:20 },
+      { name:'Bodybuilder Breakfast',         ingredients:'100g oats, 3 eggs, 1 banana, 1 whey shake (300ml milk), 1 tbsp almond butter',                      cal:560, pro:46, carb:60, fat:14 },
+      { name:'High-Protein French Toast',     ingredients:'2 slices Ezekiel bread, 3 egg whites, ½ tsp cinnamon, ½ tsp vanilla, 80g berries',                  cal:420, pro:32, carb:44, fat:8  },
+      { name:'Tuna Omelette',                 ingredients:'3 eggs, 100g canned tuna, 60g spinach, ¼ onion, 1 tsp olive oil, 2 toast slices',                   cal:460, pro:42, carb:28, fat:16 },
+      { name:'Protein Smoothie Bowl',         ingredients:'1 scoop protein powder, 100g frozen acai, 1 banana, 40g granola, 1 tsp mixed seeds',                cal:480, pro:36, carb:54, fat:10 },
+      { name:'Ricotta & Honey Toast',         ingredients:'2 slices sourdough, 80g low-fat ricotta, 1 tbsp honey, 20g walnuts, 1 banana',                      cal:440, pro:24, carb:52, fat:12 },
+      { name:'Beef & Egg Breakfast Plate',    ingredients:'100g lean beef strips, 2 fried eggs, 100g sautéed peppers, 2 tbsp salsa',                           cal:500, pro:44, carb:20, fat:26 },
+      { name:'Lentil Breakfast Bowl',         ingredients:'100g red lentils, 1 egg, 60g spinach, 30g feta, 2 slices whole grain toast',                        cal:460, pro:30, carb:48, fat:14 },
+      { name:'Almond Butter Protein Wrap',    ingredients:'1 whole wheat wrap, 2 tbsp almond butter, 1 banana, 1 protein shake (250ml milk)',                  cal:480, pro:32, carb:56, fat:14 },
+      { name:'Shrimp & Veggie Scramble',      ingredients:'100g shrimp, 3 eggs, 40g kale, 80g tomato, 80g mushrooms, 1 tsp olive oil',                         cal:420, pro:40, carb:14, fat:18 },
+      { name:'Chocolate Banana Protein Shake',ingredients:'1 scoop whey protein, 1 banana, 1 tbsp cocoa, 50g oats, 250ml almond milk',                         cal:460, pro:40, carb:56, fat:6  },
+      { name:'Sardine Toast',                 ingredients:'2 slices rye bread, 100g sardines, ½ avocado, juice of ½ lemon, ¼ red onion',                       cal:440, pro:36, carb:30, fat:18 },
+      { name:'Tofu Scramble',                 ingredients:'200g firm tofu, ¼ tsp turmeric, 60g spinach, ½ bell pepper, 2 tbsp nutritional yeast',              cal:380, pro:30, carb:20, fat:16 },
+      { name:'High-Protein Muesli',           ingredients:'80g protein-enriched muesli, 250ml milk, 1 banana, 2 tbsp hemp seeds',                              cal:480, pro:32, carb:62, fat:10 },
+      { name:'Egg & Salmon Rye Stack',        ingredients:'2 slices rye bread, 2 poached eggs, 80g smoked salmon, 30g spinach, 1 tsp mustard',                 cal:460, pro:40, carb:28, fat:16 },
+    ],
+    lunch: [
+      { name:'Grilled Chicken & Brown Rice',  ingredients:'170g grilled chicken breast, 150g brown rice, 100g broccoli, 2 tbsp soy sauce',                     cal:580, pro:52, carb:58, fat:10 },
+      { name:'Tuna Protein Bowl',             ingredients:'150g tuna, 100g quinoa, ½ cucumber, 80g edamame, 2 tbsp sesame dressing',                            cal:520, pro:46, carb:46, fat:10 },
+      { name:'Lean Beef Wrap',                ingredients:'1 whole wheat wrap, 130g lean beef, 2 lettuce leaves, 1 tomato, 1 tsp mustard',                     cal:560, pro:44, carb:46, fat:16 },
+      { name:'Turkey & Quinoa Salad',         ingredients:'150g turkey breast, 100g quinoa, 60g baby spinach, 80g cherry tomatoes, juice of ½ lemon',          cal:500, pro:44, carb:42, fat:10 },
+      { name:'Salmon Stir-Fry & Rice',        ingredients:'150g salmon, 100g broccoli, 60g snap peas, 1 tsp ginger, 150g brown rice, 2 tbsp soy sauce',        cal:580, pro:46, carb:52, fat:16 },
+      { name:'Chicken & Lentil Soup',         ingredients:'150g chicken breast, 100g red lentils, 1 carrot, 2 celery stalks, 1 crusty roll',                   cal:520, pro:44, carb:54, fat:8  },
+      { name:'High-Protein Pasta',            ingredients:'120g chickpea pasta, 130g chicken, 100g tomato, 60g spinach, 20g parmesan',                         cal:580, pro:50, carb:56, fat:12 },
+      { name:'Shrimp & Veggie Bowl',          ingredients:'150g shrimp, 150g brown rice, 80g zucchini, 80g carrot, 3 tbsp teriyaki sauce',                     cal:520, pro:42, carb:56, fat:8  },
+      { name:'Turkey Meatball Sub',           ingredients:'1 sub roll, 4 turkey meatballs (130g), 80ml marinara, 40g mozzarella, fresh basil',                 cal:560, pro:44, carb:54, fat:16 },
+      { name:'Lean Pork Loin & Veg',          ingredients:'150g pork loin, 200g sweet potato, 80g asparagus, 1 tbsp Dijon mustard',                            cal:540, pro:46, carb:44, fat:12 },
+      { name:'Chicken Burrito Bowl',          ingredients:'130g chicken, 150g rice, 80g black beans, 2 tbsp salsa, ½ avocado, 2 tbsp Greek yogurt',            cal:580, pro:48, carb:58, fat:14 },
+      { name:'Baked Cod & Quinoa',            ingredients:'150g cod fillet, 100g quinoa, 80g green beans, juice of ½ lemon, 1 tsp olive oil',                  cal:500, pro:46, carb:42, fat:10 },
+      { name:'Ground Turkey Tacos',           ingredients:'2 corn tortillas, 130g lean turkey, 3 tbsp salsa, ¼ avocado, juice of ½ lime, 30g cheese',          cal:540, pro:42, carb:44, fat:16 },
+      { name:'Tofu & Edamame Bowl',           ingredients:'150g firm tofu, 80g edamame, 150g brown rice, 1 tsp sesame, ½ cucumber, 2 tbsp soy sauce',          cal:520, pro:36, carb:52, fat:14 },
+      { name:'Chicken Caesar Wrap',           ingredients:'1 whole wheat wrap, 130g chicken, 60g romaine, 20g parmesan, 2 tbsp light Caesar dressing',         cal:520, pro:44, carb:42, fat:14 },
+      { name:'Egg & Chickpea Salad',          ingredients:'3 hard-boiled eggs, 100g chickpeas, ½ cucumber, 30g feta, 1 tbsp olive oil',                        cal:500, pro:30, carb:40, fat:18 },
+      { name:'Lean Lamb Pitta',               ingredients:'1 pita, 130g lean lamb mince, 3 tbsp tzatziki, 1 tomato, ½ cucumber',                               cal:540, pro:40, carb:46, fat:16 },
+      { name:'Muscle-Building Stir-Fry',      ingredients:'150g lean beef, 150g rice, 100g broccoli, 60g edamame, 1 tsp ginger, 2 tbsp oyster sauce',          cal:580, pro:48, carb:56, fat:12 },
+      { name:'White Fish & Rice',             ingredients:'150g tilapia, 150g white rice, 100g steamed veg, juice of ½ lemon, fresh herbs',                    cal:500, pro:46, carb:50, fat:8  },
+      { name:'Greek Chicken Bowl',            ingredients:'130g chicken, 150g brown rice, 3 tbsp tzatziki, 80g cherry tomatoes, 30g feta',                     cal:540, pro:46, carb:46, fat:14 },
+      { name:'Protein Grain Bowl',            ingredients:'80g mixed grains, 130g chicken, 60g roasted peppers, 3 tbsp hummus, 40g spinach',                   cal:560, pro:40, carb:54, fat:14 },
+      { name:'Lemon Herb Turkey Plate',       ingredients:'150g turkey breast, 200g roasted potato, 80g broccolini, juice of 1 lemon',                         cal:520, pro:48, carb:42, fat:10 },
+      { name:'Tuna-Stuffed Avocado',          ingredients:'1 avocado, 150g tuna, ¼ red onion, juice of ½ lemon, 40g mixed greens, 6 crackers',                 cal:500, pro:38, carb:26, fat:24 },
+      { name:'Teriyaki Salmon Bowl',          ingredients:'150g salmon, 3 tbsp teriyaki sauce, 150g brown rice, 60g edamame, ½ cucumber',                      cal:580, pro:46, carb:54, fat:16 },
+      { name:'Spicy Chicken Rice Plate',      ingredients:'150g chicken thigh, 150g jasmine rice, 1 tbsp sriracha, 80g bok choy, 1 egg',                       cal:560, pro:46, carb:52, fat:12 },
+    ],
+    post_workout: [
+      { name:'Protein Shake & Banana',        ingredients:'2 scoops whey protein, 1 banana, 250ml almond milk, 50g oats',                                      cal:400, pro:40, carb:48, fat:4  },
+      { name:'Chicken & Potato Bowl',         ingredients:'150g grilled chicken, 200g boiled potato, 80g green beans, 1 tsp olive oil',                        cal:480, pro:44, carb:44, fat:10 },
+      { name:'Greek Yogurt & Granola',        ingredients:'200g low-fat Greek yogurt, 40g granola, 1 tbsp honey, 1 banana',                                    cal:380, pro:28, carb:52, fat:6  },
+      { name:'Egg Whites & Rice Cakes',       ingredients:'5 egg whites, 6 rice cakes, ½ avocado, pinch of salt',                                              cal:340, pro:30, carb:36, fat:8  },
+      { name:'Casein Protein Pudding',        ingredients:'1 scoop casein powder, 200ml almond milk, 1 tsp cocoa, 1 banana, 1 tsp honey',                      cal:380, pro:38, carb:38, fat:4  },
+      { name:'Tuna Rice Bowl',                ingredients:'150g tuna, 150g white rice, ½ cucumber, 2 tbsp soy sauce, ½ tsp sesame oil',                        cal:440, pro:42, carb:46, fat:6  },
+      { name:'Turkey & Sweet Potato',         ingredients:'150g turkey mince, 200g sweet potato, 60g spinach, 2 cloves garlic',                                cal:460, pro:40, carb:48, fat:8  },
+      { name:'Post-Workout Smoothie',         ingredients:'1 scoop whey, 1 banana, 50g oats, 250ml almond milk, 1 tsp honey',                                  cal:420, pro:36, carb:50, fat:4  },
+      { name:'Salmon & Quinoa',               ingredients:'150g salmon, 100g quinoa, 80g asparagus, juice of ½ lemon, 1 tsp olive oil',                        cal:480, pro:44, carb:40, fat:14 },
+      { name:'Peanut Butter Rice Cakes',      ingredients:'6 rice cakes, 2 tbsp peanut butter, 1 banana, 1 protein shake (250ml)',                             cal:440, pro:34, carb:50, fat:12 },
+      { name:'Chicken & Oats Mix',            ingredients:'50g oats, 100g shredded chicken, 200ml almond milk, 1 tbsp honey, 20g almonds',                     cal:460, pro:38, carb:52, fat:10 },
+      { name:'Cottage Cheese & Crackers',     ingredients:'150g low-fat cottage cheese, 10 whole grain crackers, 2 tomatoes',                                  cal:360, pro:32, carb:34, fat:6  },
+      { name:'Shrimp & Brown Rice',           ingredients:'150g shrimp, 150g brown rice, 50g edamame, 2 tbsp soy sauce, 1 tsp ginger',                         cal:440, pro:42, carb:48, fat:6  },
+      { name:'High-Protein Chocolate Milk',   ingredients:'350ml protein-enriched chocolate milk, 1 banana, 20g almonds',                                      cal:420, pro:32, carb:52, fat:8  },
+      { name:'Tilapia & Veggie Bowl',         ingredients:'150g tilapia, 150g brown rice, 100g broccoli, 2 cloves garlic, juice of ½ lemon',                   cal:440, pro:44, carb:42, fat:8  },
+      { name:'Low-Fat Ricotta Toast',         ingredients:'2 slices Ezekiel bread, 80g ricotta, 1 banana, 1 tbsp honey, 1 tbsp flaxseed',                      cal:380, pro:26, carb:48, fat:8  },
+      { name:'Tuna-Stuffed Egg Whites',       ingredients:'5 egg whites, 100g tuna, 1 tsp mustard, ½ tsp paprika, ½ cucumber',                                 cal:340, pro:38, carb:6,  fat:4  },
+      { name:'Whey & Berry Smoothie',         ingredients:'1 scoop whey protein, 100g frozen berries, 50g oats, 250ml almond milk, 1 banana',                  cal:400, pro:36, carb:50, fat:4  },
+      { name:'Turkey & Rice Plate',           ingredients:'150g lean turkey, 150g white rice, 100g steamed broccoli, 2 tbsp soy sauce',                        cal:460, pro:44, carb:48, fat:6  },
+      { name:'Lean Beef & Sweet Potato',      ingredients:'130g lean ground beef, 200g sweet potato, 60g spinach, 1 tsp olive oil',                            cal:480, pro:40, carb:46, fat:10 },
+      { name:'Edamame & Egg Salad',           ingredients:'100g edamame, 2 hard-boiled eggs, 80g quinoa, juice of ½ lemon, fresh herbs',                       cal:400, pro:30, carb:36, fat:12 },
+      { name:'Whey Pancakes',                 ingredients:'1 scoop whey protein, 60g oats, 4 egg whites, 100ml almond milk, 50g berries',                      cal:420, pro:38, carb:44, fat:6  },
+      { name:'Lemon Herb Salmon',             ingredients:'150g salmon, juice of 1 lemon, 1 tbsp dill, 150g boiled potato, 80g green beans',                   cal:480, pro:44, carb:40, fat:14 },
+      { name:'Baked Chicken & Veg',           ingredients:'150g chicken breast, 80g zucchini, 80g capsicum, 1 tsp olive oil, fresh herbs',                     cal:400, pro:44, carb:16, fat:14 },
+      { name:'Chocolate Whey Oats',           ingredients:'80g oats, 1 scoop chocolate whey, 200ml almond milk, 1 tsp cocoa, 1 banana',                        cal:440, pro:38, carb:50, fat:6  },
+    ],
+    dinner: [
+      { name:'Grilled Chicken & Veg',         ingredients:'180g chicken breast, 200g roasted sweet potato, 120g broccoli, 1 tbsp olive oil',                   cal:520, pro:50, carb:44, fat:12 },
+      { name:'Baked Salmon & Brown Rice',     ingredients:'180g salmon fillet, 150g brown rice, 100g asparagus, juice of ½ lemon, 1 tbsp dill',                cal:560, pro:48, carb:50, fat:16 },
+      { name:'Turkey Mince Pasta',            ingredients:'120g chickpea pasta, 150g turkey mince, 100g tomato sauce, 60g spinach',                            cal:540, pro:50, carb:52, fat:10 },
+      { name:'Tuna & Veggie Stir-Fry',        ingredients:'150g tuna steak, 150g stir-fry veg, 150g brown rice, 3 tbsp teriyaki sauce',                        cal:520, pro:50, carb:46, fat:10 },
+      { name:'Lean Beef & Sweet Potato',      ingredients:'160g lean sirloin, 200g mashed sweet potato, 100g green beans, 80ml gravy',                         cal:560, pro:48, carb:52, fat:12 },
+      { name:'Chicken & Black Bean Bowl',     ingredients:'160g chicken, 100g black beans, 150g brown rice, 2 tbsp salsa, ½ avocado',                          cal:540, pro:48, carb:56, fat:10 },
+      { name:'Baked Cod & Quinoa',            ingredients:'160g cod, 100g quinoa, 80g roasted peppers, juice of ½ lemon, 40g spinach',                         cal:480, pro:46, carb:44, fat:8  },
+      { name:'Chicken & Vegetable Soup',      ingredients:'160g chicken breast, 80g red lentils, 60g kale, 1 carrot, 2 celery stalks, 500ml broth',            cal:460, pro:44, carb:40, fat:8  },
+      { name:'Prawn & Brown Rice Bowl',       ingredients:'180g king prawns, 150g brown rice, 80g bok choy, 1 tsp sesame, 1 tsp ginger, 2 tbsp soy',           cal:520, pro:44, carb:50, fat:8  },
+      { name:'Lean Lamb & Roast Veg',         ingredients:'160g lamb loin, 150g courgette, 150g potato, 1 tsp rosemary, 1 tbsp olive oil',                     cal:540, pro:46, carb:40, fat:18 },
+      { name:'High-Protein Chicken Tikka',    ingredients:'180g chicken, 2 tbsp tikka paste, 100ml Greek yogurt, 200g basmati rice',                           cal:520, pro:50, carb:48, fat:10 },
+      { name:'White Fish & Lentil Stew',      ingredients:'160g tilapia, 100g green lentils, 100g tomato, 60g spinach, 1 crusty roll',                         cal:500, pro:46, carb:48, fat:8  },
+      { name:'Turkey Stuffed Peppers',        ingredients:'2 bell peppers, 150g ground turkey, 100g rice, 80g tomato sauce, 40g mozzarella',                   cal:480, pro:44, carb:42, fat:10 },
+      { name:'Chicken & Cauliflower Mash',    ingredients:'180g chicken breast, 250g cauliflower mash, 80g peas, 150ml chicken stock',                         cal:440, pro:46, carb:28, fat:10 },
+      { name:'Muscle Mince Bowl',             ingredients:'150g lean mince, 150g brown rice, 80g edamame, 100g broccoli, 2 tbsp soy sauce',                    cal:560, pro:50, carb:52, fat:10 },
+      { name:'Pork Tenderloin & Veg',         ingredients:'180g pork tenderloin, 200g roasted potato, 100g asparagus, 1 tbsp Dijon mustard',                   cal:520, pro:48, carb:42, fat:10 },
+      { name:'Tuna Jacket Potato',            ingredients:'1 large baked potato (300g), 150g tuna, 3 tbsp low-fat Greek yogurt, 60g sweetcorn',                cal:500, pro:44, carb:52, fat:6  },
+      { name:'Chicken & Bok Choy Noodles',    ingredients:'160g chicken, 150g soba noodles, 80g bok choy, 1 tsp ginger, 2 tbsp soy, 1 tsp sesame',            cal:520, pro:46, carb:48, fat:10 },
+      { name:'Beef & Broccoli Rice Bowl',     ingredients:'150g lean beef, 100g broccoli, 150g white rice, 2 tbsp oyster sauce, 2 cloves garlic',              cal:540, pro:48, carb:52, fat:10 },
+      { name:'Baked Trout & Potato',          ingredients:'180g rainbow trout, 200g baby potatoes, 100g green beans, juice of ½ lemon, herbs',                 cal:520, pro:46, carb:40, fat:14 },
+      { name:'Chicken & Edamame Bowl',        ingredients:'160g chicken, 80g edamame, 100g quinoa, 2 tbsp sesame dressing, ½ cucumber',                        cal:540, pro:50, carb:42, fat:12 },
+      { name:'Turkey & Vegetable Curry',      ingredients:'160g turkey breast, 80g chickpeas, 60g spinach, 100g tomato, 150g brown rice',                      cal:520, pro:46, carb:50, fat:8  },
+      { name:'Lean Meatballs & Pasta',        ingredients:'4 turkey meatballs (150g), 120g whole wheat spaghetti, 100g tomato sauce, fresh basil',             cal:540, pro:46, carb:52, fat:10 },
+      { name:'Chicken Fajita Bowl',           ingredients:'160g chicken, 1 tsp fajita spice, 150g rice, ½ bell pepper, ¼ avocado, 2 tbsp salsa',              cal:540, pro:48, carb:48, fat:14 },
+      { name:'Grilled Swordfish & Quinoa',    ingredients:'180g swordfish, 100g quinoa, 80g cherry tomatoes, 1 tbsp basil pesto, 40g spinach',                 cal:520, pro:46, carb:42, fat:16 },
+    ],
+  },
+
+  lose_weight: {
+    breakfast: [
+      { name:'Veggie Egg White Omelette',     ingredients:'5 egg whites, 60g spinach, 80g mushrooms, 1 tomato, fresh herbs',                                   cal:220, pro:26, carb:8,  fat:6  },
+      { name:'Berry Greek Yogurt Bowl',       ingredients:'180g non-fat Greek yogurt, 80g mixed berries, 1 tsp flaxseed, pinch of cinnamon',                   cal:240, pro:24, carb:28, fat:2  },
+      { name:'Overnight Oats (Slim)',         ingredients:'60g oats, 200ml almond milk, 1 tbsp chia seeds, 60g blueberries',                                   cal:300, pro:12, carb:48, fat:6  },
+      { name:'Avocado Toast (Half)',          ingredients:'1 slice rye bread, ¼ avocado, 6 cherry tomatoes, pinch of red pepper flakes',                       cal:280, pro:8,  carb:32, fat:14 },
+      { name:'Protein Smoothie (Low-cal)',    ingredients:'1 scoop whey protein, 250ml almond milk, 60g spinach, 80g frozen berries',                          cal:280, pro:30, carb:24, fat:4  },
+      { name:'Boiled Egg & Rye Toast',        ingredients:'2 boiled eggs, 2 slices rye bread, ½ cucumber, 2 tomatoes',                                         cal:300, pro:20, carb:28, fat:10 },
+      { name:'Cottage Cheese & Fruit',        ingredients:'150g low-fat cottage cheese, 80g pineapple, 1 kiwi, fresh mint',                                    cal:250, pro:24, carb:26, fat:2  },
+      { name:'Banana Protein Smoothie',       ingredients:'1 banana, 1 scoop whey protein, 200ml skimmed milk, ice, ½ tsp cinnamon',                           cal:300, pro:28, carb:36, fat:2  },
+      { name:'Smashed Avocado Egg Toast',     ingredients:'1 slice sourdough, ¼ avocado, 1 poached egg, 1 tomato',                                             cal:330, pro:16, carb:28, fat:16 },
+      { name:'Veggie Scramble',               ingredients:'2 eggs, ½ capsicum, ¼ onion, 60g spinach, 1 tomato, olive oil spray',                               cal:280, pro:18, carb:14, fat:14 },
+      { name:'Chia Pudding',                  ingredients:'3 tbsp chia seeds, 200ml almond milk, ½ tsp vanilla, 60g berries, 1 tsp honey',                     cal:260, pro:8,  carb:28, fat:12 },
+      { name:'High-Protein Cereal Bowl',      ingredients:'60g protein-enriched cereal, 200ml skimmed milk, 80g strawberries',                                 cal:310, pro:22, carb:40, fat:4  },
+      { name:'Spinach Omelette',              ingredients:'4 egg whites, 1 whole egg, 60g spinach, 20g feta, 1 tomato',                                        cal:250, pro:24, carb:8,  fat:10 },
+      { name:'Fruit & Seed Bowl',             ingredients:'150g Greek yogurt, 1 kiwi, ½ apple, 1 tbsp pumpkin seeds, ½ tsp cinnamon',                          cal:280, pro:16, carb:34, fat:8  },
+      { name:'Protein-Packed Porridge',       ingredients:'60g oats, 200ml water, 1 scoop protein powder, ½ banana, ½ tsp cinnamon',                           cal:320, pro:28, carb:42, fat:4  },
+      { name:'Smoked Salmon & Egg Cup',       ingredients:'80g smoked salmon, 1 egg, 1 tbsp capers, 1 slice rye toast, 20g rocket',                            cal:300, pro:26, carb:18, fat:12 },
+      { name:'Almond Milk Smoothie Bowl',     ingredients:'1 frozen banana, 200ml almond milk, 40g spinach, 30g granola, 50g berries',                         cal:310, pro:10, carb:50, fat:6  },
+      { name:'Low-Cal Breakfast Wrap',        ingredients:'1 small whole wheat wrap, 3 egg whites, 2 tbsp salsa, 40g spinach, 1 jalapeño',                     cal:300, pro:20, carb:32, fat:6  },
+      { name:'Mango Protein Shake',           ingredients:'1 scoop whey protein, 100g frozen mango, 250ml coconut water, ice',                                 cal:260, pro:28, carb:30, fat:2  },
+      { name:'Turkish Eggs (Çılbır)',         ingredients:'2 poached eggs, 100g Greek yogurt, ½ tsp butter, ½ tsp paprika, dill, 1 rye toast',                 cal:310, pro:18, carb:22, fat:14 },
+      { name:'Savoury Quinoa Bowl',           ingredients:'80g quinoa, 1 soft-boiled egg, ¼ avocado, 6 cherry tomatoes, juice of ½ lemon',                     cal:340, pro:16, carb:38, fat:12 },
+      { name:'Skyr & Berry Bowl',             ingredients:'180g skyr, 80g strawberries, ½ banana, 1 tbsp hemp seeds, 1 tsp honey',                             cal:270, pro:24, carb:34, fat:4  },
+      { name:'Soft-Boiled Egg & Ryvita',      ingredients:'2 soft-boiled eggs, 4 Ryvita crackers, ½ cucumber, 2 tomatoes',                                     cal:260, pro:18, carb:22, fat:8  },
+      { name:'Green Protein Smoothie',        ingredients:'40g spinach, 1 scoop pea protein, 1 kiwi, ½ banana, 250ml almond milk',                             cal:280, pro:26, carb:32, fat:4  },
+      { name:'Low-Fat Banana Pancakes',       ingredients:'60g oats, 1 banana, 3 egg whites, ½ tsp cinnamon, 1 tbsp low-cal syrup',                            cal:310, pro:18, carb:44, fat:4  },
+    ],
+    lunch: [
+      { name:'Grilled Chicken Salad',         ingredients:'150g chicken breast, 80g mixed greens, 80g cherry tomatoes, ½ cucumber, 1 tbsp lemon dressing',     cal:320, pro:38, carb:14, fat:10 },
+      { name:'Tuna Lettuce Cups',             ingredients:'150g tuna, 4 cos lettuce leaves, ½ cucumber, 1 tomato, juice of ½ lemon',                           cal:260, pro:36, carb:8,  fat:6  },
+      { name:'Turkey & Spinach Wrap',         ingredients:'1 low-carb wrap, 120g turkey, 40g spinach, 1 tsp mustard, 1 tomato',                                cal:340, pro:32, carb:28, fat:8  },
+      { name:'Lentil Soup (Slim)',            ingredients:'120g red lentils, 1 carrot, 2 celery stalks, 1 tsp cumin, 40g spinach, 500ml broth',                cal:300, pro:18, carb:44, fat:4  },
+      { name:'Shrimp & Zucchini Noodles',     ingredients:'150g shrimp, 2 medium zucchinis spiralised, 2 cloves garlic, 1 tsp olive oil, 80g cherry tomatoes', cal:280, pro:30, carb:12, fat:12 },
+      { name:'Salmon & Cucumber Bowl',        ingredients:'130g salmon, ½ cucumber, 60g edamame, 1 tsp sesame, 80g brown rice',                                cal:360, pro:36, carb:28, fat:12 },
+      { name:'Chicken Vegetable Soup',        ingredients:'150g chicken, 500ml broth, 1 carrot, 2 celery stalks, 80g zucchini, fresh herbs',                   cal:280, pro:32, carb:20, fat:6  },
+      { name:'Egg & Veggie Frittata',         ingredients:'3 eggs, ½ courgette, 80g cherry tomatoes, 40g spinach, 20g feta',                                   cal:300, pro:22, carb:10, fat:16 },
+      { name:'Chickpea Salad',                ingredients:'150g chickpeas, ½ cucumber, 80g cherry tomatoes, ¼ red onion, juice of 1 lemon, fresh herbs',       cal:320, pro:14, carb:44, fat:8  },
+      { name:'White Fish Salad',              ingredients:'150g poached cod, 60g mixed leaves, 4 radishes, 1 tbsp lemon dressing, 1 tbsp capers',              cal:260, pro:36, carb:8,  fat:6  },
+      { name:'Vietnamese Prawn Roll Bowl',    ingredients:'100g prawns, ½ cucumber, fresh mint, coriander, 2 tbsp sweet chilli sauce, rice paper pieces',       cal:300, pro:26, carb:34, fat:4  },
+      { name:'Lean Turkey Lettuce Wrap',      ingredients:'130g turkey mince, 4 butter lettuce leaves, 1 tbsp hoisin, 1 carrot, ½ cucumber',                   cal:280, pro:28, carb:22, fat:6  },
+      { name:'Cauliflower Rice Stir-Fry',     ingredients:'300g cauliflower rice, 130g chicken, 100g broccoli, 2 tbsp soy sauce, 1 tsp ginger',                cal:300, pro:32, carb:18, fat:8  },
+      { name:'Greek Salad with Grilled Feta', ingredients:'2 tomatoes, ½ cucumber, 6 olives, 60g feta, ¼ red onion, 1 tsp oregano',                            cal:280, pro:10, carb:16, fat:18 },
+      { name:'Stuffed Mushrooms',             ingredients:'2 large portobello caps, 100g tuna, 60g ricotta, 40g spinach, 80g cherry tomatoes',                 cal:260, pro:28, carb:12, fat:10 },
+      { name:'Smoked Salmon Rye',             ingredients:'4 rye crackers, 80g smoked salmon, 2 tbsp light cream cheese, fresh dill',                          cal:300, pro:26, carb:22, fat:8  },
+      { name:'Tofu & Spinach Bowl',           ingredients:'150g firm tofu, 60g spinach, 1 tsp sesame, 150g brown rice, 2 tbsp soy sauce',                      cal:340, pro:22, carb:36, fat:10 },
+      { name:'Chicken & Broth Noodles',       ingredients:'500ml chicken broth, 130g chicken, 2 zucchinis spiralised, 80g mushrooms',                          cal:260, pro:28, carb:16, fat:6  },
+      { name:'Egg Salad Bowl',                ingredients:'3 hard-boiled eggs, 60g mixed greens, ¼ avocado, juice of ½ lemon, 1 tsp mustard',                  cal:300, pro:18, carb:8,  fat:20 },
+      { name:'Lean Beef Salad',               ingredients:'130g grilled lean beef, 40g rocket, 80g cherry tomatoes, juice of ½ lemon, 1 tsp olive oil',        cal:340, pro:34, carb:8,  fat:16 },
+      { name:'Baked Cod & Salad',             ingredients:'150g cod, 60g mixed salad, 4 radishes, ½ cucumber, juice of ½ lemon, 1 tsp olive oil',              cal:280, pro:36, carb:8,  fat:10 },
+      { name:'Pea & Mint Soup',               ingredients:'150g split peas, fresh mint, 500ml veg broth, 2 tbsp yogurt, 1 slice rye bread',                    cal:300, pro:14, carb:46, fat:4  },
+      { name:'Turkey & Avocado Salad',        ingredients:'120g turkey, ¼ avocado, 60g mixed greens, 1 tomato, 1 tbsp lemon dressing',                         cal:320, pro:30, carb:10, fat:16 },
+      { name:'Low-Fat Chicken Tacos',         ingredients:'3 butter lettuce cups, 130g chicken, 3 tbsp pico de gallo, ¼ avocado, juice of ½ lime, coriander',  cal:300, pro:30, carb:18, fat:10 },
+      { name:'Watermelon & Prawn Salad',      ingredients:'100g prawn, 150g watermelon, 30g rocket, 20g feta, ½ cucumber, fresh mint',                         cal:260, pro:22, carb:24, fat:6  },
+    ],
+    dinner: [
+      { name:'Baked Salmon & Greens',         ingredients:'160g salmon fillet, 120g steamed broccoli, 80g asparagus, juice of ½ lemon',                        cal:380, pro:40, carb:12, fat:18 },
+      { name:'Zucchini Bolognese',            ingredients:'130g lean beef mince, 2 zucchinis spiralised, 100g tomato sauce, fresh basil',                      cal:360, pro:36, carb:18, fat:14 },
+      { name:'Grilled Chicken & Broccoli',    ingredients:'160g chicken breast, 150g broccoli, juice of ½ lemon, 2 cloves garlic, 1 tsp olive oil',            cal:340, pro:44, carb:12, fat:10 },
+      { name:'Shrimp & Cauliflower Rice',     ingredients:'160g shrimp, 300g cauliflower rice, 2 cloves garlic, juice of 1 lime, fresh herbs',                 cal:300, pro:34, carb:14, fat:10 },
+      { name:'White Fish & Salsa Verde',      ingredients:'160g cod, 2 tbsp salsa verde, 100g steamed green beans, 80g cherry tomatoes',                       cal:320, pro:38, carb:10, fat:12 },
+      { name:'Turkey Meatballs & Veg',        ingredients:'4 turkey meatballs (130g), 1 zucchini, 100g tomato sauce, 15g parmesan',                            cal:380, pro:38, carb:20, fat:14 },
+      { name:'Chicken & Kale Stir-Fry',       ingredients:'160g chicken, 80g kale, 100g broccoli, 1 tsp ginger, 2 tbsp low-sodium soy sauce',                  cal:340, pro:40, carb:14, fat:8  },
+      { name:'Baked Trout & Asparagus',       ingredients:'160g rainbow trout, 100g asparagus, juice of ½ lemon, 1 tbsp dill, 1 tbsp capers',                  cal:360, pro:42, carb:8,  fat:18 },
+      { name:'Lean Beef Stuffed Peppers',     ingredients:'2 bell peppers, 130g lean beef, 60g quinoa, 80g tomato sauce, fresh herbs',                         cal:380, pro:36, carb:26, fat:12 },
+      { name:'Thai Basil Chicken',            ingredients:'150g chicken mince, 10 thai basil leaves, 2 tbsp fish sauce, 300g cauliflower rice',                 cal:340, pro:36, carb:16, fat:10 },
+      { name:'Tofu Green Curry',              ingredients:'180g firm tofu, 100ml light coconut milk, 2 tbsp green curry paste, 150g mixed veg',                cal:360, pro:20, carb:20, fat:18 },
+      { name:'Lemon Herb Chicken',            ingredients:'160g chicken breast, juice of 1 lemon, mixed herbs, 150g sweet potato, 60g greens',                 cal:360, pro:42, carb:24, fat:8  },
+      { name:'Seared Tuna Steak',             ingredients:'160g tuna steak, 2 tbsp sesame seeds, 100g bok choy, 2 tbsp soy sauce, 1 tsp ginger',               cal:340, pro:46, carb:8,  fat:12 },
+      { name:'Prawn & Vegetable Bowl',        ingredients:'160g prawns, 100g broccoli, 60g snap peas, 1 tsp ginger, 2 cloves garlic, 2 tbsp oyster sauce',     cal:300, pro:30, carb:14, fat:8  },
+      { name:'Chicken & Tomato Casserole',    ingredients:'160g chicken thigh (skinless), 100g tomato, 10 olives, 1 tbsp capers, fresh herbs',                 cal:360, pro:38, carb:12, fat:14 },
+      { name:'Egg & Vegetable Bake',          ingredients:'3 eggs, 80g roasted peppers, 80g courgette, 20g feta, 80g cherry tomatoes',                         cal:320, pro:22, carb:14, fat:18 },
+      { name:'Lamb & Roasted Veg',            ingredients:'150g lean lamb, 80g courgette, 80g aubergine, 80g tomato, 1 tsp rosemary',                          cal:380, pro:36, carb:14, fat:18 },
+      { name:'Spicy Chicken Soup',            ingredients:'150g chicken, 1 chilli, 100g tomato, 2 celery stalks, 1 carrot, 500ml broth, herbs',                cal:300, pro:32, carb:16, fat:8  },
+      { name:'Baked Lemon Snapper',           ingredients:'160g snapper fillet, juice of 1 lemon, 1 tbsp capers, 80g steamed kale, 80g tomato',                cal:320, pro:40, carb:8,  fat:12 },
+      { name:'Chicken Lettuce Wraps',         ingredients:'150g chicken mince, 50g water chestnuts, 1 tsp sesame oil, 2 tbsp hoisin sauce, 4 lettuce cups',    cal:300, pro:32, carb:20, fat:6  },
+      { name:'Edamame & Tofu Salad',          ingredients:'80g edamame, 150g firm tofu, ¼ avocado, 60g mixed greens, 2 tbsp sesame dressing',                  cal:340, pro:22, carb:18, fat:18 },
+      { name:'Pork & Bok Choy Stir-Fry',     ingredients:'150g lean pork, 200g bok choy, 1 tsp ginger, 2 tbsp soy sauce, 1 tsp sesame oil',                   cal:360, pro:36, carb:14, fat:14 },
+      { name:'Baked Chicken & Tomato',        ingredients:'160g chicken breast, 80g cherry tomatoes, fresh basil, 20g feta, 1 tsp olive oil',                  cal:340, pro:42, carb:8,  fat:12 },
+      { name:'Broccoli & Beef Bowl',          ingredients:'130g lean beef strips, 150g broccoli, 2 tbsp low-sodium soy sauce, 80g brown rice',                 cal:380, pro:36, carb:28, fat:10 },
+      { name:'Spiced Cod & Roast Veg',        ingredients:'160g cod, 1 tsp sumac, 80g roasted courgette, 80g bell pepper, juice of ½ lemon, herbs',            cal:320, pro:38, carb:12, fat:10 },
+    ],
+  },
+
+  maintain: {
+    breakfast: [
+      { name:'Classic Overnight Oats',        ingredients:'80g oats, 200ml milk, 1 tbsp chia seeds, 1 banana, 1 tbsp honey, 20g almonds',                      cal:420, pro:16, carb:62, fat:12 },
+      { name:'Poached Egg Avocado Toast',     ingredients:'2 slices sourdough, 2 poached eggs, ½ avocado, 1 tomato, juice of ½ lemon',                         cal:440, pro:20, carb:40, fat:20 },
+      { name:'Greek Yogurt & Granola',        ingredients:'180g Greek yogurt, 50g granola, 80g mixed berries, 1 tbsp honey',                                   cal:400, pro:22, carb:54, fat:10 },
+      { name:'Balanced Omelette',             ingredients:'2 eggs, 30g cheese, 80g mushrooms, 40g spinach, 2 slices whole wheat toast',                        cal:440, pro:28, carb:36, fat:18 },
+      { name:'Smoothie Bowl',                 ingredients:'100g frozen acai, 1 banana, 200ml almond milk, 40g granola, 20g coconut flakes, 1 kiwi',             cal:420, pro:12, carb:64, fat:10 },
+      { name:'Wholegrain Toast & Eggs',       ingredients:'2 slices wholegrain toast, 2 scrambled eggs, 1 tomato, 40g spinach, 1 tsp butter',                   cal:420, pro:22, carb:44, fat:16 },
+      { name:'Muesli & Fruit Bowl',           ingredients:'80g Swiss muesli, 200ml whole milk, 80g strawberries, 1 banana',                                    cal:400, pro:14, carb:62, fat:10 },
+      { name:'Protein Pancakes',              ingredients:'80g oats, 2 eggs, 1 scoop protein powder, 1 banana, 2 tbsp maple syrup',                            cal:440, pro:28, carb:54, fat:8  },
+      { name:'Smoked Salmon Bagel',           ingredients:'1 bagel, 50g cream cheese, 80g smoked salmon, 1 tbsp capers, ¼ red onion',                          cal:460, pro:26, carb:50, fat:16 },
+      { name:'Frittata Slice & Toast',        ingredients:'2 slices egg frittata, 2 slices whole wheat toast, 1 tomato, 20g rocket',                           cal:420, pro:24, carb:38, fat:18 },
+      { name:'Banana Nut Oatmeal',            ingredients:'100g oats, 1 banana, 30g walnuts, 1 tbsp honey, 250ml almond milk, ½ tsp cinnamon',                 cal:440, pro:14, carb:64, fat:14 },
+      { name:'Veggie Breakfast Bowl',         ingredients:'2 scrambled eggs, 100g roasted veggies, ¼ avocado, 20g feta, 2 toast slices',                       cal:460, pro:20, carb:40, fat:22 },
+      { name:'Bircher Muesli',                ingredients:'80g oats, ½ grated apple, 100g yogurt, 20g almonds, 20g raisins, ½ tsp cinnamon',                   cal:410, pro:12, carb:60, fat:12 },
+      { name:'Blueberry Muffin & Yogurt',     ingredients:'1 homemade oat muffin, 150g Greek yogurt, 80g blueberries',                                         cal:440, pro:16, carb:62, fat:12 },
+      { name:'Egg & Cheese Croissant',        ingredients:'1 butter croissant, 2 scrambled eggs, 30g gruyere, 1 tomato',                                       cal:480, pro:20, carb:42, fat:24 },
+      { name:'Chia Pudding & Fruit',          ingredients:'3 tbsp chia seeds, 200ml coconut milk, 80g mango, 1 passionfruit, 20g granola',                     cal:400, pro:8,  carb:54, fat:14 },
+      { name:'Ricotta Pancakes',              ingredients:'100g ricotta, 2 eggs, 60g flour, zest of ½ lemon, 1 tbsp honey, 80g fresh berries',                 cal:420, pro:18, carb:48, fat:14 },
+      { name:'Peanut Butter Toast & Banana',  ingredients:'2 slices wholegrain toast, 2 tbsp peanut butter, 1 banana, 1 tsp honey, 1 tsp seeds',               cal:440, pro:14, carb:56, fat:16 },
+      { name:'Shakshuka',                     ingredients:'2 eggs poached in 150g tomato sauce, ½ bell pepper, ½ tsp cumin, 20g feta, 1 pita',                 cal:460, pro:22, carb:44, fat:18 },
+      { name:'Hummus Veggie Toast',           ingredients:'2 slices sourdough, 4 tbsp hummus, ½ cucumber, 60g roasted pepper, 1 tsp olive oil',                cal:380, pro:12, carb:50, fat:14 },
+      { name:'Granola Bark Bowl',             ingredients:'150g low-fat yogurt, 40g granola bark, 80g mixed berries, 1 tbsp nut butter',                       cal:420, pro:16, carb:52, fat:14 },
+      { name:'Egg & Mushroom Toast',          ingredients:'2 slices whole wheat toast, 120g sautéed mushrooms, 1 poached egg, 1 tsp thyme',                    cal:380, pro:18, carb:42, fat:14 },
+      { name:'Apple Cinnamon Oats',           ingredients:'100g oats, 200ml milk, 1 apple, 1 tsp cinnamon, 1 tsp brown sugar, 20g walnuts',                    cal:410, pro:10, carb:64, fat:12 },
+      { name:'Tofu Scramble & Avocado',       ingredients:'180g firm tofu, ¼ tsp turmeric, 60g spinach, ¼ avocado, 2 slices rye toast',                        cal:400, pro:18, carb:36, fat:18 },
+      { name:'Matcha Smoothie Bowl',          ingredients:'1 tsp matcha, 1 banana, 200ml almond milk, 30g granola, 20g coconut, 1 kiwi',                       cal:400, pro:10, carb:62, fat:12 },
+    ],
+    lunch: [
+      { name:'Chicken & Quinoa Bowl',         ingredients:'150g grilled chicken, 100g quinoa, 100g roasted veg, 2 tbsp tahini dressing',                       cal:520, pro:40, carb:48, fat:14 },
+      { name:'Mediterranean Salad Plate',     ingredients:'130g grilled chicken, 80g fattoush salad, 3 tbsp hummus, 1 pita',                                   cal:500, pro:36, carb:48, fat:14 },
+      { name:'Tuna Nicoise',                  ingredients:'130g tuna, 80g green beans, 1 boiled egg, 100g potato, 10 olives, 40g lettuce',                     cal:480, pro:36, carb:34, fat:18 },
+      { name:'Balanced Buddha Bowl',          ingredients:'150g brown rice, 130g salmon, ½ avocado, 60g edamame, ½ cucumber, 1 tsp sesame',                    cal:520, pro:36, carb:52, fat:16 },
+      { name:'Chicken Soup & Bread',          ingredients:'400ml chicken vegetable soup, 1 whole grain roll, 1 small apple',                                   cal:480, pro:32, carb:56, fat:10 },
+      { name:'Prawn & Avocado Wrap',          ingredients:'1 whole wheat wrap, 130g prawn, ½ avocado, 2 lettuce leaves, juice of ½ lemon',                     cal:480, pro:30, carb:46, fat:18 },
+      { name:'Veggie Grain Bowl',             ingredients:'100g farro, 100g roasted veg, 80g chickpeas, 30g feta, juice of ½ lemon, 1 tsp olive oil',          cal:500, pro:18, carb:62, fat:16 },
+      { name:'Turkey Club Sandwich',          ingredients:'3 slices wholegrain bread, 120g turkey, lettuce, tomato, ¼ avocado',                                cal:500, pro:36, carb:46, fat:16 },
+      { name:'Salmon Salad Bowl',             ingredients:'150g salmon, 60g mixed leaves, 80g quinoa, ½ cucumber, 1 tbsp lemon dressing',                      cal:520, pro:40, carb:38, fat:18 },
+      { name:'Lentil & Roast Veg Bowl',       ingredients:'150g green lentils, 100g roasted carrot, 80g beetroot, 20g feta, 2 tbsp dressing',                  cal:480, pro:22, carb:60, fat:12 },
+      { name:'Lean Steak Pita',               ingredients:'1 whole wheat pita, 130g lean steak, 3 tbsp tzatziki, 1 tomato, ½ cucumber',                        cal:500, pro:38, carb:44, fat:14 },
+      { name:'Chicken & Sweet Potato',        ingredients:'150g chicken, 200g sweet potato, 100g steamed broc, 2 tbsp tahini, juice of ½ lemon',               cal:480, pro:38, carb:46, fat:12 },
+      { name:'Halloumi & Quinoa',             ingredients:'80g grilled halloumi, 100g quinoa, 80g roasted peppers, 40g spinach, 6 olives',                     cal:500, pro:24, carb:46, fat:20 },
+      { name:'Poke Bowl',                     ingredients:'150g salmon, 150g sushi rice, 60g edamame, ¼ avocado, 1 tsp sesame, 2 tbsp soy sauce',              cal:520, pro:36, carb:52, fat:16 },
+      { name:'Chicken & Vegetable Pasta',     ingredients:'120g whole wheat pasta, 130g chicken, 100g broccoli, juice of ½ lemon, 20g parmesan',               cal:500, pro:38, carb:52, fat:12 },
+      { name:'Egg & Roasted Veg Bowl',        ingredients:'2 boiled eggs, 150g roasted courgette and pepper, 3 tbsp hummus, 6 crackers',                       cal:460, pro:22, carb:44, fat:18 },
+      { name:'Tomato Basil Soup & Roll',      ingredients:'350ml tomato soup, 1 whole grain roll, 100g grilled chicken on the side',                           cal:480, pro:28, carb:56, fat:10 },
+      { name:'Couscous & Veg Plate',          ingredients:'120g couscous, 150g roasted veg, 3 tbsp mint yogurt, 2 tbsp pomegranate seeds',                     cal:460, pro:14, carb:70, fat:8  },
+      { name:'Fish & Chips (Healthy)',        ingredients:'150g baked fish, 200g oven sweet potato fries, 80g peas, 1 tbsp tartare sauce',                     cal:500, pro:34, carb:56, fat:12 },
+      { name:'Chicken Noodle Bowl',           ingredients:'130g rice noodles, 130g chicken, 80g bok choy, 400ml broth, 1 tsp ginger, 2 tbsp soy',              cal:480, pro:36, carb:52, fat:8  },
+      { name:'Black Bean Burrito',            ingredients:'1 whole wheat tortilla, 120g black beans, 80g rice, 3 tbsp salsa, ¼ avocado',                       cal:500, pro:18, carb:70, fat:12 },
+      { name:'Soba Noodle Salad',             ingredients:'130g soba noodles, 80g edamame, ½ cucumber, 2 tbsp sesame dressing, 1 tsp ginger',                  cal:480, pro:20, carb:66, fat:12 },
+      { name:'Tuna & White Bean Salad',       ingredients:'130g tuna, 120g cannellini beans, 80g cherry tomatoes, ¼ red onion, juice of ½ lemon',              cal:460, pro:36, carb:42, fat:10 },
+      { name:'Grilled Veg & Halloumi Wrap',   ingredients:'1 whole wheat wrap, 60g halloumi, 100g grilled veg, 2 tbsp hummus, 20g rocket',                     cal:500, pro:22, carb:50, fat:20 },
+      { name:'Prawn Pad Thai',                ingredients:'130g rice noodles, 130g prawn, 1 egg, 80g beansprouts, 20g peanuts, juice of ½ lime',               cal:520, pro:30, carb:58, fat:16 },
+    ],
+    post_workout: [
+      { name:'Protein Banana Smoothie',       ingredients:'1 scoop whey protein, 1 banana, 250ml almond milk, 1 tbsp peanut butter',                           cal:380, pro:32, carb:42, fat:8  },
+      { name:'Turkey & Crackers',             ingredients:'100g turkey slices, 8 whole grain crackers, 3 tbsp hummus, ½ cucumber',                             cal:340, pro:28, carb:32, fat:8  },
+      { name:'Greek Yogurt & Seeds',          ingredients:'180g Greek yogurt, 1 tbsp pumpkin seeds, 1 tsp honey, 1 banana',                                    cal:360, pro:24, carb:42, fat:8  },
+      { name:'Egg & Rice Cake Stack',         ingredients:'2 boiled eggs, 6 rice cakes, ¼ avocado, 6 cherry tomatoes',                                         cal:360, pro:22, carb:32, fat:14 },
+      { name:'Tuna & Crackers',               ingredients:'130g tuna, 6 rye crackers, ¼ avocado, juice of ½ lemon, black pepper',                              cal:340, pro:32, carb:26, fat:12 },
+      { name:'Cottage Cheese & Fruit',        ingredients:'150g low-fat cottage cheese, 1 kiwi, 80g pineapple, ½ banana, 1 tbsp flaxseed',                     cal:320, pro:24, carb:38, fat:4  },
+      { name:'Chicken Rice Bowl (Light)',     ingredients:'130g chicken breast, 120g white rice, 80g steamed veg, 2 tbsp soy sauce',                           cal:400, pro:36, carb:42, fat:6  },
+      { name:'Balanced Recovery Shake',       ingredients:'1 scoop whey protein, 50g oats, 1 banana, 250ml almond milk, 1 tsp honey',                          cal:380, pro:30, carb:50, fat:4  },
+      { name:'Salmon Avocado Snack',          ingredients:'60g smoked salmon, ¼ avocado, 4 rye crispbreads, juice of ½ lemon',                                 cal:360, pro:26, carb:22, fat:18 },
+    ],
+    dinner: [
+      { name:'Grilled Salmon & Veg',          ingredients:'180g salmon fillet, 120g roasted broccoli, 200g sweet potato, 1 tbsp olive oil',                    cal:560, pro:44, carb:44, fat:20 },
+      { name:'Chicken Stir-Fry & Noodles',    ingredients:'150g chicken, 120g egg noodles, 120g stir-fry veg, 2 tbsp oyster sauce, 1 tsp sesame',              cal:540, pro:40, carb:56, fat:14 },
+      { name:'Beef & Vegetable Stew',         ingredients:'150g lean beef, 150g potato, 1 carrot, 2 celery stalks, 100g tomato, 1 crusty roll',                cal:580, pro:40, carb:52, fat:16 },
+      { name:'Baked Pesto Salmon & Rice',     ingredients:'180g salmon, 2 tbsp basil pesto, 150g basmati rice, 80g cherry tomatoes, 40g spinach',              cal:560, pro:42, carb:50, fat:18 },
+      { name:'Chicken & Vegetable Curry',     ingredients:'160g chicken, 80g chickpeas, 60g tomato, 40g spinach, 150g basmati rice, 2 tbsp yogurt',            cal:540, pro:40, carb:54, fat:12 },
+      { name:'Lean Lamb & Potato',            ingredients:'160g lamb loin, 200g roasted potato, 80g peas, 2 tbsp mint sauce, 60g side salad',                  cal:560, pro:40, carb:48, fat:18 },
+      { name:'Tuna & Pasta Bake',             ingredients:'130g pasta, 130g tuna, 100ml light cream sauce, 60g corn, 20g parmesan, 20g breadcrumb',            cal:540, pro:38, carb:58, fat:14 },
+      { name:'Grilled Pork & Salad',          ingredients:'160g pork tenderloin, 60g mixed salad, 200g baked potato, 1 tbsp light dressing',                   cal:540, pro:42, carb:46, fat:16 },
+      { name:'Prawn & Vegetable Pasta',       ingredients:'120g whole wheat pasta, 150g prawns, 80g cherry tomatoes, 2 cloves garlic, 1 tbsp olive oil',       cal:520, pro:36, carb:56, fat:14 },
+      { name:'Turkey & Vegetable Roast',      ingredients:'180g turkey breast, 120g roast veg, 80ml gravy, 200g roast potato, 80g peas',                       cal:560, pro:44, carb:50, fat:16 },
+      { name:'Chicken Fajitas',               ingredients:'160g chicken, 1 bell pepper, 2 small whole wheat tortillas, ¼ avocado, 3 tbsp salsa',               cal:540, pro:40, carb:52, fat:14 },
+      { name:'Baked Sea Bass & Quinoa',       ingredients:'180g sea bass, 100g quinoa, 100g roasted asparagus, juice of ½ lemon, herbs',                       cal:500, pro:40, carb:44, fat:14 },
+      { name:'Lamb & Lentil Tagine',          ingredients:'150g lamb, 100g green lentils, 100g tomato, 1 tsp ras-el-hanout, 120g couscous, 2 tbsp yogurt',     cal:560, pro:38, carb:54, fat:16 },
+      { name:'Turkey Bolognese & Pasta',      ingredients:'150g turkey mince, 120g whole wheat spaghetti, 100g tomato sauce, fresh basil',                     cal:520, pro:40, carb:56, fat:10 },
+      { name:'Chicken & Mushroom Risotto',    ingredients:'150g arborio rice, 150g chicken, 120g mushrooms, 20g parmesan, 50ml white wine',                    cal:560, pro:36, carb:66, fat:14 },
+      { name:'Soy Glazed Salmon',             ingredients:'180g salmon, 3 tbsp soy glaze, 150g jasmine rice, 100g bok choy, 1 tsp sesame',                     cal:560, pro:42, carb:50, fat:18 },
+      { name:'Lean Beef Taco Bowl',           ingredients:'150g lean beef, 150g brown rice, 80g black beans, 3 tbsp salsa, ¼ avocado, juice of ½ lime',        cal:540, pro:38, carb:52, fat:14 },
+      { name:'Chicken & Orzo Bake',           ingredients:'160g chicken, 120g orzo, 80g cherry tomatoes, 10 olives, 20g feta, fresh basil, juice of ½ lemon', cal:520, pro:36, carb:54, fat:14 },
+      { name:'Grilled Swordfish & Veg',       ingredients:'180g swordfish, 80g courgette, 80g bell pepper, juice of ½ lemon, 1 tbsp olive oil',                cal:500, pro:42, carb:22, fat:22 },
+      { name:'Chickpea & Spinach Curry',      ingredients:'180g chickpeas, 80g spinach, 100g tomato, 100ml coconut milk, 1 small naan, 100g rice',             cal:540, pro:20, carb:72, fat:14 },
+      { name:'Turkey Stuffed Peppers',        ingredients:'2 bell peppers, 150g turkey mince, 100g brown rice, 80g tomato sauce, 30g mozzarella',              cal:500, pro:36, carb:44, fat:14 },
+      { name:'Baked Trout & Roast Veg',       ingredients:'180g trout, 200g sweet potato, 100g broccoli, juice of ½ lemon, herbs, 1 tsp olive oil',            cal:520, pro:40, carb:42, fat:16 },
+      { name:'Beef & Broccoli Bowl',          ingredients:'150g lean beef, 150g brown rice, 120g broccoli, 2 tbsp oyster sauce, 1 tsp sesame oil',             cal:540, pro:40, carb:52, fat:14 },
+      { name:'Spiced Chicken & Couscous',     ingredients:'160g chicken, 1 tsp ras-el-hanout, 120g couscous, 2 tbsp pomegranate seeds, fresh herbs',           cal:520, pro:40, carb:54, fat:12 },
+      { name:'Prawn Green Curry',             ingredients:'180g prawns, 150ml coconut milk, 2 tbsp green curry paste, 150g basmati, Thai basil leaves',        cal:540, pro:34, carb:56, fat:16 },
+    ],
+  },
+};
+
+
+const MP_GOAL_CONFIG = {
+  weight_gain: {
+    label: 'Weight Gain',
+    emoji: '📈',
+    mealTypes: ['breakfast','lunch','post_workout','dinner'],
+    calRange: '2500–3000 kcal',
+    bannerClass: 'mp-banner-weight_gain',
+    textClass: 'mp-banner-text-weight_gain',
+    desc: 'High-calorie meals to help you reach a calorie surplus and pack on size.',
+    tip: '🍽️ Eat every 3–4 hours and aim for calorie-dense whole foods.',
+  },
+  build_muscle: {
+    label: 'Build Muscle',
+    emoji: '💪',
+    mealTypes: ['breakfast','lunch','post_workout','dinner'],
+    calRange: '2400–2800 kcal',
+    bannerClass: 'mp-banner-build_muscle',
+    textClass: 'mp-banner-text-build_muscle',
+    desc: 'High-protein, balanced-carb meals optimised for hypertrophy and recovery.',
+    tip: '💪 Hit your protein target every day — consistency is key to muscle growth.',
+  },
+  lose_weight: {
+    label: 'Lose Weight',
+    emoji: '🔥',
+    mealTypes: ['breakfast','lunch','dinner'],
+    calRange: '1700–2100 kcal',
+    bannerClass: 'mp-banner-lose_weight',
+    textClass: 'mp-banner-text-lose_weight',
+    desc: 'Lower-calorie, high-protein meals to preserve muscle while burning fat.',
+    tip: '🔥 Stay hydrated and avoid liquid calories to maximise your deficit.',
+  },
+  maintain: {
+    label: 'Maintain Fitness',
+    emoji: '⚡',
+    mealTypes: ['breakfast','lunch','post_workout','dinner'],
+    calRange: '2100–2500 kcal',
+    bannerClass: 'mp-banner-maintain',
+    textClass: 'mp-banner-text-maintain',
+    desc: 'Balanced macros to fuel your training and sustain your current physique.',
+    tip: '⚡ Balanced meals mean balanced energy — keep portions consistent day to day.',
+  },
+};
+
+const MP_MEAL_TYPE_META = {
+  breakfast:    { label:'Breakfast',     emoji:'🌅', numClass:'mp-num-breakfast', badgeClass:'mp-badge-breakfast' },
+  lunch:        { label:'Lunch',         emoji:'☀️',  numClass:'mp-num-lunch',     badgeClass:'mp-badge-lunch'     },
+  post_workout: { label:'Post Workout',  emoji:'⚡',  numClass:'mp-num-postwork',  badgeClass:'mp-badge-postwork'  },
+  dinner:       { label:'Dinner',        emoji:'🌙', numClass:'mp-num-dinner',    badgeClass:'mp-badge-dinner'    },
+};
+
+let mpCurrentGoal = 'lose_weight';
+let mpCurrentPlan = [];
+
+function mpSetGoal(goal) {
+  mpCurrentGoal = goal;
+  document.querySelectorAll('.mp-goal-chip').forEach(b =>
+    b.classList.toggle('active', b.dataset.goal === goal)
+  );
+  mpGeneratePlan();
+}
+
+function mpPickMeal(goal, type) {
+  const pool = (MEAL_DB[goal] || {})[type] || [];
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function mpGeneratePlan() {
+  const gc = MP_GOAL_CONFIG[mpCurrentGoal];
+
+  mpCurrentPlan = gc.mealTypes.map(type => {
+    const meal = mpPickMeal(mpCurrentGoal, type);
+    return meal ? { ...meal, type, id: Date.now() + Math.random(), logged: false } : null;
+  }).filter(Boolean);
+
+  mpRenderTargetBanner();
+  mpRenderPlan();
+}
+
+function mpRenderTargetBanner() {
+  const gc = MP_GOAL_CONFIG[mpCurrentGoal];
+  const banner = document.getElementById('mp-target-banner');
+  const totals = mpCurrentPlan.reduce((a,m) => ({
+    cal: a.cal + m.cal, pro: a.pro + m.pro, carb: a.carb + m.carb, fat: a.fat + m.fat
+  }), { cal:0, pro:0, carb:0, fat:0 });
+
+  banner.className = 'mp-target-banner ' + gc.bannerClass;
+  banner.innerHTML = `
+    <div>
+      <div class="mp-target-label ${gc.textClass}">${gc.emoji} ${gc.label} · Daily Target</div>
+      <div class="mp-target-range ${gc.textClass}">${gc.calRange}</div>
+    </div>
+    <div class="mp-target-pills">
+      <span class="mp-target-pill ${gc.textClass}">🔥 ${totals.cal} kcal</span>
+      <span class="mp-target-pill ${gc.textClass}">🥩 ${totals.pro}g protein</span>
+      <span class="mp-target-pill ${gc.textClass}">🌾 ${totals.carb}g carbs</span>
+      <span class="mp-target-pill ${gc.textClass}">🥑 ${totals.fat}g fat</span>
+    </div>
+  `;
+}
+
+function mpRenderPlan() {
+  const gc = MP_GOAL_CONFIG[mpCurrentGoal];
+  const totals = mpCurrentPlan.reduce((a,m) => ({
+    cal: a.cal + m.cal, pro: a.pro + m.pro, carb: a.carb + m.carb, fat: a.fat + m.fat
+  }), { cal:0, pro:0, carb:0, fat:0 });
+
+  const cardsHtml = mpCurrentPlan.map((meal, idx) => {
+    const meta = MP_MEAL_TYPE_META[meal.type];
+    return `
+    <div class="mp-meal-card" id="mp-card-${meal.id}" style="animation-delay:${idx * 0.07}s">
+      <div class="mp-meal-num ${meta.numClass}">${idx + 1}</div>
+      <div class="mp-meal-content">
+        <span class="mp-meal-type-badge ${meta.badgeClass}">${meta.emoji} ${meta.label}</span>
+        <div class="mp-meal-name">${escHtml(meal.name)}</div>
+        <div class="mp-meal-ingredients">${escHtml(meal.ingredients)}</div>
+        <div class="mp-meal-macros">
+          <span class="mp-macro-tag mp-macro-cal">🔥 ${meal.cal} kcal</span>
+          <span class="mp-macro-tag mp-macro-pro">🥩 ${meal.pro}g</span>
+          <span class="mp-macro-tag mp-macro-carb">🌾 ${meal.carb}g</span>
+          <span class="mp-macro-tag mp-macro-fat">🥑 ${meal.fat}g</span>
+        </div>
+        <button class="mp-log-btn${meal.logged ? ' logged' : ''}"
+                id="mp-log-${meal.id}"
+                onclick="mpLogMeal('${meal.id}')">
+          ${meal.logged
+            ? '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Logged'
+            : '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Log Meal'}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('mp-plan-output').innerHTML = `
+    <div class="mp-plan-summary">
+      <div class="mp-sum-pill"><div class="s-label">Meals</div><div class="s-val">${mpCurrentPlan.length}</div></div>
+      <div class="mp-sum-pill"><div class="s-label">Calories</div><div class="s-val">${totals.cal}</div></div>
+      <div class="mp-sum-pill"><div class="s-label">Protein</div><div class="s-val">${totals.pro}g</div></div>
+      <div class="mp-sum-pill"><div class="s-label">Carbs</div><div class="s-val">${totals.carb}g</div></div>
+      <div class="mp-sum-pill"><div class="s-label">Fat</div><div class="s-val">${totals.fat}g</div></div>
+    </div>
+    <div class="wp-goal-banner ${mpGoalBannerClass(mpCurrentGoal)}" style="margin-bottom:1.25rem">
+      <div style="flex-shrink:0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      </div>
+      <div>
+        <div style="font-weight:700;font-size:.88rem;margin-bottom:.2rem">${gc.label} Nutrition Protocol</div>
+        <div style="font-size:.82rem;color:#374151;line-height:1.4">${gc.desc}</div>
+        <div style="font-size:.78rem;color:#6b7280;margin-top:.35rem;font-style:italic">${gc.tip}</div>
+      </div>
+    </div>
+    <div class="mp-meals-grid">${cardsHtml}</div>
+  `;
+
+  document.getElementById('mp-log-all-bar').style.display = 'flex';
+}
+
+function mpGoalBannerClass(goal) {
+  const map = {
+    weight_gain: 'style="border-color:rgba(245,122,61,.25);background:rgba(245,122,61,.06);color:#c2410c"',
+    build_muscle: 'style="border-color:rgba(124,58,237,.25);background:rgba(124,58,237,.06);color:#6d28d9"',
+    lose_weight: 'style="border-color:rgba(239,68,68,.25);background:rgba(239,68,68,.06);color:#dc2626"',
+    maintain: 'style="border-color:rgba(31,173,150,.25);background:rgba(31,173,150,.06);color:#0f766e"',
+  };
+  return map[goal] || '';
+}
+
+function mpLogMeal(idStr) {
+  const meal = mpCurrentPlan.find(m => String(m.id) === idStr);
+  if (!meal) return;
+
+  const dateStr = fmt(dashDate);
+  const btn = document.getElementById('mp-log-' + idStr);
+
+  if (!meal.logged) {
+    // ── LOG ──
+    const logId = Date.now();
+    meal.logEntryId = logId;
+    const entries = getFoodLog(dateStr);
+    entries.push({
+      id: logId,
+      name: meal.name,
+      ingredients: meal.ingredients,
+      calories: meal.cal,
+      protein: meal.pro,
+      carbs: meal.carb,
+      fat: meal.fat,
+    });
+    saveFoodLog(dateStr, entries);
+    meal.logged = true;
+    if (btn) {
+      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Logged';
+      btn.classList.add('logged');
+    }
+    showToast(meal.name + ' added to Food Log!');
+  } else {
+    // ── UNDO ──
+    const entries = getFoodLog(dateStr).filter(e => e.id !== meal.logEntryId);
+    saveFoodLog(dateStr, entries);
+    meal.logged = false;
+    meal.logEntryId = null;
+    if (btn) {
+      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Log Meal';
+      btn.classList.remove('logged');
+    }
+    showToast(meal.name + ' removed from Food Log.');
+  }
+}
+
+function mpLogAllMeals() {
+  let count = 0;
+  mpCurrentPlan.forEach(meal => {
+    if (!meal.logged) {
+      mpLogMeal(String(meal.id));
+      count++;
+    }
+  });
+  if (count === 0) showToast('All meals already logged!');
+  else showToast(count + ' meal' + (count > 1 ? 's' : '') + ' added to Food Log!');
+}
+
+const _origNavigate = navigate;
+window.navigate = function(page) {
+  _origNavigate(page);
+  if (page === 'meals' && mpCurrentPlan.length === 0) mpGeneratePlan();
+};

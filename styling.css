@@ -1574,3 +1574,454 @@ main {
     gap: .75rem;
     flex-wrap: wrap;
 }
+
+.mp-header-card {
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(135deg, #f0fdf9 0%, #ffffff 60%);
+  border-color: rgba(31,173,150,.2);
+}
+ 
+.mp-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.mp-header-text {
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+}
+
+.mp-header-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #1fad96;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(31,173,150,.25);
+}
+
+.mp-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #0f1729;
+  line-height: 1.2;
+}
+
+.mp-subtitle {
+  font-size: .82rem;
+  color: #65758b;
+  margin-top: .2rem;
+}
+
+/* Goal Selector */
+.mp-goal-card {
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.mp-goal-label {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: #65758b;
+  margin-bottom: .75rem;
+}
+
+.mp-goal-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+}
+
+.mp-goal-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .5rem 1.1rem;
+  border-radius: 999px;
+  border: 1.5px solid #e1e7ef;
+  background: transparent;
+  cursor: pointer;
+  transition: all .2s;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .85rem;
+  font-weight: 600;
+  color: #65758b;
+}
+
+.mp-goal-chip:hover {
+  border-color: rgba(31,173,150,.4);
+  color: #0f1729;
+  background: rgba(31,173,150,.04);
+}
+
+.mp-goal-chip.active {
+  background: #1fad96;
+  color: white;
+  border-color: #1fad96;
+  box-shadow: 0 2px 10px rgba(31,173,150,.25);
+}
+
+.mp-chip-icon {
+  font-size: .95rem;
+}
+
+.mp-target-banner {
+  border-radius: 18px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  animation: slideUp .3s ease both;
+}
+
+.mp-target-label {
+  font-size: .78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  opacity: .7;
+  margin-bottom: .2rem;
+}
+
+.mp-target-range {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.mp-target-pills {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.mp-target-pill {
+  padding: .3rem .75rem;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 600;
+  background: rgba(255,255,255,.55);
+  border: 1px solid rgba(255,255,255,.5);
+  backdrop-filter: blur(4px);
+}
+
+/* Meal Cards Plan */
+.mp-meals-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.mp-meal-card {
+  padding: 1.25rem;
+  border-radius: 20px;
+  border: 1px solid #e1e7ef;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04);
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  animation: slideUp .35s ease both;
+  transition: box-shadow .2s, transform .2s;
+}
+
+.mp-meal-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,.08);
+  transform: translateY(-1px);
+}
+
+.mp-meal-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Outfit', sans-serif;
+  font-size: .85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: white;
+}
+
+.mp-meal-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.mp-meal-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .18rem .6rem;
+  border-radius: 999px;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  margin-bottom: .45rem;
+}
+
+.mp-meal-name {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #0f1729;
+  margin-bottom: .3rem;
+  line-height: 1.3;
+}
+
+.mp-meal-ingredients {
+  font-size: .78rem;
+  color: #65758b;
+  margin-bottom: .65rem;
+  line-height: 1.5;
+}
+
+.mp-meal-macros {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+  margin-bottom: .8rem;
+}
+
+.mp-macro-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: .28rem;
+  padding: .22rem .6rem;
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
+}
+
+.mp-macro-cal {
+  background: rgba(245,122,61,.1);
+  color: #f57a3d;
+}
+
+.mp-macro-pro {
+  background: rgba(17,180,212,.1);
+  color: #11b4d4;
+}
+
+.mp-macro-carb {
+  background: rgba(142,94,237,.1);
+  color: #8e5eed;
+}
+
+.mp-macro-fat {
+  background: rgba(249,195,31,.15);
+  color: #d4a108;
+}
+
+.mp-log-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .38rem .9rem;
+  border-radius: 999px;
+  border: 1.5px solid rgba(31,173,150,.3);
+  background: rgba(31,173,150,.06);
+  color: #1fad96;
+  font-family: 'DM Sans', sans-serif;
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+}
+
+.mp-log-btn:hover {
+  background: rgba(31,173,150,.14);
+}
+
+.mp-log-btn.logged {
+  background: #1fad96;
+  color: white;
+  border-color: #1fad96;
+  cursor: default;
+}
+
+.mp-log-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.mp-plan-summary {
+  card: inherit;
+  background: rgba(210,224,240,.12);
+  border: 1px solid #e1e7ef;
+  border-radius: 18px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-bottom: 1.25rem;
+}
+
+.mp-sum-pill {
+  background: #fff;
+  border: 1px solid #e1e7ef;
+  border-radius: 12px;
+  padding: .55rem .9rem;
+  text-align: center;
+  min-width: 72px;
+}
+
+.mp-sum-pill .s-label {
+  font-size: .66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #65758b;
+}
+
+.mp-sum-pill .s-val {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f1729;
+  margin-top: .1rem;
+}
+
+.mp-log-all-bar {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0 .5rem;
+  margin-bottom: 1rem;
+}
+.mp-num-breakfast {
+    background: #f57a3d;
+}
+
+.mp-num-lunch {
+    background: #11b4d4;
+}
+
+.mp-num-postwork {
+    background: #8e5eed;
+}
+
+.mp-num-dinner {
+    background: #1fad96;
+}
+
+.mp-badge-breakfast {
+    background: rgba(245, 122, 61, .1);
+    color: #f57a3d;
+}
+
+.mp-badge-lunch {
+    background: rgba(17, 180, 212, .1);
+    color: #11b4d4;
+}
+
+.mp-badge-postwork {
+    background: rgba(142, 94, 237, .1);
+    color: #8e5eed;
+}
+
+.mp-badge-dinner {
+    background: rgba(31, 173, 150, .1);
+    color: #1fad96;
+}
+
+.mp-banner-weight_gain {
+    background: linear-gradient(135deg, rgba(245, 122, 61, .1), rgba(249, 195, 31, .07));
+    border: 1px solid rgba(245, 122, 61, .2);
+}
+
+.mp-banner-build_muscle {
+    background: linear-gradient(135deg, rgba(124, 58, 237, .09), rgba(142, 94, 237, .06));
+    border: 1px solid rgba(124, 58, 237, .2);
+}
+
+.mp-banner-lose_weight {
+    background: linear-gradient(135deg, rgba(239, 68, 68, .08), rgba(245, 122, 61, .06));
+    border: 1px solid rgba(239, 68, 68, .2);
+}
+
+.mp-banner-maintain {
+    background: linear-gradient(135deg, rgba(31, 173, 150, .09), rgba(6, 182, 212, .06));
+    border: 1px solid rgba(31, 173, 150, .2);
+}
+
+.mp-banner-text-weight_gain {
+    color: #c2410c;
+}
+
+.mp-banner-text-build_muscle {
+    color: #6d28d9;
+}
+
+.mp-banner-text-lose_weight {
+    color: #dc2626;
+}
+
+.mp-banner-text-maintain {
+    color: #0f766e;
+}
+
+@media (max-width: 639px) {
+    .mp-header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .mp-regen-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .mp-meal-card {
+        flex-direction: column;
+        gap: .75rem;
+    }
+
+    .mp-plan-summary {
+        justify-content: space-between;
+    }
+}
+
+.mp-log-btn.logged:hover {
+    background: rgba(239, 68, 68, .12);
+    border-color: rgba(239, 68, 68, .35);
+    color: #dc2626;
+    cursor: pointer;
+}
+
+.mp-log-btn.logged:hover::after {
+    content: ' (undo)';
+    font-size: .7rem;
+    opacity: .8;
+}
+
+.wp-save-btn.saved:hover {
+    background: rgba(239, 68, 68, .12) !important;
+    border-color: rgba(239, 68, 68, .35) !important;
+    color: #dc2626 !important;
+    cursor: pointer;
+}
+
+.wp-save-btn.saved:hover::after {
+    content: ' (undo)';
+    font-size: .7rem;
+    opacity: .8;
+}
