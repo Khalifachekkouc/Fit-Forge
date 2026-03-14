@@ -27,6 +27,10 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></svg>
         Gym
       </button>
+      <button class="nav-btn" onclick="navigate('programs')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Programs
+      </button>
       <button class="nav-btn" onclick="navigate('profile')">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Profile &amp; Goals
@@ -144,11 +148,11 @@
           </div>
           <div class="form-group">
             <label class="form-label">Weight (kg)</label>
-            <input id="p-weight" type="number" class="form-input" value="70" min="20" max="400">
+            <input id="p-weight" type="number" class="form-input" value="70" min="20" max="200">
           </div>
           <div class="form-group">
             <label class="form-label">Age</label>
-            <input id="p-age" type="number" class="form-input" value="30" min="10" max="120">
+            <input id="p-age" type="number" class="form-input" value="20" min="10" max="90">
           </div>
           <div class="form-group">
             <label class="form-label">Gender</label>
@@ -176,13 +180,13 @@
         </div>
         <hr class="divider">
         <button class="submit-btn" onclick="saveProfile()">
-          💾 Save &amp; Calculate
+          Save &amp; Calculate
         </button>
       </div>
 
       <div class="card results-card">
         <div class="flex items-center gap-2 mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="8" x2="16" y1="10" y2="10"/><line x1="8" x2="12" y1="14" y2="14"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="hsl(170 70% 40%)" stroke-width="2" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="8" x2="16" y1="10" y2="10"/><line x1="8" x2="12" y1="14" y2="14"/></svg>
           <h2 class="section-title">Recommended Goals</h2>
         </div>
         <div id="calc-result">
@@ -197,6 +201,66 @@
       </div>
     </div>
   </div>
+  <div id="page-programs" class="page">
+    <div class="card hero-banner" style="margin-bottom:2rem;">
+      <div class="hero-gradient"></div>
+      <div class="hero-content">
+        <h1>🏋️ Workout Programs</h1>
+        <p>Each plan targets a <strong>different muscle zone</strong> — no two exercises overlap the same sub-muscle, so every rep counts.</p>
+      </div>
+    </div>
+    <div class="card" style="padding:1.5rem; margin-bottom:1.5rem;">
+      <div class="flex items-center gap-2 mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#1fad96" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <h2 class="section-title">Your Profile</h2>
+      </div>
+      <div class="wp-profile-grid">
+        <div class="form-group">
+          <label class="form-label">Gender</label>
+          <div class="wp-toggle-group" id="wp-gender-group">
+            <button class="wp-toggle active" data-val="male" onclick="wpSetToggle('gender','male')">♂ Male</button>
+            <button class="wp-toggle" data-val="female" onclick="wpSetToggle('gender','female')">♀ Female</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fitness Level</label>
+          <div class="wp-toggle-group" id="wp-level-group">
+            <button class="wp-toggle active" data-val="beginner" onclick="wpSetToggle('level','beginner')">Beginner</button>
+            <button class="wp-toggle" data-val="intermediate" onclick="wpSetToggle('level','intermediate')">Intermediate</button>
+            <button class="wp-toggle" data-val="advanced" onclick="wpSetToggle('level','advanced')">Advanced</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Goal</label>
+          <div class="wp-toggle-group" id="wp-goal-group">
+            <button class="wp-toggle active" data-val="build_muscle" onclick="wpSetToggle('goal','build_muscle')">💪 Build Muscle</button>
+            <button class="wp-toggle" data-val="lose_fat" onclick="wpSetToggle('goal','lose_fat')">🔥 Lose Fat</button>
+            <button class="wp-toggle" data-val="maintain" onclick="wpSetToggle('goal','maintain')">⚡ Maintain Fitness</button>
+            <button class="wp-toggle" data-val="strength" onclick="wpSetToggle('goal','strength')">🏆 Increase Strength</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Muscle Group Focus</label>
+          <div class="wp-toggle-group" id="wp-muscle-group">
+            <button class="wp-toggle active" data-val="chest" onclick="wpSetToggle('muscle','chest')">Chest</button>
+            <button class="wp-toggle" data-val="back" onclick="wpSetToggle('muscle','back')">Back</button>
+            <button class="wp-toggle" data-val="legs" onclick="wpSetToggle('muscle','legs')">Legs</button>
+            <button class="wp-toggle" data-val="shoulders" onclick="wpSetToggle('muscle','shoulders')">Shoulders</button>
+            <button class="wp-toggle" data-val="arms" onclick="wpSetToggle('muscle','arms')">Arms</button>
+            <button class="wp-toggle" data-val="core" onclick="wpSetToggle('muscle','core')">Core / Abs</button>
+            <button class="wp-toggle" data-val="glutes" onclick="wpSetToggle('muscle','glutes')">Glutes</button>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:1.5rem;">
+        <button class="btn btn-primary" style="height:48px;padding:0 1.75rem;font-size:.95rem;" onclick="generateWorkoutPlan()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Generate Workout Plan
+        </button>
+      </div>
+    </div>
+    <div id="wp-plan-output"></div>
+  </div>
 </main>
 
 <nav class="mobile-nav">
@@ -207,6 +271,10 @@
   <button class="mobile-nav-btn" onclick="navigate('gym')">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></svg>
     Gym
+  </button>
+  <button class="mobile-nav-btn" onclick="navigate('programs')">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    Programs
   </button>
   <button class="mobile-nav-btn" onclick="navigate('profile')">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>

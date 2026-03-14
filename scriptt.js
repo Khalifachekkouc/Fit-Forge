@@ -331,14 +331,7 @@ function saveGoals() {
 }
 
 const MUSCLE_GROUPS = [
-  "Back",
-  "Chest",
-  "Legs",
-  "Arms",
-  "Shoulders",
-  "Full Body",
-  "Core",
-  "Cardio",
+  "Chest", "Back", "Legs", "Shoulders", "Arms", "Core / Abs", "Glutes", "Full Body", "Cardio",
 ];
 
 function changeGymDay(n) {
@@ -388,40 +381,32 @@ function renderExercises(exercises) {
         <th>Exercise</th><th>Sets</th><th>Reps</th><th>Weight</th><th></th>
       </tr></thead>
       <tbody>
-      ${exercises
-        .map(
-          (ex, i) => `
-        <tr class="exercise-row" id="ex-row-${ex.id}">
-          <td>
-            <div class="exercise-name">${escHtml(ex.name)}</div>
-            ${ex.notes ? `<div class="exercise-notes">${escHtml(ex.notes)}</div>` : ""}
-          </td>
-          <td>${ex.sets}</td>
-          <td>${ex.reps}</td>
-          <td>${ex.weight} kg</td>
+      ${exercises.map((ex) => {
+            const safeId = String(ex.id).replace(/[^a-zA-Z0-9_-]/g, '_');
+            return `
+        <tr class="exercise-row" id="ex-row-${safeId}">
+          <td><div class="exercise-name">${escHtml(ex.name)}</div>${ex.notes ? `<div class="exercise-notes">${escHtml(ex.notes)}</div>` : ""}</td>
+          <td>${ex.sets}</td><td>${ex.reps}</td><td>${ex.weight} kg</td>
           <td style="text-align:right;white-space:nowrap">
-            <button class="btn btn-ghost" style="padding:.3rem .6rem;border-radius:8px;font-size:.78rem" onclick="startEdit(${ex.id})">✏️</button>
-            <button class="btn-icon" onclick="deleteExercise(${ex.id})" style="display:inline-flex">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-            </button>
+            <button class="btn btn-ghost" style="padding:.3rem .6rem;border-radius:8px;font-size:.78rem" onclick="startEdit('${safeId}')">✏️</button>
+            <button class="btn-icon" onclick="deleteExercise('${safeId}')" style="display:inline-flex"><svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
           </td>
         </tr>
-        <tr class="edit-row" id="edit-row-${ex.id}">
+        <tr class="edit-row" id="edit-row-${safeId}">
           <td colspan="5" style="padding:.75rem">
             <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:.6rem;align-items:end">
-              <div class="form-group"><label class="form-label">Name</label><input id="ee-name-${ex.id}" class="form-input" style="height:38px" value="${escHtml(ex.name)}"></div>
-              <div class="form-group"><label class="form-label">Sets</label><input id="ee-sets-${ex.id}" type="number" class="form-input" style="height:38px;text-align:center" value="${ex.sets}"></div>
-              <div class="form-group"><label class="form-label">Reps</label><input id="ee-reps-${ex.id}" type="number" class="form-input" style="height:38px;text-align:center" value="${ex.reps}"></div>
-              <div class="form-group"><label class="form-label">Weight</label><input id="ee-weight-${ex.id}" type="number" step="0.5" class="form-input" style="height:38px;text-align:center" value="${ex.weight}"></div>
+              <div class="form-group"><label class="form-label">Name</label><input id="ee-name-${safeId}" class="form-input" style="height:38px" value="${escHtml(ex.name)}"></div>
+              <div class="form-group"><label class="form-label">Sets</label><input id="ee-sets-${safeId}" type="number" class="form-input" style="height:38px;text-align:center" value="${ex.sets}"></div>
+              <div class="form-group"><label class="form-label">Reps</label><input id="ee-reps-${safeId}" type="number" class="form-input" style="height:38px;text-align:center" value="${ex.reps}"></div>
+              <div class="form-group"><label class="form-label">Weight</label><input id="ee-weight-${safeId}" type="number" step="0.5" class="form-input" style="height:38px;text-align:center" value="${ex.weight}"></div>
             </div>
             <div style="display:flex;gap:.5rem;margin-top:.5rem">
-              <button class="btn btn-primary" style="height:36px" onclick="saveEdit(${ex.id})">✓ Save</button>
-              <button class="btn btn-ghost" style="height:36px" onclick="cancelEdit(${ex.id})">Cancel</button>
+              <button class="btn btn-primary" style="height:36px" onclick="saveEdit('${safeId}')">✓ Save</button>
+              <button class="btn btn-ghost" style="height:36px" onclick="cancelEdit('${safeId}')">Cancel</button>
             </div>
           </td>
-        </tr>`,
-        )
-        .join("")}
+        </tr>`;
+          }).join("")}
       </tbody>
     </table>`;
 }
@@ -461,18 +446,16 @@ function addExercise() {
 function deleteExercise(id) {
   const dateStr = fmt(gymDate);
   const wd = getGymDay(dateStr);
-  wd.exercises = (wd.exercises || []).filter((e) => e.id !== id);
+  wd.exercises = (wd.exercises || []).filter(
+    (e) => String(e.id).replace(/[^a-zA-Z0-9_-]/g, '_') !== String(id)
+  );
   saveGymDay(dateStr, wd);
   renderGym();
 }
-
 function startEdit(id) {
-  document
-    .querySelectorAll(".edit-row")
-    .forEach((r) => r.classList.remove("open"));
+  document.querySelectorAll(".edit-row").forEach((r) => r.classList.remove("open"));
   document.getElementById(`edit-row-${id}`).classList.add("open");
 }
-
 function cancelEdit(id) {
   document.getElementById(`edit-row-${id}`).classList.remove("open");
 }
@@ -480,7 +463,9 @@ function cancelEdit(id) {
 function saveEdit(id) {
   const dateStr = fmt(gymDate);
   const wd = getGymDay(dateStr);
-  const ex = (wd.exercises || []).find((e) => e.id === id);
+  const ex = (wd.exercises || []).find(
+    (e) => String(e.id).replace(/[^a-zA-Z0-9_-]/g, '_') === String(id)
+  );
   if (ex) {
     ex.name = document.getElementById(`ee-name-${id}`).value.trim() || ex.name;
     ex.sets = +document.getElementById(`ee-sets-${id}`).value || ex.sets;
@@ -725,3 +710,1480 @@ function escHtml(s) {
 
 renderDashboard();
 updateExerciseSuggestions();
+
+
+const WP_STATE = { gender: 'male', level: 'beginner', goal: 'build_muscle', muscle: 'chest' };
+const WP_MUSCLE_TO_GYM = { chest:'Chest', back:'Back', legs:'Legs', shoulders:'Shoulders', arms:'Arms', core:'Core / Abs', glutes:'Glutes' };
+
+// ── Sub-target labels (what the user sees) ───────────────────
+const SUB_TARGET_LABELS = {
+  // Chest
+  'mid-chest':    'Mid Chest',
+  'upper-chest':  'Upper Chest',
+  'lower-chest':  'Lower Chest',
+  'inner-chest':  'Inner Chest',
+  'chest-stretch':'Chest Stretch',
+  // Back
+  'lats-width':   'Lat Width',
+  'lats-thickness':'Lat Thickness',
+  'mid-back':     'Mid Back',
+  'rear-delt-back':'Rear Delt',
+  'lower-back':   'Lower Back',
+  // Legs
+  'quads':        'Quads',
+  'hamstrings':   'Hamstrings',
+  'glutes-legs':  'Glutes',
+  'calves':       'Calves',
+  'adductors':    'Adductors',
+  // Shoulders
+  'front-delt':   'Front Delt',
+  'side-delt':    'Side Delt',
+  'rear-delt':    'Rear Delt',
+  'traps':        'Traps',
+  'rotator':      'Rotator Cuff',
+  // Arms
+  'bicep-long':   'Bicep (Long Head)',
+  'bicep-short':  'Bicep (Short Head)',
+  'tricep-long':  'Tricep (Long Head)',
+  'tricep-lateral':'Tricep (Lateral)',
+  'forearms':     'Forearms',
+  // Core
+  'upper-abs':    'Upper Abs',
+  'lower-abs':    'Lower Abs',
+  'obliques':     'Obliques',
+  'deep-core':    'Deep Core',
+  'lower-back-core':'Lower Back',
+  // Glutes
+  'glute-max':    'Glute Max',
+  'glute-med':    'Glute Med',
+  'hip-flexors':  'Hip Flexors',
+  'hamstring-glute':'Ham-Glute Tie-In',
+  'abductors':    'Abductors',
+};
+
+// Sub-target color map (subtle pill colors)
+const SUB_TARGET_COLORS = {
+  // Chest
+  'mid-chest':    '#0ea5e9','upper-chest':'#7c3aed','lower-chest':'#ea580c',
+  'inner-chest':  '#16a34a','chest-stretch':'#db2777',
+  // Back
+  'lats-width':   '#0ea5e9','lats-thickness':'#7c3aed','mid-back':'#ea580c',
+  'rear-delt-back':'#16a34a','lower-back':'#b45309',
+  // Legs
+  'quads':'#0ea5e9','hamstrings':'#7c3aed','glutes-legs':'#ea580c',
+  'calves':'#16a34a','adductors':'#db2777',
+  // Shoulders
+  'front-delt':'#0ea5e9','side-delt':'#7c3aed','rear-delt':'#ea580c',
+  'traps':'#16a34a','rotator':'#b45309',
+  // Arms
+  'bicep-long':'#0ea5e9','bicep-short':'#7c3aed','tricep-long':'#ea580c',
+  'tricep-lateral':'#16a34a','forearms':'#b45309',
+  // Core
+  'upper-abs':'#0ea5e9','lower-abs':'#7c3aed','obliques':'#ea580c',
+  'deep-core':'#16a34a','lower-back-core':'#b45309',
+  // Glutes
+  'glute-max':'#0ea5e9','glute-med':'#7c3aed','hip-flexors':'#ea580c',
+  'hamstring-glute':'#16a34a','abductors':'#db2777',
+};
+
+//           Goal config
+const GOAL_CONFIG = {
+  build_muscle: {
+    label: '\uD83D\uDCAA Build Muscle',
+    desc: 'Moderate weight, higher volume — ideal for hypertrophy.',
+    repRange:  { beginner:'10\u201312', intermediate:'8\u201312', advanced:'8\u201312' },
+    setsRange: { beginner:[3,3], intermediate:[3,4], advanced:[4,5] },
+    exCount:   { beginner:[3,4], intermediate:[4,5], advanced:[5,6] },
+    restSec:   { beginner:60, intermediate:75, advanced:75 },
+    weightHint:'Moderate weight — last 2 reps should be challenging.',
+    filter: null,
+  },
+  lose_fat: {
+    label: '\uD83D\uDD25 Lose Fat',
+    desc: 'Higher reps, shorter rest — keeps heart rate elevated.',
+    repRange:  { beginner:'12\u201315', intermediate:'12\u201315', advanced:'15\u201320' },
+    setsRange: { beginner:[3,3], intermediate:[3,4], advanced:[3,4] },
+    exCount:   { beginner:[4,5], intermediate:[5,6], advanced:[5,6] },
+    restSec:   { beginner:45, intermediate:45, advanced:30 },
+    weightHint:'Light-to-moderate weight — focus on form and pace.',
+    filter: (name) => !/(heavy|rack pull|snatch|cluster|chain|barbell squat)/i.test(name),
+  },
+  maintain: {
+    label: '\u26A1 Maintain Fitness',
+    desc: 'Balanced sets & reps — keeps you strong and consistent.',
+    repRange:  { beginner:'10\u201312', intermediate:'10\u201312', advanced:'8\u201312' },
+    setsRange: { beginner:[3,3], intermediate:[3,3], advanced:[3,4] },
+    exCount:   { beginner:[3,4], intermediate:[4,5], advanced:[4,5] },
+    restSec:   { beginner:60, intermediate:60, advanced:60 },
+    weightHint:'Comfortable working weight — maintain consistent form.',
+    filter: null,
+  },
+  strength: {
+    label: '\uD83C\uDFC6 Increase Strength',
+    desc: 'Heavy compounds, low reps — maximal force development.',
+    repRange:  { beginner:'6\u20138', intermediate:'4\u20136', advanced:'3\u20135' },
+    setsRange: { beginner:[4,4], intermediate:[4,5], advanced:[5,6] },
+    exCount:   { beginner:[3,4], intermediate:[3,4], advanced:[4,5] },
+    restSec:   { beginner:90, intermediate:120, advanced:150 },
+    weightHint:'Heavy weight — aim for 85–95% of your max effort.',
+    filter: (name) => /(barbell|squat|deadlift|press|row|pull.up|bench|dip|weighted|heavy|loaded|paused)/i.test(name),
+  },
+};
+
+const EXERCISE_DB = {
+  chest: {
+    male: {
+      beginner: [
+        { name:'Push-Up',                    sub:'mid-chest'     },
+        { name:'Incline Push-Up',            sub:'upper-chest'   },
+        { name:'Decline Push-Up',            sub:'lower-chest'   },
+        { name:'Dumbbell Fly (flat)',         sub:'inner-chest'   },
+        { name:'TRX Push-Up',                sub:'chest-stretch' },
+        { name:'Knee Push-Up',               sub:'mid-chest'     },
+        { name:'Dumbbell Chest Press',       sub:'mid-chest'     },
+        { name:'Machine Chest Press',        sub:'mid-chest'     },
+        { name:'Incline Dumbbell Press',     sub:'upper-chest'   },
+        { name:'Cable Fly (low to high)',    sub:'upper-chest'   },
+        { name:'Cable Chest Press',          sub:'mid-chest'     },
+        { name:'Pec Deck Machine',           sub:'inner-chest'   },
+        { name:'Svend Press',                sub:'inner-chest'   },
+        { name:'Resistance Band Chest Press',sub:'mid-chest'     },
+        { name:'Landmine Press',             sub:'upper-chest'   },
+        { name:'Floor Press',                sub:'mid-chest'     },
+        { name:'Band Fly',                   sub:'chest-stretch' },
+        { name:'Dumbbell Pullover',          sub:'chest-stretch' },
+        { name:'Smith Machine Press',        sub:'mid-chest'     },
+        { name:'Wide-Grip Push-Up',          sub:'inner-chest'   },
+        { name:'Cable Fly (high to low)',    sub:'lower-chest'   },
+        { name:'Bosu Ball Push-Up',          sub:'chest-stretch' },
+        { name:'Neutral-Grip DB Press',      sub:'mid-chest'     },
+        { name:'Chest Dip (assisted)',       sub:'lower-chest'   },
+        { name:'Single-Arm Cable Press',     sub:'inner-chest'   },
+      ],
+      intermediate: [
+        { name:'Barbell Bench Press',        sub:'mid-chest'     },
+        { name:'Incline Barbell Press',      sub:'upper-chest'   },
+        { name:'Decline Bench Press',        sub:'lower-chest'   },
+        { name:'Cable Crossover',            sub:'inner-chest'   },
+        { name:'Dumbbell Pullover',          sub:'chest-stretch' },
+        { name:'Dumbbell Fly',               sub:'chest-stretch' },
+        { name:'Incline Dumbbell Press',     sub:'upper-chest'   },
+        { name:'Incline Cable Fly',          sub:'upper-chest'   },
+        { name:'Chest Dip',                  sub:'lower-chest'   },
+        { name:'Guillotine Press',           sub:'upper-chest'   },
+        { name:'Close-Grip Bench Press',     sub:'inner-chest'   },
+        { name:'Decline Dumbbell Press',     sub:'lower-chest'   },
+        { name:'Landmine Press',             sub:'upper-chest'   },
+        { name:'Cable Fly (high to low)',    sub:'lower-chest'   },
+        { name:'Low Cable Fly',              sub:'lower-chest'   },
+        { name:'Weighted Dip',               sub:'lower-chest'   },
+        { name:'DB Squeeze Press',           sub:'inner-chest'   },
+        { name:'Pec Deck',                   sub:'inner-chest'   },
+        { name:'Smith Incline Press',        sub:'upper-chest'   },
+        { name:'Cross-Body Cable Fly',       sub:'inner-chest'   },
+        { name:'Floor Press (barbell)',      sub:'mid-chest'     },
+        { name:'Single-Arm DB Press',        sub:'mid-chest'     },
+        { name:'Machine Incline Press',      sub:'upper-chest'   },
+        { name:'Seated Cable Fly',           sub:'chest-stretch' },
+        { name:'Low to High Cable Fly',      sub:'upper-chest'   },
+      ],
+      advanced: [
+        { name:'Paused Bench Press',         sub:'mid-chest'     },
+        { name:'Steep Incline Barbell Press',sub:'upper-chest'   },
+        { name:'Decline Barbell Press',      sub:'lower-chest'   },
+        { name:'Heavy Cable Crossover',      sub:'inner-chest'   },
+        { name:'Loaded Dip',                 sub:'lower-chest'   },
+        { name:'Spoto Press',                sub:'mid-chest'     },
+        { name:'Board Press',                sub:'mid-chest'     },
+        { name:'Barbell Floor Press',        sub:'mid-chest'     },
+        { name:'Reverse-Grip Bench Press',   sub:'upper-chest'   },
+        { name:'Pin Press',                  sub:'mid-chest'     },
+        { name:'Plyometric Push-Up',         sub:'chest-stretch' },
+        { name:'One-Arm Push-Up',            sub:'mid-chest'     },
+        { name:'Chain Bench Press',          sub:'mid-chest'     },
+        { name:'Decline Cable Fly',          sub:'lower-chest'   },
+        { name:'Steep Incline Cable Fly',    sub:'upper-chest'   },
+        { name:'Weighted Chest Dip',         sub:'lower-chest'   },
+        { name:'Heavy DB Fly',               sub:'chest-stretch' },
+        { name:'Loaded Landmine Press',      sub:'upper-chest'   },
+        { name:'Band-Resisted Bench Press',  sub:'mid-chest'     },
+        { name:'One-Arm Cable Press',        sub:'inner-chest'   },
+        { name:'Explosive Push-Up',          sub:'chest-stretch' },
+        { name:'Cluster Set Bench Press',    sub:'mid-chest'     },
+        { name:'Tempo Bench Press',          sub:'mid-chest'     },
+        { name:'Cross-Body Cable Fly',       sub:'inner-chest'   },
+        { name:'Heavy Incline DB Press',     sub:'upper-chest'   },
+      ],
+    },
+    female: {
+      beginner: [
+        { name:'Knee Push-Up',               sub:'mid-chest'     },
+        { name:'Incline Push-Up',            sub:'upper-chest'   },
+        { name:'Cable Fly (high to low)',    sub:'lower-chest'   },
+        { name:'Pec Deck (light)',           sub:'inner-chest'   },
+        { name:'Band Fly',                   sub:'chest-stretch' },
+        { name:'Wall Push-Up',               sub:'mid-chest'     },
+        { name:'Dumbbell Chest Press',       sub:'mid-chest'     },
+        { name:'Machine Chest Press',        sub:'mid-chest'     },
+        { name:'Incline DB Press (light)',   sub:'upper-chest'   },
+        { name:'Cable Fly (low to high)',    sub:'upper-chest'   },
+        { name:'Resistance Band Press',      sub:'mid-chest'     },
+        { name:'Svend Press',                sub:'inner-chest'   },
+        { name:'Dumbbell Pullover (light)',  sub:'chest-stretch' },
+        { name:'Low Cable Fly',              sub:'lower-chest'   },
+        { name:'Chest Dip (assisted)',       sub:'lower-chest'   },
+        { name:'TRX Push-Up',                sub:'chest-stretch' },
+        { name:'Wide-Grip Push-Up',          sub:'inner-chest'   },
+        { name:'Floor Press (light DB)',     sub:'mid-chest'     },
+        { name:'Neutral-Grip DB Press',      sub:'mid-chest'     },
+        { name:'Single-Arm Band Press',      sub:'inner-chest'   },
+        { name:'Stability Ball DB Press',    sub:'chest-stretch' },
+        { name:'Half Push-Up',               sub:'mid-chest'     },
+        { name:'Smith Machine Press',        sub:'mid-chest'     },
+        { name:'Bosu Ball Push-Up',          sub:'chest-stretch' },
+        { name:'Seated DB Chest Press',      sub:'mid-chest'     },
+      ],
+      intermediate: [
+        { name:'Push-Up (full)',             sub:'mid-chest'     },
+        { name:'Incline Dumbbell Press',     sub:'upper-chest'   },
+        { name:'Decline DB Press',           sub:'lower-chest'   },
+        { name:'Cable Fly',                  sub:'inner-chest'   },
+        { name:'Dumbbell Pullover',          sub:'chest-stretch' },
+        { name:'Dumbbell Bench Press',       sub:'mid-chest'     },
+        { name:'Incline Cable Fly',          sub:'upper-chest'   },
+        { name:'Chest Dip (assisted)',       sub:'lower-chest'   },
+        { name:'Cable Crossover',            sub:'inner-chest'   },
+        { name:'Landmine Press',             sub:'upper-chest'   },
+        { name:'Low Cable Fly',              sub:'lower-chest'   },
+        { name:'DB Squeeze Press',           sub:'inner-chest'   },
+        { name:'Pec Deck',                   sub:'inner-chest'   },
+        { name:'Weighted Push-Up',           sub:'mid-chest'     },
+        { name:'Smith Machine Bench',        sub:'mid-chest'     },
+        { name:'TRX Push-Up (elevated)',     sub:'chest-stretch' },
+        { name:'Band-Resisted Push-Up',      sub:'chest-stretch' },
+        { name:'Seated Cable Fly',           sub:'chest-stretch' },
+        { name:'Close-Grip Push-Up',         sub:'inner-chest'   },
+        { name:'Floor Press',                sub:'mid-chest'     },
+        { name:'Single-Arm Cable Press',     sub:'inner-chest'   },
+        { name:'Machine Chest Press',        sub:'mid-chest'     },
+        { name:'Svend Press (heavier)',      sub:'inner-chest'   },
+        { name:'Incline Band Press',         sub:'upper-chest'   },
+        { name:'Low to High Cable Fly',      sub:'upper-chest'   },
+      ],
+      advanced: [
+        { name:'Barbell Bench Press',        sub:'mid-chest'     },
+        { name:'Incline Barbell Press',      sub:'upper-chest'   },
+        { name:'Decline Barbell Press',      sub:'lower-chest'   },
+        { name:'Heavy Cable Crossover',      sub:'inner-chest'   },
+        { name:'Plyometric Push-Up',         sub:'chest-stretch' },
+        { name:'Paused DB Press',            sub:'mid-chest'     },
+        { name:'Spoto Press',                sub:'mid-chest'     },
+        { name:'Weighted Chest Dip',         sub:'lower-chest'   },
+        { name:'Steep Incline Cable Fly',    sub:'upper-chest'   },
+        { name:'One-Arm DB Press',           sub:'mid-chest'     },
+        { name:'Reverse Grip Press',         sub:'upper-chest'   },
+        { name:'Loaded Push-Up',             sub:'mid-chest'     },
+        { name:'Barbell Floor Press',        sub:'mid-chest'     },
+        { name:'Close-Grip Bench',           sub:'inner-chest'   },
+        { name:'Single-Arm Cable Fly',       sub:'inner-chest'   },
+        { name:'Band-Resisted Bench',        sub:'chest-stretch' },
+        { name:'Heavy DB Fly',               sub:'chest-stretch' },
+        { name:'Decline Cable Fly',          sub:'lower-chest'   },
+        { name:'Loaded Landmine Press',      sub:'upper-chest'   },
+        { name:'Cross-Body Cable Fly',       sub:'inner-chest'   },
+        { name:'Explosive Push-Up',          sub:'chest-stretch' },
+        { name:'Heavy Incline DB Press',     sub:'upper-chest'   },
+        { name:'Cluster Set Bench Press',    sub:'mid-chest'     },
+        { name:'Heavy Pec Deck',             sub:'inner-chest'   },
+        { name:'Chain Push-Up',              sub:'chest-stretch' },
+      ],
+    },
+  },
+  back: {
+    male: {
+      beginner: [
+        { name:'Lat Pulldown',               sub:'lats-width'    },
+        { name:'Seated Cable Row',           sub:'lats-thickness'},
+        { name:'Dumbbell Row',               sub:'lats-thickness'},
+        { name:'Reverse Fly',                sub:'rear-delt-back'},
+        { name:'Good Morning (BW)',          sub:'lower-back'    },
+        { name:'Assisted Pull-Up',           sub:'lats-width'    },
+        { name:'Wide-Grip Lat Pulldown',     sub:'lats-width'    },
+        { name:'Face Pull',                  sub:'rear-delt-back'},
+        { name:'TRX Row',                    sub:'mid-back'      },
+        { name:'Resistance Band Row',        sub:'mid-back'      },
+        { name:'Straight-Arm Pulldown',      sub:'lats-width'    },
+        { name:'Superman Hold',              sub:'lower-back'    },
+        { name:'Machine Row',                sub:'lats-thickness'},
+        { name:'Underhand Lat Pulldown',     sub:'lats-width'    },
+        { name:'Chest-Supported Row',        sub:'mid-back'      },
+        { name:'Inverted Row',               sub:'mid-back'      },
+        { name:'Hip Hinge (BW)',             sub:'lower-back'    },
+        { name:'Band Pull-Apart',            sub:'rear-delt-back'},
+        { name:'Bent-Over DB Row',           sub:'lats-thickness'},
+        { name:'Kneeling Cable Row',         sub:'mid-back'      },
+        { name:'Low Row Machine',            sub:'lats-thickness'},
+        { name:'Single-Arm Cable Row',       sub:'lats-thickness'},
+        { name:'Incline DB Row',             sub:'mid-back'      },
+        { name:'Seated Band Row',            sub:'mid-back'      },
+        { name:'Stability Ball Back Ext',    sub:'lower-back'    },
+      ],
+      intermediate: [
+        { name:'Pull-Ups',                   sub:'lats-width'    },
+        { name:'Barbell Row',                sub:'lats-thickness'},
+        { name:'T-Bar Row',                  sub:'lats-thickness'},
+        { name:'Face Pull',                  sub:'rear-delt-back'},
+        { name:'Rack Pull',                  sub:'lower-back'    },
+        { name:'Lat Pulldown',               sub:'lats-width'    },
+        { name:'Seated Cable Row',           sub:'lats-thickness'},
+        { name:'Wide-Grip Pull-Up',          sub:'lats-width'    },
+        { name:'Chest-Supported Row',        sub:'mid-back'      },
+        { name:'Pendlay Row',                sub:'lats-thickness'},
+        { name:'Meadows Row',                sub:'lats-thickness'},
+        { name:'Reverse Fly (cable)',        sub:'rear-delt-back'},
+        { name:'Underhand Barbell Row',      sub:'lats-thickness'},
+        { name:'High Cable Row',             sub:'mid-back'      },
+        { name:'Cable Pullover',             sub:'lats-width'    },
+        { name:'Straight-Arm Pulldown',      sub:'lats-width'    },
+        { name:'Good Morning',               sub:'lower-back'    },
+        { name:'Single-Arm Cable Row',       sub:'lats-thickness'},
+        { name:'Incline DB Row',             sub:'mid-back'      },
+        { name:'Close-Grip Pulldown',        sub:'lats-thickness'},
+        { name:'TRX Row (feet elevated)',    sub:'mid-back'      },
+        { name:'Band-Assisted Pull-Up',      sub:'lats-width'    },
+        { name:'Yates Row',                  sub:'lats-thickness'},
+        { name:'Machine Row',                sub:'mid-back'      },
+        { name:'Back Extension (weighted)',  sub:'lower-back'    },
+      ],
+      advanced: [
+        { name:'Weighted Pull-Ups',          sub:'lats-width'    },
+        { name:'Heavy Barbell Row',          sub:'lats-thickness'},
+        { name:'Rack Deadlift',              sub:'lower-back'    },
+        { name:'Heavy Face Pull',            sub:'rear-delt-back'},
+        { name:'Snatch-Grip Deadlift',       sub:'lower-back'    },
+        { name:'T-Bar Row (heavy)',          sub:'lats-thickness'},
+        { name:'Pendlay Row',                sub:'lats-thickness'},
+        { name:'Chest-Supported Row (heavy)',sub:'mid-back'      },
+        { name:'Paused Pull-Up',             sub:'lats-width'    },
+        { name:'Archer Row',                 sub:'lats-width'    },
+        { name:'Deficit Deadlift',           sub:'lower-back'    },
+        { name:'Renegade Row',               sub:'mid-back'      },
+        { name:'Explosive Pull-Up',          sub:'lats-width'    },
+        { name:'Heavy Meadows Row',          sub:'lats-thickness'},
+        { name:'Single-Arm DB Row (heavy)',  sub:'lats-thickness'},
+        { name:'Straight-Arm Pulldown (heavy)',sub:'lats-width'  },
+        { name:'Yates Row',                  sub:'lats-thickness'},
+        { name:'Behind-Neck Pulldown',       sub:'lats-width'    },
+        { name:'Heavy Cable Row',            sub:'mid-back'      },
+        { name:'Cable Pullover',             sub:'lats-width'    },
+        { name:'Loaded Back Extension',      sub:'lower-back'    },
+        { name:'Cluster Pull-Up',            sub:'lats-width'    },
+        { name:'Single-Arm Cable Pullover',  sub:'lats-width'    },
+        { name:'Band-Resisted Row',          sub:'mid-back'      },
+        { name:'Inverted Row (weighted)',    sub:'mid-back'      },
+      ],
+    },
+    female: {
+      beginner: [
+        { name:'Lat Pulldown (light)',       sub:'lats-width'    },
+        { name:'Seated Cable Row (light)',   sub:'lats-thickness'},
+        { name:'Resistance Band Row',        sub:'mid-back'      },
+        { name:'Reverse Fly (light)',        sub:'rear-delt-back'},
+        { name:'Good Morning (BW)',          sub:'lower-back'    },
+        { name:'Assisted Pull-Up',           sub:'lats-width'    },
+        { name:'Wide-Grip Lat Pulldown',     sub:'lats-width'    },
+        { name:'Face Pull',                  sub:'rear-delt-back'},
+        { name:'TRX Row',                    sub:'mid-back'      },
+        { name:'Dumbbell Row (light)',       sub:'lats-thickness'},
+        { name:'Superman Hold',              sub:'lower-back'    },
+        { name:'Machine Row',                sub:'lats-thickness'},
+        { name:'Underhand Lat Pulldown',     sub:'lats-width'    },
+        { name:'Chest-Supported Row (light)',sub:'mid-back'      },
+        { name:'Inverted Row',               sub:'mid-back'      },
+        { name:'Band Pull-Apart',            sub:'rear-delt-back'},
+        { name:'Kneeling Cable Row',         sub:'mid-back'      },
+        { name:'Low Row Machine',            sub:'lats-thickness'},
+        { name:'Incline DB Row',             sub:'mid-back'      },
+        { name:'Hip Hinge (BW)',             sub:'lower-back'    },
+        { name:'Seated Band Row',            sub:'mid-back'      },
+        { name:'Single-Arm Band Row',        sub:'lats-thickness'},
+        { name:'Straight-Arm Pulldown',      sub:'lats-width'    },
+        { name:'Band Reverse Fly',           sub:'rear-delt-back'},
+        { name:'Stability Ball Back Ext',    sub:'lower-back'    },
+      ],
+      intermediate: [
+        { name:'Pull-Up (assisted)',         sub:'lats-width'    },
+        { name:'Lat Pulldown',               sub:'lats-width'    },
+        { name:'Dumbbell Row',               sub:'lats-thickness'},
+        { name:'Face Pull',                  sub:'rear-delt-back'},
+        { name:'Back Extension (weighted)',  sub:'lower-back'    },
+        { name:'Cable Row',                  sub:'lats-thickness'},
+        { name:'Wide-Grip Pulldown',         sub:'lats-width'    },
+        { name:'Chest-Supported Row',        sub:'mid-back'      },
+        { name:'Incline DB Row',             sub:'mid-back'      },
+        { name:'Reverse Fly (cable)',        sub:'rear-delt-back'},
+        { name:'Machine Row',                sub:'mid-back'      },
+        { name:'Close-Grip Pulldown',        sub:'lats-thickness'},
+        { name:'Straight-Arm Pulldown',      sub:'lats-width'    },
+        { name:'Meadows Row (light)',        sub:'lats-thickness'},
+        { name:'Single-Arm Cable Row',       sub:'lats-thickness'},
+        { name:'High Cable Row',             sub:'mid-back'      },
+        { name:'Good Morning',               sub:'lower-back'    },
+        { name:'Renegade Row (light)',       sub:'mid-back'      },
+        { name:'TRX Row (feet elevated)',    sub:'mid-back'      },
+        { name:'Superman (weighted)',        sub:'lower-back'    },
+        { name:'Kneeling Pulldown',          sub:'lats-width'    },
+        { name:'T-Bar Row (light)',          sub:'lats-thickness'},
+        { name:'Cable Pullover',             sub:'lats-width'    },
+        { name:'Pendlay Row (light)',        sub:'lats-thickness'},
+        { name:'Band Pull-Apart',            sub:'rear-delt-back'},
+      ],
+      advanced: [
+        { name:'Full Pull-Up',               sub:'lats-width'    },
+        { name:'Barbell Row',                sub:'lats-thickness'},
+        { name:'Rack Pull',                  sub:'lower-back'    },
+        { name:'Heavy Face Pull',            sub:'rear-delt-back'},
+        { name:'Weighted TRX Row',           sub:'mid-back'      },
+        { name:'Heavy Lat Pulldown',         sub:'lats-width'    },
+        { name:'T-Bar Row',                  sub:'lats-thickness'},
+        { name:'Single-Arm DB Row',          sub:'lats-thickness'},
+        { name:'Pendlay Row',                sub:'lats-thickness'},
+        { name:'Chest-Supported Row (heavy)',sub:'mid-back'      },
+        { name:'Straight-Arm Pulldown (heavy)',sub:'lats-width'  },
+        { name:'Close-Grip Weighted Pulldown',sub:'lats-thickness'},
+        { name:'Loaded Back Extension',      sub:'lower-back'    },
+        { name:'Heavy Cable Row',            sub:'mid-back'      },
+        { name:'Meadows Row',                sub:'lats-thickness'},
+        { name:'Loaded Renegade Row',        sub:'mid-back'      },
+        { name:'Yates Row',                  sub:'lats-thickness'},
+        { name:'Deficit Pull',               sub:'lower-back'    },
+        { name:'Paused Pull-Up',             sub:'lats-width'    },
+        { name:'Explosive Pulldown',         sub:'lats-width'    },
+        { name:'Cable Pullover',             sub:'lats-width'    },
+        { name:'Archer Row',                 sub:'lats-width'    },
+        { name:'Snatch-Grip Row',            sub:'lower-back'    },
+        { name:'Band-Resisted Row',          sub:'mid-back'      },
+        { name:'Single-Arm Pullover',        sub:'lats-width'    },
+      ],
+    },
+  },
+  legs: {
+    male: {
+      beginner: [
+        { name:'Bodyweight Squat',           sub:'quads'         },
+        { name:'Romanian Deadlift (light)',  sub:'hamstrings'    },
+        { name:'Glute Bridge',               sub:'glutes-legs'   },
+        { name:'Calf Raise',                 sub:'calves'        },
+        { name:'Lateral Band Walk',          sub:'adductors'     },
+        { name:'Goblet Squat',               sub:'quads'         },
+        { name:'Leg Press',                  sub:'quads'         },
+        { name:'Leg Curl',                   sub:'hamstrings'    },
+        { name:'Hip Thrust (BW)',            sub:'glutes-legs'   },
+        { name:'Leg Extension',              sub:'quads'         },
+        { name:'Sumo Squat',                 sub:'adductors'     },
+        { name:'Lunges (BW)',                sub:'quads'         },
+        { name:'Step-Up',                    sub:'glutes-legs'   },
+        { name:'Calf Raise (seated)',        sub:'calves'        },
+        { name:'Wall Sit',                   sub:'quads'         },
+        { name:'Resistance Band Squat',      sub:'quads'         },
+        { name:'Dumbbell Squat',             sub:'quads'         },
+        { name:'Reverse Lunge',              sub:'glutes-legs'   },
+        { name:'Split Squat',                sub:'quads'         },
+        { name:'Leg Abduction Machine',      sub:'adductors'     },
+        { name:'Hip Hinge (BW)',             sub:'hamstrings'    },
+        { name:'Single-Leg Press',           sub:'quads'         },
+        { name:'Box Squat (light)',          sub:'quads'         },
+        { name:'Step-Down',                  sub:'quads'         },
+        { name:'TRX Squat',                  sub:'quads'         },
+      ],
+      intermediate: [
+        { name:'Barbell Squat',              sub:'quads'         },
+        { name:'Romanian Deadlift',          sub:'hamstrings'    },
+        { name:'Hip Thrust',                 sub:'glutes-legs'   },
+        { name:'Calf Raise (standing)',      sub:'calves'        },
+        { name:'Lateral Lunge',              sub:'adductors'     },
+        { name:'Leg Press',                  sub:'quads'         },
+        { name:'Leg Curl',                   sub:'hamstrings'    },
+        { name:'Bulgarian Split Squat',      sub:'quads'         },
+        { name:'Hack Squat',                 sub:'quads'         },
+        { name:'Front Squat',                sub:'quads'         },
+        { name:'Sumo Deadlift',              sub:'adductors'     },
+        { name:'Single-Leg Romanian DL',     sub:'hamstrings'    },
+        { name:'Leg Extension',              sub:'quads'         },
+        { name:'Nordic Curl',                sub:'hamstrings'    },
+        { name:'Glute Ham Raise',            sub:'glutes-legs'   },
+        { name:'Good Morning',               sub:'hamstrings'    },
+        { name:'Box Jump',                   sub:'quads'         },
+        { name:'Step-Up (weighted)',         sub:'glutes-legs'   },
+        { name:'Lunges (weighted)',          sub:'quads'         },
+        { name:'Leg Abduction',              sub:'adductors'     },
+        { name:'Calf Raise (seated, weighted)',sub:'calves'      },
+        { name:'Leg Press (wide stance)',    sub:'adductors'     },
+        { name:'Goblet Squat (heavy)',       sub:'quads'         },
+        { name:'Dumbbell Split Squat',       sub:'quads'         },
+        { name:'Reverse Lunge (weighted)',   sub:'glutes-legs'   },
+      ],
+      advanced: [
+        { name:'Heavy Barbell Squat',        sub:'quads'         },
+        { name:'Romanian Deadlift (heavy)',  sub:'hamstrings'    },
+        { name:'Hip Thrust (barbell)',       sub:'glutes-legs'   },
+        { name:'Calf Raise (heavy)',         sub:'calves'        },
+        { name:'Sumo Deadlift (heavy)',      sub:'adductors'     },
+        { name:'Paused Squat',               sub:'quads'         },
+        { name:'Front Squat (heavy)',        sub:'quads'         },
+        { name:'Nordic Hamstring Curl',      sub:'hamstrings'    },
+        { name:'Bulgarian Split Squat (heavy)',sub:'quads'       },
+        { name:'Hack Squat (heavy)',         sub:'quads'         },
+        { name:'Glute Ham Raise',            sub:'glutes-legs'   },
+        { name:'Single-Leg Squat (pistol)', sub:'quads'         },
+        { name:'Box Squat (heavy)',          sub:'quads'         },
+        { name:'Zercher Squat',              sub:'quads'         },
+        { name:'Safety Bar Squat',           sub:'quads'         },
+        { name:'Single-Leg Romanian DL (heavy)',sub:'hamstrings' },
+        { name:'Loaded Box Jump',            sub:'quads'         },
+        { name:'Heavy Leg Press',            sub:'quads'         },
+        { name:'Heavy Leg Curl',             sub:'hamstrings'    },
+        { name:'Overhead Squat',             sub:'quads'         },
+        { name:'Cyclist Squat',              sub:'quads'         },
+        { name:'Chain Squat',                sub:'quads'         },
+        { name:'Weighted Step-Up',           sub:'glutes-legs'   },
+        { name:'Tempo Squat',                sub:'quads'         },
+        { name:'Split Squat (heavy)',        sub:'quads'         },
+      ],
+    },
+    female: {
+      beginner: [
+        { name:'Glute Bridge',               sub:'glutes-legs'   },
+        { name:'Romanian DL (light)',        sub:'hamstrings'    },
+        { name:'Sumo Squat',                 sub:'adductors'     },
+        { name:'Calf Raise',                 sub:'calves'        },
+        { name:'Lateral Band Walk',          sub:'adductors'     },
+        { name:'Hip Thrust (BW)',            sub:'glutes-legs'   },
+        { name:'Leg Press',                  sub:'quads'         },
+        { name:'Leg Curl',                   sub:'hamstrings'    },
+        { name:'Bodyweight Squat',           sub:'quads'         },
+        { name:'Donkey Kick (BW)',           sub:'glutes-legs'   },
+        { name:'Fire Hydrant',               sub:'adductors'     },
+        { name:'Clamshell',                  sub:'adductors'     },
+        { name:'Step-Up',                    sub:'glutes-legs'   },
+        { name:'Reverse Lunge (BW)',         sub:'glutes-legs'   },
+        { name:'Goblet Squat',               sub:'quads'         },
+        { name:'Leg Extension',              sub:'quads'         },
+        { name:'Hip Abduction Machine',      sub:'adductors'     },
+        { name:'Single-Leg Bridge',          sub:'glutes-legs'   },
+        { name:'Resistance Band Squat',      sub:'quads'         },
+        { name:'Glute Kickback (machine)',   sub:'glutes-legs'   },
+        { name:'Calf Raise (seated)',        sub:'calves'        },
+        { name:'Banded Squat Pulse',         sub:'quads'         },
+        { name:'Sumo Deadlift (light)',      sub:'adductors'     },
+        { name:'TRX Squat',                  sub:'quads'         },
+        { name:'Step-Down',                  sub:'quads'         },
+      ],
+      intermediate: [
+        { name:'Hip Thrust (barbell)',       sub:'glutes-legs'   },
+        { name:'Romanian Deadlift',          sub:'hamstrings'    },
+        { name:'Bulgarian Split Squat',      sub:'quads'         },
+        { name:'Calf Raise (weighted)',      sub:'calves'        },
+        { name:'Sumo Deadlift',              sub:'adductors'     },
+        { name:'Leg Press',                  sub:'quads'         },
+        { name:'Leg Curl',                   sub:'hamstrings'    },
+        { name:'Glute Bridge (weighted)',    sub:'glutes-legs'   },
+        { name:'Cable Kickback',             sub:'glutes-legs'   },
+        { name:'Single-Leg Romanian DL',     sub:'hamstrings'    },
+        { name:'Lateral Lunge',              sub:'adductors'     },
+        { name:'Goblet Squat (heavy)',       sub:'quads'         },
+        { name:'Curtsy Lunge',               sub:'adductors'     },
+        { name:'Hack Squat',                 sub:'quads'         },
+        { name:'Donkey Kick (cable)',        sub:'glutes-legs'   },
+        { name:'Nordic Curl (assisted)',     sub:'hamstrings'    },
+        { name:'Hip Abduction',              sub:'adductors'     },
+        { name:'Step-Up (weighted)',         sub:'glutes-legs'   },
+        { name:'Glute Kickback (cable)',     sub:'glutes-legs'   },
+        { name:'Leg Extension',              sub:'quads'         },
+        { name:'Sumo Squat (DB)',            sub:'adductors'     },
+        { name:'Box Jump',                   sub:'quads'         },
+        { name:'Reverse Lunge (weighted)',   sub:'glutes-legs'   },
+        { name:'Smith Machine Squat',        sub:'quads'         },
+        { name:'Fire Hydrant (cable)',       sub:'adductors'     },
+      ],
+      advanced: [
+        { name:'Barbell Hip Thrust (heavy)', sub:'glutes-legs'   },
+        { name:'Romanian Deadlift (heavy)',  sub:'hamstrings'    },
+        { name:'Barbell Squat',              sub:'quads'         },
+        { name:'Calf Raise (heavy)',         sub:'calves'        },
+        { name:'Sumo Deadlift (heavy)',      sub:'adductors'     },
+        { name:'Front Squat',                sub:'quads'         },
+        { name:'Nordic Hamstring Curl',      sub:'hamstrings'    },
+        { name:'Bulgarian Split Squat (heavy)',sub:'quads'       },
+        { name:'Hack Squat (heavy)',         sub:'quads'         },
+        { name:'Paused Hip Thrust',          sub:'glutes-legs'   },
+        { name:'Single-Leg RDL (heavy)',     sub:'hamstrings'    },
+        { name:'Loaded Curtsy Lunge',        sub:'adductors'     },
+        { name:'Heavy Cable Kickback',       sub:'glutes-legs'   },
+        { name:'Glute Ham Raise',            sub:'glutes-legs'   },
+        { name:'Pistol Squat',               sub:'quads'         },
+        { name:'Heavy Leg Press',            sub:'quads'         },
+        { name:'Single-Leg Squat',           sub:'quads'         },
+        { name:'Cyclist Squat',              sub:'quads'         },
+        { name:'Box Squat',                  sub:'quads'         },
+        { name:'Hip Thrust 21s',             sub:'glutes-legs'   },
+        { name:'Loaded Box Jump',            sub:'quads'         },
+        { name:'Band-Resisted Squat',        sub:'quads'         },
+        { name:'Weighted Donkey Kick',       sub:'glutes-legs'   },
+        { name:'Loaded Lateral Lunge',       sub:'adductors'     },
+        { name:'Chain Squat',                sub:'quads'         },
+      ],
+    },
+  },
+  shoulders: {
+    male: {
+      beginner: [
+        { name:'Dumbbell Shoulder Press',   sub:'front-delt'    },
+        { name:'Lateral Raise (light)',      sub:'side-delt'     },
+        { name:'Rear Delt Fly (light)',      sub:'rear-delt'     },
+        { name:'DB Shrug',                   sub:'traps'         },
+        { name:'Band Pull-Apart',            sub:'rotator'       },
+        { name:'Arnold Press (light)',       sub:'front-delt'    },
+        { name:'Machine Shoulder Press',    sub:'front-delt'    },
+        { name:'Front Raise (light)',        sub:'front-delt'    },
+        { name:'Cable Lateral Raise',        sub:'side-delt'     },
+        { name:'Upright Row (light)',        sub:'traps'         },
+        { name:'TRX Face Pull',              sub:'rear-delt'     },
+        { name:'Resistance Band Press',      sub:'front-delt'    },
+        { name:'Bent-Over Rear Delt Raise',  sub:'rear-delt'     },
+        { name:'Resistance Band Lat Raise',  sub:'side-delt'     },
+        { name:'DB Y-Raise',                 sub:'rotator'       },
+        { name:'Plate Front Raise',          sub:'front-delt'    },
+        { name:'Wall Slide',                 sub:'rotator'       },
+        { name:'Prone Y/T/W',               sub:'rotator'       },
+        { name:'Incline Rear Delt Fly',      sub:'rear-delt'     },
+        { name:'Seated DB Press',            sub:'front-delt'    },
+        { name:'Single-Arm Cable Raise',     sub:'side-delt'     },
+        { name:'Cable Front Raise',          sub:'front-delt'    },
+        { name:'Landmine Press (light)',     sub:'front-delt'    },
+        { name:'Kneeling Band Press',        sub:'front-delt'    },
+        { name:'Resistance Band Shrug',      sub:'traps'         },
+      ],
+      intermediate: [
+        { name:'Barbell Overhead Press',    sub:'front-delt'    },
+        { name:'Lateral Raise',              sub:'side-delt'     },
+        { name:'Face Pull',                  sub:'rear-delt'     },
+        { name:'Dumbbell Shrug',             sub:'traps'         },
+        { name:'Band Pull-Apart',            sub:'rotator'       },
+        { name:'Arnold Press',               sub:'front-delt'    },
+        { name:'Push Press',                 sub:'front-delt'    },
+        { name:'Rear Delt Fly',              sub:'rear-delt'     },
+        { name:'Cable Lateral Raise',        sub:'side-delt'     },
+        { name:'Upright Row',                sub:'traps'         },
+        { name:'Prone Y/T/W (weighted)',    sub:'rotator'       },
+        { name:'Landmine Press',             sub:'front-delt'    },
+        { name:'Cable Front Raise',          sub:'front-delt'    },
+        { name:'High Cable Row',             sub:'rear-delt'     },
+        { name:'DB Y-Raise',                 sub:'rotator'       },
+        { name:'Incline Rear Delt Fly',      sub:'rear-delt'     },
+        { name:'Plate Raise',                sub:'front-delt'    },
+        { name:'Kneeling Cable Press',       sub:'front-delt'    },
+        { name:'Seated Barbell Press',       sub:'front-delt'    },
+        { name:'Machine Shoulder Press',    sub:'front-delt'    },
+        { name:'Single-Arm OHP',             sub:'front-delt'    },
+        { name:'Cable Shrug',                sub:'traps'         },
+        { name:'Behind-Neck Press',          sub:'side-delt'     },
+        { name:'Front Raise',                sub:'front-delt'    },
+        { name:'Band Pull-Apart (heavy)',    sub:'rotator'       },
+      ],
+      advanced: [
+        { name:'Heavy Barbell OHP',          sub:'front-delt'    },
+        { name:'Lateral Raise (heavy)',      sub:'side-delt'     },
+        { name:'Heavy Face Pull',            sub:'rear-delt'     },
+        { name:'Snatch-Grip High Pull',      sub:'traps'         },
+        { name:'Cuban Press',                sub:'rotator'       },
+        { name:'Push Press (heavy)',         sub:'front-delt'    },
+        { name:'Hang Clean & Press',         sub:'front-delt'    },
+        { name:'Rear Delt Fly (heavy)',      sub:'rear-delt'     },
+        { name:'Heavy Cable Lateral Raise',  sub:'side-delt'     },
+        { name:'Upright Row (heavy)',        sub:'traps'         },
+        { name:'Javelin Press',              sub:'rotator'       },
+        { name:'Bradford Press',             sub:'front-delt'    },
+        { name:'Seated Barbell Press',       sub:'front-delt'    },
+        { name:'Z-Press',                    sub:'front-delt'    },
+        { name:'Paused OHP',                 sub:'front-delt'    },
+        { name:'Arnold Press (heavy)',       sub:'front-delt'    },
+        { name:'Bottoms-Up KB Press',        sub:'rotator'       },
+        { name:'Band-Resisted OHP',          sub:'front-delt'    },
+        { name:'Cluster OHP Set',            sub:'front-delt'    },
+        { name:'Half-Kneeling OHP',          sub:'front-delt'    },
+        { name:'Lateral Raise 21s',          sub:'side-delt'     },
+        { name:'Dumbbell OHP (heavy)',       sub:'front-delt'    },
+        { name:'Heavy Upright Row',          sub:'traps'         },
+        { name:'Single-Arm DB OHP',          sub:'front-delt'    },
+        { name:'Behind-Neck Press',          sub:'side-delt'     },
+      ],
+    },
+    female: {
+      beginner: [
+        { name:'DB Shoulder Press (light)', sub:'front-delt'    },
+        { name:'Lateral Raise (light)',      sub:'side-delt'     },
+        { name:'Rear Delt Fly (light)',      sub:'rear-delt'     },
+        { name:'Resistance Band Shrug',      sub:'traps'         },
+        { name:'Band Pull-Apart',            sub:'rotator'       },
+        { name:'Arnold Press (light)',       sub:'front-delt'    },
+        { name:'Machine Shoulder Press',    sub:'front-delt'    },
+        { name:'Front Raise (light)',        sub:'front-delt'    },
+        { name:'Cable Lateral Raise',        sub:'side-delt'     },
+        { name:'TRX Face Pull',              sub:'rear-delt'     },
+        { name:'Prone Y/T/W',               sub:'rotator'       },
+        { name:'Resistance Band Press',      sub:'front-delt'    },
+        { name:'Bent-Over Rear Delt Raise',  sub:'rear-delt'     },
+        { name:'DB Y-Raise',                 sub:'rotator'       },
+        { name:'Plate Front Raise',          sub:'front-delt'    },
+        { name:'Wall Slide',                 sub:'rotator'       },
+        { name:'Seated DB Press',            sub:'front-delt'    },
+        { name:'Single-Arm Cable Raise',     sub:'side-delt'     },
+        { name:'Cable Front Raise',          sub:'front-delt'    },
+        { name:'Incline Rear Delt Raise',    sub:'rear-delt'     },
+        { name:'Kneeling Band Press',        sub:'front-delt'    },
+        { name:'Light Upright Row',          sub:'traps'         },
+        { name:'Stability Ball Press',       sub:'front-delt'    },
+        { name:'Resistance Band Lat Raise',  sub:'side-delt'     },
+        { name:'Single-Arm Band Press',      sub:'front-delt'    },
+      ],
+      intermediate: [
+        { name:'Dumbbell Shoulder Press',   sub:'front-delt'    },
+        { name:'Lateral Raise',              sub:'side-delt'     },
+        { name:'Face Pull',                  sub:'rear-delt'     },
+        { name:'DB Shrug',                   sub:'traps'         },
+        { name:'Band Pull-Apart',            sub:'rotator'       },
+        { name:'Arnold Press',               sub:'front-delt'    },
+        { name:'Rear Delt Fly',              sub:'rear-delt'     },
+        { name:'Cable Lateral Raise',        sub:'side-delt'     },
+        { name:'Upright Row',                sub:'traps'         },
+        { name:'Prone Y/T/W (weighted)',    sub:'rotator'       },
+        { name:'Landmine Press',             sub:'front-delt'    },
+        { name:'Cable Front Raise',          sub:'front-delt'    },
+        { name:'High Cable Row',             sub:'rear-delt'     },
+        { name:'Incline Rear Delt Fly',      sub:'rear-delt'     },
+        { name:'Plate Raise',                sub:'front-delt'    },
+        { name:'Kneeling Cable Press',       sub:'front-delt'    },
+        { name:'Machine Shoulder Press',    sub:'front-delt'    },
+        { name:'Push Press (light)',         sub:'front-delt'    },
+        { name:'Single-Arm OHP',             sub:'front-delt'    },
+        { name:'Cable Shrug',                sub:'traps'         },
+        { name:'Seated Barbell Press (light)',sub:'front-delt'   },
+        { name:'Resistance Band Shrug',      sub:'traps'         },
+        { name:'DB Y-Raise',                 sub:'rotator'       },
+        { name:'Front Raise',                sub:'front-delt'    },
+        { name:'Seated Band Press',          sub:'front-delt'    },
+      ],
+      advanced: [
+        { name:'Barbell OHP',                sub:'front-delt'    },
+        { name:'Lateral Raise (heavy)',      sub:'side-delt'     },
+        { name:'Heavy Face Pull',            sub:'rear-delt'     },
+        { name:'Snatch-Grip High Pull',      sub:'traps'         },
+        { name:'Cuban Press',                sub:'rotator'       },
+        { name:'Push Press',                 sub:'front-delt'    },
+        { name:'Heavy Arnold Press',         sub:'front-delt'    },
+        { name:'Rear Delt Fly (heavy)',      sub:'rear-delt'     },
+        { name:'Heavy Cable Lateral Raise',  sub:'side-delt'     },
+        { name:'Heavy Upright Row',          sub:'traps'         },
+        { name:'Javelin Press',              sub:'rotator'       },
+        { name:'Bradford Press',             sub:'front-delt'    },
+        { name:'Z-Press',                    sub:'front-delt'    },
+        { name:'Paused OHP',                 sub:'front-delt'    },
+        { name:'Bottoms-Up KB Press',        sub:'rotator'       },
+        { name:'Band-Resisted OHP',          sub:'front-delt'    },
+        { name:'Cluster OHP Set',            sub:'front-delt'    },
+        { name:'Lateral Raise 21s',          sub:'side-delt'     },
+        { name:'Heavy DB OHP',               sub:'front-delt'    },
+        { name:'Seated Barbell Press',       sub:'front-delt'    },
+        { name:'Hang Clean & Press',         sub:'front-delt'    },
+        { name:'Half-Kneeling OHP',          sub:'front-delt'    },
+        { name:'Single-Arm DB OHP',          sub:'front-delt'    },
+        { name:'Behind-Neck Press',          sub:'side-delt'     },
+        { name:'Landmine Press (heavy)',     sub:'front-delt'    },
+      ],
+    },
+  },
+  arms: {
+    male: {
+      beginner: [
+        { name:'Incline DB Curl',            sub:'bicep-long'    },
+        { name:'Concentration Curl',         sub:'bicep-short'   },
+        { name:'Overhead DB Tricep Ext',     sub:'tricep-long'   },
+        { name:'Tricep Kickback',            sub:'tricep-lateral'},
+        { name:'Wrist Curl',                 sub:'forearms'      },
+        { name:'Hammer Curl',                sub:'bicep-long'    },
+        { name:'Dumbbell Biceps Curl',       sub:'bicep-short'   },
+        { name:'Tricep Pushdown (rope)',     sub:'tricep-lateral'},
+        { name:'TRX Tricep Extension',       sub:'tricep-long'   },
+        { name:'Resistance Band Curl',       sub:'bicep-short'   },
+        { name:'Band Tricep Pushdown',       sub:'tricep-lateral'},
+        { name:'Seated DB Curl',             sub:'bicep-short'   },
+        { name:'Narrow Push-Up',             sub:'tricep-lateral'},
+        { name:'Cross-Body Hammer Curl',     sub:'bicep-long'    },
+        { name:'Overhead Band Extension',    sub:'tricep-long'   },
+        { name:'EZ-Bar Curl (light)',        sub:'bicep-short'   },
+        { name:'Cable Curl (light)',         sub:'bicep-short'   },
+        { name:'Reverse Curl',               sub:'forearms'      },
+        { name:'Skull Crusher (light)',      sub:'tricep-long'   },
+        { name:'Zottman Curl',               sub:'forearms'      },
+        { name:'Tricep Dip (bench)',         sub:'tricep-lateral'},
+        { name:'Machine Preacher Curl',      sub:'bicep-short'   },
+        { name:'Single-Arm Pushdown',        sub:'tricep-lateral'},
+        { name:'Cable Overhead Extension',   sub:'tricep-long'   },
+        { name:'Forearm Curl',               sub:'forearms'      },
+      ],
+      intermediate: [
+        { name:'Incline DB Curl',            sub:'bicep-long'    },
+        { name:'Preacher Curl',              sub:'bicep-short'   },
+        { name:'Overhead Tricep Extension',  sub:'tricep-long'   },
+        { name:'Rope Pushdown',              sub:'tricep-lateral'},
+        { name:'Wrist Curl (weighted)',      sub:'forearms'      },
+        { name:'Barbell Curl',               sub:'bicep-short'   },
+        { name:'Hammer Curl',                sub:'bicep-long'    },
+        { name:'Skull Crusher',              sub:'tricep-long'   },
+        { name:'Tricep Dip',                 sub:'tricep-lateral'},
+        { name:'EZ-Bar Curl',                sub:'bicep-short'   },
+        { name:'Cable Curl',                 sub:'bicep-short'   },
+        { name:'Close-Grip Bench Press',     sub:'tricep-lateral'},
+        { name:'Concentration Curl',         sub:'bicep-short'   },
+        { name:'Zottman Curl',               sub:'forearms'      },
+        { name:'Cable Hammer Curl',          sub:'bicep-long'    },
+        { name:'Single-Arm Preacher Curl',   sub:'bicep-short'   },
+        { name:'Overhead Cable Extension',   sub:'tricep-long'   },
+        { name:'DB Skull Crusher',           sub:'tricep-long'   },
+        { name:'Cross-Body Curl',            sub:'bicep-long'    },
+        { name:'21s Curl',                   sub:'bicep-short'   },
+        { name:'Tate Press',                 sub:'tricep-lateral'},
+        { name:'Reverse Pushdown',           sub:'forearms'      },
+        { name:'Machine Curl',               sub:'bicep-short'   },
+        { name:'Reverse Curl',               sub:'forearms'      },
+        { name:'Single-Arm Overhead Ext',    sub:'tricep-long'   },
+      ],
+      advanced: [
+        { name:'Incline DB Curl (heavy)',    sub:'bicep-long'    },
+        { name:'Preacher Curl (heavy)',      sub:'bicep-short'   },
+        { name:'Overhead Tricep Ext (heavy)',sub:'tricep-long'   },
+        { name:'Rope Pushdown (heavy)',      sub:'tricep-lateral'},
+        { name:'Forearm Roller',             sub:'forearms'      },
+        { name:'Heavy Barbell Curl',         sub:'bicep-short'   },
+        { name:'Drag Curl',                  sub:'bicep-long'    },
+        { name:'Skull Crusher (heavy)',      sub:'tricep-long'   },
+        { name:'Loaded Tricep Dip',          sub:'tricep-lateral'},
+        { name:'EZ-Bar Curl (heavy)',        sub:'bicep-short'   },
+        { name:'Spider Curl',                sub:'bicep-short'   },
+        { name:'Close-Grip Bench (heavy)',   sub:'tricep-lateral'},
+        { name:'Hammer Curl (heavy)',        sub:'bicep-long'    },
+        { name:'Zottman Curl (heavy)',       sub:'forearms'      },
+        { name:'Cable Curl (heavy)',         sub:'bicep-short'   },
+        { name:'French Press',               sub:'tricep-long'   },
+        { name:'Band-Resisted Curl',         sub:'bicep-short'   },
+        { name:'Tate Press (heavy)',         sub:'tricep-lateral'},
+        { name:'21s (heavy)',                sub:'bicep-short'   },
+        { name:'Cluster Curl Set',           sub:'bicep-short'   },
+        { name:'Barbell Reverse Curl',       sub:'forearms'      },
+        { name:'One-Arm Cable Curl',         sub:'bicep-short'   },
+        { name:'Reverse Barbell Curl',       sub:'forearms'      },
+        { name:'Weighted Dip',               sub:'tricep-lateral'},
+        { name:'Single-Arm Overhead Ext (heavy)',sub:'tricep-long'},
+      ],
+    },
+    female: {
+      beginner: [
+        { name:'Incline DB Curl',            sub:'bicep-long'    },
+        { name:'Concentration Curl',         sub:'bicep-short'   },
+        { name:'Overhead DB Tricep Ext (light)',sub:'tricep-long'},
+        { name:'Tricep Kickback',            sub:'tricep-lateral'},
+        { name:'Wrist Curl',                 sub:'forearms'      },
+        { name:'Hammer Curl',                sub:'bicep-long'    },
+        { name:'Dumbbell Biceps Curl (light)',sub:'bicep-short'  },
+        { name:'Band Tricep Pushdown',       sub:'tricep-lateral'},
+        { name:'TRX Tricep Extension',       sub:'tricep-long'   },
+        { name:'Resistance Band Curl',       sub:'bicep-short'   },
+        { name:'Narrow Push-Up',             sub:'tricep-lateral'},
+        { name:'Seated DB Curl',             sub:'bicep-short'   },
+        { name:'Cross-Body Hammer Curl',     sub:'bicep-long'    },
+        { name:'Overhead Band Extension',    sub:'tricep-long'   },
+        { name:'EZ-Bar Curl (light)',        sub:'bicep-short'   },
+        { name:'Cable Curl (light)',         sub:'bicep-short'   },
+        { name:'Reverse Curl',               sub:'forearms'      },
+        { name:'Zottman Curl (light)',       sub:'forearms'      },
+        { name:'Tricep Dip (bench)',         sub:'tricep-lateral'},
+        { name:'Machine Preacher Curl (light)',sub:'bicep-short' },
+        { name:'Single-Arm Pushdown',        sub:'tricep-lateral'},
+        { name:'Rope Pushdown (light)',      sub:'tricep-lateral'},
+        { name:'Forearm Curl',               sub:'forearms'      },
+        { name:'Band Curl',                  sub:'bicep-short'   },
+        { name:'Single-Arm Band Extension',  sub:'tricep-long'   },
+      ],
+      intermediate: [
+        { name:'Incline DB Curl',            sub:'bicep-long'    },
+        { name:'Preacher Curl',              sub:'bicep-short'   },
+        { name:'Overhead Extension',         sub:'tricep-long'   },
+        { name:'Rope Pushdown',              sub:'tricep-lateral'},
+        { name:'Wrist Curl (weighted)',      sub:'forearms'      },
+        { name:'Dumbbell Curl',              sub:'bicep-short'   },
+        { name:'Hammer Curl',                sub:'bicep-long'    },
+        { name:'Skull Crusher (light)',      sub:'tricep-long'   },
+        { name:'Tricep Dip (assisted)',      sub:'tricep-lateral'},
+        { name:'EZ-Bar Curl',                sub:'bicep-short'   },
+        { name:'Cable Curl',                 sub:'bicep-short'   },
+        { name:'Close-Grip Push-Up',         sub:'tricep-lateral'},
+        { name:'Concentration Curl',         sub:'bicep-short'   },
+        { name:'Zottman Curl',               sub:'forearms'      },
+        { name:'Cable Hammer Curl',          sub:'bicep-long'    },
+        { name:'Single-Arm Preacher Curl',   sub:'bicep-short'   },
+        { name:'Overhead Cable Extension',   sub:'tricep-long'   },
+        { name:'DB Skull Crusher',           sub:'tricep-long'   },
+        { name:'Cross-Body Curl',            sub:'bicep-long'    },
+        { name:'21s Curl',                   sub:'bicep-short'   },
+        { name:'Tate Press (light)',         sub:'tricep-lateral'},
+        { name:'Reverse Pushdown',           sub:'forearms'      },
+        { name:'Machine Curl',               sub:'bicep-short'   },
+        { name:'Reverse Curl',               sub:'forearms'      },
+        { name:'Single-Arm Overhead Ext',    sub:'tricep-long'   },
+      ],
+      advanced: [
+        { name:'Incline DB Curl (heavy)',    sub:'bicep-long'    },
+        { name:'Preacher Curl (heavy)',      sub:'bicep-short'   },
+        { name:'Overhead Extension (heavy)',sub:'tricep-long'    },
+        { name:'Rope Pushdown (heavy)',      sub:'tricep-lateral'},
+        { name:'Forearm Roller',             sub:'forearms'      },
+        { name:'Barbell Curl',               sub:'bicep-short'   },
+        { name:'Drag Curl',                  sub:'bicep-long'    },
+        { name:'Skull Crusher',              sub:'tricep-long'   },
+        { name:'Weighted Tricep Dip',        sub:'tricep-lateral'},
+        { name:'EZ-Bar Curl (heavy)',        sub:'bicep-short'   },
+        { name:'Spider Curl',                sub:'bicep-short'   },
+        { name:'Close-Grip Bench',           sub:'tricep-lateral'},
+        { name:'Hammer Curl (heavy)',        sub:'bicep-long'    },
+        { name:'Zottman Curl (heavy)',       sub:'forearms'      },
+        { name:'Cable Curl (heavy)',         sub:'bicep-short'   },
+        { name:'French Press',               sub:'tricep-long'   },
+        { name:'Band-Resisted Curl',         sub:'bicep-short'   },
+        { name:'Tate Press',                 sub:'tricep-lateral'},
+        { name:'21s (heavy)',                sub:'bicep-short'   },
+        { name:'Cluster Curl Set',           sub:'bicep-short'   },
+        { name:'Barbell Reverse Curl',       sub:'forearms'      },
+        { name:'One-Arm Cable Curl',         sub:'bicep-short'   },
+        { name:'Reverse Barbell Curl',       sub:'forearms'      },
+        { name:'Loaded Narrow Push-Up',      sub:'tricep-lateral'},
+        { name:'Single-Arm Overhead Ext (heavy)',sub:'tricep-long'},
+      ],
+    },
+  },
+  core: {
+    male: {
+      beginner: [
+        { name:'Crunches',                   sub:'upper-abs'     },
+        { name:'Leg Raise',                  sub:'lower-abs'     },
+        { name:'Russian Twist (BW)',         sub:'obliques'      },
+        { name:'Plank',                      sub:'deep-core'     },
+        { name:'Superman Hold',              sub:'lower-back-core'},
+        { name:'Bicycle Crunch',             sub:'obliques'      },
+        { name:'Reverse Crunch',             sub:'lower-abs'     },
+        { name:'Dead Bug',                   sub:'deep-core'     },
+        { name:'Bird Dog',                   sub:'lower-back-core'},
+        { name:'Side Plank',                 sub:'obliques'      },
+        { name:'Mountain Climber',           sub:'upper-abs'     },
+        { name:'Flutter Kick',               sub:'lower-abs'     },
+        { name:'Heel Tap',                   sub:'obliques'      },
+        { name:'Hollow Body Hold',           sub:'deep-core'     },
+        { name:'Toe Touch Crunch',           sub:'upper-abs'     },
+        { name:'Seated Knee Tuck',           sub:'lower-abs'     },
+        { name:'High Knee March',            sub:'lower-abs'     },
+        { name:'Ab Wheel (kneeling)',        sub:'deep-core'     },
+        { name:'Pallof Press (light)',       sub:'deep-core'     },
+        { name:'V-Up (modified)',            sub:'upper-abs'     },
+        { name:'Side Crunch',                sub:'obliques'      },
+        { name:'Stability Ball Crunch',      sub:'upper-abs'     },
+        { name:'Cable Crunch (light)',       sub:'upper-abs'     },
+        { name:'Glute Bridge',               sub:'lower-back-core'},
+        { name:'Standing Oblique Crunch',    sub:'obliques'      },
+      ],
+      intermediate: [
+        { name:'Weighted Crunch',            sub:'upper-abs'     },
+        { name:'Hanging Leg Raise',          sub:'lower-abs'     },
+        { name:'Russian Twist (weighted)',   sub:'obliques'      },
+        { name:'Ab Wheel Rollout',           sub:'deep-core'     },
+        { name:'Good Morning',               sub:'lower-back-core'},
+        { name:'Cable Crunch',               sub:'upper-abs'     },
+        { name:'Toes-to-Bar',                sub:'lower-abs'     },
+        { name:'V-Up',                       sub:'upper-abs'     },
+        { name:'Copenhagen Plank',           sub:'obliques'      },
+        { name:'L-Sit Hold',                 sub:'deep-core'     },
+        { name:'Windshield Wiper',           sub:'obliques'      },
+        { name:'Wood Chop (cable)',          sub:'obliques'      },
+        { name:'Plank with Reach',           sub:'deep-core'     },
+        { name:'Side Plank (weighted)',      sub:'obliques'      },
+        { name:'GHD Crunch',                 sub:'upper-abs'     },
+        { name:'Decline Crunch',             sub:'upper-abs'     },
+        { name:'Hanging Knee Raise',         sub:'lower-abs'     },
+        { name:'Suitcase Carry',             sub:'obliques'      },
+        { name:'Farmer Walk',                sub:'deep-core'     },
+        { name:'Hollow Body Rock',           sub:'deep-core'     },
+        { name:'Dragon Flag (assisted)',     sub:'lower-abs'     },
+        { name:'Pallof Press',               sub:'deep-core'     },
+        { name:'Stability Ball Rollout',     sub:'deep-core'     },
+        { name:'Ab Wheel (standing)',        sub:'deep-core'     },
+        { name:'Single-Leg Dead Bug',        sub:'lower-back-core'},
+      ],
+      advanced: [
+        { name:'GHD Sit-Up',                 sub:'upper-abs'     },
+        { name:'Dragon Flag',                sub:'lower-abs'     },
+        { name:'Weighted Russian Twist',     sub:'obliques'      },
+        { name:'Barbell Rollout',            sub:'deep-core'     },
+        { name:'Loaded Good Morning',        sub:'lower-back-core'},
+        { name:'Cable Crunch (heavy)',       sub:'upper-abs'     },
+        { name:'Toes-to-Bar (strict)',       sub:'lower-abs'     },
+        { name:'L-Sit',                      sub:'deep-core'     },
+        { name:'Copenhagen Plank (elevated)',sub:'obliques'      },
+        { name:'Planche Lean',               sub:'deep-core'     },
+        { name:'Windshield Wiper (straight)',sub:'obliques'      },
+        { name:'Heavy Wood Chop',            sub:'obliques'      },
+        { name:'Weighted Hanging Leg Raise', sub:'lower-abs'     },
+        { name:'Advanced Copenhagen',        sub:'obliques'      },
+        { name:'Ab Wheel Dragon Flag',       sub:'lower-abs'     },
+        { name:'Heavy Suitcase Carry',       sub:'obliques'      },
+        { name:'Hanging Windshield Wiper',   sub:'obliques'      },
+        { name:'Front Lever (tuck)',         sub:'deep-core'     },
+        { name:'Hollow Body Press',          sub:'deep-core'     },
+        { name:'Pallof Press (heavy)',       sub:'deep-core'     },
+        { name:'Weighted V-Up',              sub:'upper-abs'     },
+        { name:'Dragon Flag Negative',       sub:'lower-abs'     },
+        { name:'Single-Arm Farmer Walk',     sub:'deep-core'     },
+        { name:'Loaded Plank',               sub:'deep-core'     },
+        { name:'Tuck Planche Hold',          sub:'deep-core'     },
+      ],
+    },
+    female: {
+      beginner: [
+        { name:'Crunches',                   sub:'upper-abs'     },
+        { name:'Leg Raise (bent knee)',      sub:'lower-abs'     },
+        { name:'Side Crunch',                sub:'obliques'      },
+        { name:'Plank',                      sub:'deep-core'     },
+        { name:'Superman Hold',              sub:'lower-back-core'},
+        { name:'Bicycle Crunch',             sub:'obliques'      },
+        { name:'Reverse Crunch',             sub:'lower-abs'     },
+        { name:'Dead Bug',                   sub:'deep-core'     },
+        { name:'Bird Dog',                   sub:'lower-back-core'},
+        { name:'Side Plank',                 sub:'obliques'      },
+        { name:'Mountain Climber',           sub:'upper-abs'     },
+        { name:'Flutter Kick',               sub:'lower-abs'     },
+        { name:'Heel Tap',                   sub:'obliques'      },
+        { name:'Hollow Body Hold',           sub:'deep-core'     },
+        { name:'Toe Touch Crunch',           sub:'upper-abs'     },
+        { name:'Seated Knee Tuck',           sub:'lower-abs'     },
+        { name:'High Knee March',            sub:'lower-abs'     },
+        { name:'Ab Bike',                    sub:'obliques'      },
+        { name:'Pallof Press (light)',       sub:'deep-core'     },
+        { name:'V-Up (modified)',            sub:'upper-abs'     },
+        { name:'Glute Bridge',               sub:'lower-back-core'},
+        { name:'Stability Ball Crunch',      sub:'upper-abs'     },
+        { name:'Scissor Kick',               sub:'lower-abs'     },
+        { name:'Standing Oblique Crunch',    sub:'obliques'      },
+        { name:'Single-Leg Dead Bug',        sub:'lower-back-core'},
+      ],
+      intermediate: [
+        { name:'Weighted Crunch',            sub:'upper-abs'     },
+        { name:'Hanging Knee Raise',         sub:'lower-abs'     },
+        { name:'Russian Twist (weighted)',   sub:'obliques'      },
+        { name:'Ab Wheel Rollout',           sub:'deep-core'     },
+        { name:'Back Extension (weighted)',  sub:'lower-back-core'},
+        { name:'Cable Crunch',               sub:'upper-abs'     },
+        { name:'Toes-to-Bar',                sub:'lower-abs'     },
+        { name:'V-Up',                       sub:'upper-abs'     },
+        { name:'Copenhagen Plank',           sub:'obliques'      },
+        { name:'L-Sit Hold (tuck)',          sub:'deep-core'     },
+        { name:'Windshield Wiper (bent)',    sub:'obliques'      },
+        { name:'Wood Chop (cable)',          sub:'obliques'      },
+        { name:'Plank with Reach',           sub:'deep-core'     },
+        { name:'Side Plank (weighted)',      sub:'obliques'      },
+        { name:'GHD Crunch',                 sub:'upper-abs'     },
+        { name:'Decline Crunch',             sub:'upper-abs'     },
+        { name:'Hanging Leg Raise',          sub:'lower-abs'     },
+        { name:'Suitcase Carry',             sub:'obliques'      },
+        { name:'Farmer Walk',                sub:'deep-core'     },
+        { name:'Hollow Body Rock',           sub:'deep-core'     },
+        { name:'Dragon Flag (assisted)',     sub:'lower-abs'     },
+        { name:'Pallof Press',               sub:'deep-core'     },
+        { name:'Stability Ball Rollout',     sub:'deep-core'     },
+        { name:'Ab Wheel (standing)',        sub:'deep-core'     },
+        { name:'Single-Leg Dead Bug',        sub:'lower-back-core'},
+      ],
+      advanced: [
+        { name:'GHD Sit-Up',                 sub:'upper-abs'     },
+        { name:'Dragon Flag',                sub:'lower-abs'     },
+        { name:'Weighted Russian Twist',     sub:'obliques'      },
+        { name:'Barbell Rollout',            sub:'deep-core'     },
+        { name:'Loaded Back Extension',      sub:'lower-back-core'},
+        { name:'Cable Crunch (heavy)',       sub:'upper-abs'     },
+        { name:'Toes-to-Bar',                sub:'lower-abs'     },
+        { name:'L-Sit',                      sub:'deep-core'     },
+        { name:'Copenhagen Plank (elevated)',sub:'obliques'      },
+        { name:'Planche Lean',               sub:'deep-core'     },
+        { name:'Windshield Wiper (straight)',sub:'obliques'      },
+        { name:'Heavy Wood Chop',            sub:'obliques'      },
+        { name:'Weighted Hanging Leg Raise', sub:'lower-abs'     },
+        { name:'Advanced Copenhagen',        sub:'obliques'      },
+        { name:'Ab Wheel Dragon Flag',       sub:'lower-abs'     },
+        { name:'Heavy Suitcase Carry',       sub:'obliques'      },
+        { name:'Hanging Windshield Wiper',   sub:'obliques'      },
+        { name:'Front Lever (tuck)',         sub:'deep-core'     },
+        { name:'Hollow Body Press',          sub:'deep-core'     },
+        { name:'Pallof Press (heavy)',       sub:'deep-core'     },
+        { name:'Weighted V-Up',              sub:'upper-abs'     },
+        { name:'Dragon Flag Negative',       sub:'lower-abs'     },
+        { name:'Single-Arm Farmer Walk',     sub:'deep-core'     },
+        { name:'Loaded Plank',               sub:'deep-core'     },
+        { name:'Stomach Vacuum',             sub:'deep-core'     },
+      ],
+    },
+  },
+  glutes: {
+    male: {
+      beginner: [
+        { name:'Hip Thrust (BW)',            sub:'glute-max'     },
+        { name:'Romanian DL (light)',        sub:'hamstring-glute'},
+        { name:'Fire Hydrant',               sub:'glute-med'     },
+        { name:'Kneeling Squat',             sub:'hip-flexors'   },
+        { name:'Lateral Band Walk',          sub:'abductors'     },
+        { name:'Glute Bridge',               sub:'glute-max'     },
+        { name:'Donkey Kick (BW)',           sub:'glute-max'     },
+        { name:'Clamshell',                  sub:'glute-med'     },
+        { name:'Reverse Lunge (BW)',         sub:'hip-flexors'   },
+        { name:'Step-Up',                    sub:'glute-max'     },
+        { name:'Sumo Squat',                 sub:'abductors'     },
+        { name:'Single-Leg Glute Bridge',    sub:'glute-max'     },
+        { name:'Banded Squat',               sub:'glute-med'     },
+        { name:'Hip Hinge (BW)',             sub:'hamstring-glute'},
+        { name:'Glute Squeeze Hold',         sub:'glute-max'     },
+        { name:'Seated Hip Abduction',       sub:'abductors'     },
+        { name:'Prone Hip Extension',        sub:'glute-max'     },
+        { name:'TRX Hip Thrust',             sub:'glute-max'     },
+        { name:'Resistance Band Hip Thrust', sub:'glute-max'     },
+        { name:'Box Squat (BW)',             sub:'glute-max'     },
+        { name:'Frog Pump',                  sub:'glute-max'     },
+        { name:'Side-Lying Clam',            sub:'glute-med'     },
+        { name:'Standing Band Kickback',     sub:'glute-max'     },
+        { name:'Supine Hip Abduction',       sub:'abductors'     },
+        { name:'Cable Hip Extension (light)',sub:'glute-max'     },
+      ],
+      intermediate: [
+        { name:'Hip Thrust (barbell)',       sub:'glute-max'     },
+        { name:'Romanian Deadlift',          sub:'hamstring-glute'},
+        { name:'Cable Kickback',             sub:'glute-med'     },
+        { name:'Good Morning',               sub:'hip-flexors'   },
+        { name:'Lateral Lunge',              sub:'abductors'     },
+        { name:'Bulgarian Split Squat',      sub:'glute-max'     },
+        { name:'Sumo Deadlift',              sub:'abductors'     },
+        { name:'Glute Bridge (weighted)',    sub:'glute-max'     },
+        { name:'Hip Abduction Machine',      sub:'abductors'     },
+        { name:'Single-Leg Romanian DL',     sub:'hamstring-glute'},
+        { name:'Reverse Hyper',              sub:'glute-max'     },
+        { name:'Cable Pull-Through',         sub:'hamstring-glute'},
+        { name:'Donkey Kick (cable)',        sub:'glute-max'     },
+        { name:'Fire Hydrant (cable)',       sub:'glute-med'     },
+        { name:'Back Extension',             sub:'glute-max'     },
+        { name:'Box Squat',                  sub:'glute-max'     },
+        { name:'Frog Pump (weighted)',       sub:'glute-max'     },
+        { name:'Banded Hip Thrust',          sub:'glute-max'     },
+        { name:'Step-Up (weighted)',         sub:'glute-max'     },
+        { name:'Hex Bar Deadlift',           sub:'glute-max'     },
+        { name:'Curtsy Lunge',               sub:'abductors'     },
+        { name:'Nordic Curl',                sub:'hamstring-glute'},
+        { name:'Leg Press (high foot)',      sub:'glute-max'     },
+        { name:'Single-Leg Press',           sub:'glute-max'     },
+        { name:'Glute Ham Raise',            sub:'hamstring-glute'},
+      ],
+      advanced: [
+        { name:'Heavy Barbell Hip Thrust',   sub:'glute-max'     },
+        { name:'Romanian DL (heavy)',        sub:'hamstring-glute'},
+        { name:'Heavy Cable Kickback',       sub:'glute-med'     },
+        { name:'Loaded Good Morning',        sub:'hip-flexors'   },
+        { name:'Loaded Lateral Lunge',       sub:'abductors'     },
+        { name:'Sumo Deadlift (heavy)',      sub:'abductors'     },
+        { name:'Barbell Glute Bridge',       sub:'glute-max'     },
+        { name:'Single-Leg Hip Thrust',      sub:'glute-max'     },
+        { name:'Paused Hip Thrust',          sub:'glute-max'     },
+        { name:'Single-Leg RDL (heavy)',     sub:'hamstring-glute'},
+        { name:'Reverse Hyper (weighted)',   sub:'glute-max'     },
+        { name:'Cable Pull-Through (heavy)', sub:'hamstring-glute'},
+        { name:'GHD Hip Extension',          sub:'glute-max'     },
+        { name:'Deficit Hip Thrust',         sub:'glute-max'     },
+        { name:'Loaded Back Extension',      sub:'glute-max'     },
+        { name:'Box Squat (heavy)',          sub:'glute-max'     },
+        { name:'Hip Thrust 21s',             sub:'glute-max'     },
+        { name:'Band-Resisted Hip Thrust',   sub:'glute-max'     },
+        { name:'Curtsy Lunge (heavy)',       sub:'abductors'     },
+        { name:'Glute Ham Raise (weighted)', sub:'hamstring-glute'},
+        { name:'Nordic Hamstring Curl',      sub:'hamstring-glute'},
+        { name:'Hex Bar Hip Hinge',          sub:'glute-max'     },
+        { name:'Heavy Leg Press (high foot)',sub:'glute-max'     },
+        { name:'Loaded Step-Up',             sub:'glute-max'     },
+        { name:'Explosive Hip Thrust',       sub:'glute-max'     },
+      ],
+    },
+    female: {
+      beginner: [
+        { name:'Hip Thrust (BW)',            sub:'glute-max'     },
+        { name:'Romanian DL (light)',        sub:'hamstring-glute'},
+        { name:'Fire Hydrant',               sub:'glute-med'     },
+        { name:'Reverse Lunge (BW)',         sub:'hip-flexors'   },
+        { name:'Lateral Band Walk',          sub:'abductors'     },
+        { name:'Glute Bridge',               sub:'glute-max'     },
+        { name:'Donkey Kick (BW)',           sub:'glute-max'     },
+        { name:'Clamshell',                  sub:'glute-med'     },
+        { name:'Single-Leg Glute Bridge',    sub:'glute-max'     },
+        { name:'Frog Pump',                  sub:'glute-max'     },
+        { name:'Sumo Squat (BW)',            sub:'abductors'     },
+        { name:'Banded Squat',               sub:'glute-med'     },
+        { name:'Hip Hinge (BW)',             sub:'hamstring-glute'},
+        { name:'Glute Squeeze Hold',         sub:'glute-max'     },
+        { name:'Seated Hip Abduction Machine',sub:'abductors'    },
+        { name:'Prone Hip Extension',        sub:'glute-max'     },
+        { name:'TRX Hip Thrust',             sub:'glute-max'     },
+        { name:'Resistance Band Hip Thrust', sub:'glute-max'     },
+        { name:'Step-Up',                    sub:'glute-max'     },
+        { name:'Donkey Kick (band)',         sub:'glute-max'     },
+        { name:'Side-Lying Hip Abduction',   sub:'abductors'     },
+        { name:'Standing Band Kickback',     sub:'glute-max'     },
+        { name:'Kneeling Squat',             sub:'hip-flexors'   },
+        { name:'Supine Hip Abduction',       sub:'abductors'     },
+        { name:'Cable Hip Extension (light)',sub:'glute-max'     },
+      ],
+      intermediate: [
+        { name:'Hip Thrust (barbell)',       sub:'glute-max'     },
+        { name:'Romanian Deadlift',          sub:'hamstring-glute'},
+        { name:'Cable Kickback',             sub:'glute-med'     },
+        { name:'Curtsy Lunge',               sub:'hip-flexors'   },
+        { name:'Hip Abduction Machine',      sub:'abductors'     },
+        { name:'Bulgarian Split Squat',      sub:'glute-max'     },
+        { name:'Sumo Deadlift',              sub:'abductors'     },
+        { name:'Glute Bridge (weighted)',    sub:'glute-max'     },
+        { name:'Donkey Kick (cable)',        sub:'glute-med'     },
+        { name:'Single-Leg Romanian DL',     sub:'hamstring-glute'},
+        { name:'Reverse Hyper',              sub:'glute-max'     },
+        { name:'Cable Pull-Through',         sub:'hamstring-glute'},
+        { name:'Fire Hydrant (cable)',       sub:'glute-med'     },
+        { name:'Back Extension',             sub:'glute-max'     },
+        { name:'Box Squat',                  sub:'glute-max'     },
+        { name:'Frog Pump (weighted)',       sub:'glute-max'     },
+        { name:'Banded Hip Thrust',          sub:'glute-max'     },
+        { name:'Step-Up (weighted)',         sub:'glute-max'     },
+        { name:'Glute Kickback (cable)',     sub:'glute-max'     },
+        { name:'Lateral Lunge',              sub:'abductors'     },
+        { name:'Good Morning',               sub:'hip-flexors'   },
+        { name:'Nordic Curl (assisted)',     sub:'hamstring-glute'},
+        { name:'Leg Press (high foot)',      sub:'glute-max'     },
+        { name:'Single-Leg Press',           sub:'glute-max'     },
+        { name:'Glute Ham Raise',            sub:'hamstring-glute'},
+      ],
+      advanced: [
+        { name:'Heavy Barbell Hip Thrust',   sub:'glute-max'     },
+        { name:'Romanian DL (heavy)',        sub:'hamstring-glute'},
+        { name:'Heavy Cable Kickback',       sub:'glute-med'     },
+        { name:'Loaded Curtsy Lunge',        sub:'hip-flexors'   },
+        { name:'Loaded Lateral Lunge',       sub:'abductors'     },
+        { name:'Sumo Deadlift (heavy)',      sub:'abductors'     },
+        { name:'Barbell Glute Bridge',       sub:'glute-max'     },
+        { name:'Single-Leg Hip Thrust',      sub:'glute-max'     },
+        { name:'Paused Hip Thrust',          sub:'glute-max'     },
+        { name:'Single-Leg RDL (heavy)',     sub:'hamstring-glute'},
+        { name:'Reverse Hyper (weighted)',   sub:'glute-max'     },
+        { name:'Cable Pull-Through (heavy)', sub:'hamstring-glute'},
+        { name:'GHD Hip Extension',          sub:'glute-max'     },
+        { name:'Deficit Hip Thrust',         sub:'glute-max'     },
+        { name:'Loaded Back Extension',      sub:'glute-max'     },
+        { name:'Box Squat (heavy)',          sub:'glute-max'     },
+        { name:'Hip Thrust 21s',             sub:'glute-max'     },
+        { name:'Band-Resisted Hip Thrust',   sub:'glute-max'     },
+        { name:'Glute Ham Raise (weighted)', sub:'hamstring-glute'},
+        { name:'Nordic Hamstring Curl',      sub:'hamstring-glute'},
+        { name:'Heavy Leg Press (high foot)',sub:'glute-max'     },
+        { name:'Loaded Step-Up',             sub:'glute-max'     },
+        { name:'Explosive Hip Thrust',       sub:'glute-max'     },
+        { name:'Barbell Squat (glute focus)',sub:'glute-max'     },
+        { name:'Weighted Donkey Kick',       sub:'glute-med'     },
+      ],
+    },
+  },
+};
+
+function wpPickExercises(muscle, gender, level, goal) {
+  const pool = ((EXERCISE_DB[muscle] || {})[gender] || {})[level] || [];
+  const gc = GOAL_CONFIG[goal];
+  const [minCount, maxCount] = gc.exCount[level];
+
+  let filtered = gc.filter ? pool.filter(e => gc.filter(e.name)) : pool;
+  if (filtered.length < minCount) filtered = pool;
+
+  const shuffled = [...filtered].sort(() => Math.random() - 0.5);
+
+  const usedSubs = new Set();
+  const selected = [];
+  for (const ex of shuffled) {
+    if (!usedSubs.has(ex.sub)) {
+      usedSubs.add(ex.sub);
+      selected.push(ex);
+      if (selected.length >= maxCount) break;
+    }
+  }
+
+  if (selected.length < minCount) {
+    for (const ex of shuffled) {
+      if (!selected.includes(ex)) {
+        selected.push(ex);
+        if (selected.length >= minCount) break;
+      }
+    }
+  }
+
+  return selected;
+}
+
+const GOAL_STYLES = {
+  build_muscle: { color:'#7c3aed', bg:'rgba(139,92,246,.08)', border:'rgba(139,92,246,.25)' },
+  lose_fat:     { color:'#ea580c', bg:'rgba(249,115,22,.08)',  border:'rgba(249,115,22,.25)'  },
+  maintain:     { color:'#0891b2', bg:'rgba(6,182,212,.08)',   border:'rgba(6,182,212,.25)'   },
+  strength:     { color:'#b45309', bg:'rgba(245,158,11,.08)',  border:'rgba(245,158,11,.25)'  },
+};
+const WP_MUSCLE_LABELS = { chest:'Chest', back:'Back', legs:'Legs', shoulders:'Shoulders', arms:'Arms', core:'Core / Abs', glutes:'Glutes' };
+const LEVEL_LABELS = { beginner:'Beginner', intermediate:'Intermediate', advanced:'Advanced' };
+
+function wpSetToggle(type, val) {
+  WP_STATE[type] = val;
+  const groupId = { gender:'wp-gender-group', level:'wp-level-group', goal:'wp-goal-group', muscle:'wp-muscle-group' }[type];
+  document.querySelectorAll('#' + groupId + ' .wp-toggle').forEach(b => b.classList.toggle('active', b.dataset.val === val));
+}
+
+function wpGetSets(goal, level) {
+  const [min, max] = GOAL_CONFIG[goal].setsRange[level];
+  return min + Math.floor(Math.random() * (max - min + 1));
+}
+
+let wpCurrentPlan = null;
+
+function generateWorkoutPlan() {
+  const { gender, level, goal, muscle } = WP_STATE;
+  const gc = GOAL_CONFIG[goal];
+  const exercises = wpPickExercises(muscle, gender, level, goal);
+  wpCurrentPlan = exercises.map((ex, i) => ({
+    id: Date.now() + i,
+    name: ex.name,
+    sub: ex.sub,
+    sets: wpGetSets(goal, level),
+    reps: gc.repRange[level],
+    rest: gc.restSec[level],
+    saved: false,
+  }));
+  wpRenderPlan(gender, level, goal, muscle);
+}
+
+function wpRenderPlan(gender, level, goal, muscle) {
+  const gc = GOAL_CONFIG[goal];
+  const gs = GOAL_STYLES[goal];
+  const totalSets = wpCurrentPlan.reduce((s, e) => s + e.sets, 0);
+  const restSec = gc.restSec[level];
+  const restLabel = restSec >= 60
+    ? Math.floor(restSec / 60) + (restSec % 60 ? ':' + String(restSec % 60).padStart(2, '0') : '') + ' min'
+    : restSec + ' sec';
+
+  const exHtml = wpCurrentPlan.map((ex, i) => {
+    const subLabel = SUB_TARGET_LABELS[ex.sub] || ex.sub;
+    const subColor = SUB_TARGET_COLORS[ex.sub] || '#64748b';
+    return `
+    <div class="wp-exercise-item" id="wp-ex-${ex.id}">
+      <div class="wp-ex-num">${i + 1}</div>
+      <div class="wp-ex-info">
+        <div class="wp-ex-name">${escHtml(ex.name)}</div>
+        <div class="wp-ex-meta">
+          <span class="wp-sub-badge" style="background:${subColor}18;color:${subColor};border:1px solid ${subColor}30">
+            <svg width="8" height="8" viewBox="0 0 8 8" fill="${subColor}"><circle cx="4" cy="4" r="4"/></svg>
+            ${subLabel}
+          </span>
+          <span class="wp-ex-sets-label">${ex.sets} sets × ${ex.reps} reps</span>
+        </div>
+      </div>
+      <div class="wp-ex-actions">
+        <button class="wp-save-btn" onclick="wpSaveOne(${ex.id})" id="wp-save-${ex.id}">+ Log</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('wp-plan-output').innerHTML = `
+    <div class="card wp-plan-card">
+      <div class="wp-plan-title">${WP_MUSCLE_LABELS[muscle] || muscle} Day</div>
+      <div class="wp-meta-badges">
+        <span class="wp-badge wp-badge-gender">${gender === 'male' ? '\u2642 Male' : '\u2640 Female'}</span>
+        <span class="wp-badge wp-badge-level">${LEVEL_LABELS[level]}</span>
+        <span class="wp-badge" style="background:${gs.bg};color:${gs.color};border:1px solid ${gs.border}">${gc.label}</span>
+      </div>
+      <div class="wp-goal-banner" style="border-color:${gs.border};background:${gs.bg}">
+        <div class="wp-goal-banner-icon" style="color:${gs.color}">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        </div>
+        <div>
+          <div class="wp-goal-banner-title" style="color:${gs.color}">${gc.label} Protocol</div>
+          <div class="wp-goal-banner-desc">${gc.desc}</div>
+          <div class="wp-goal-banner-hint">💪 ${gc.weightHint}</div>
+        </div>
+      </div>
+      <div class="wp-summary-strip">
+        <div class="wp-summary-pill"><div class="s-label">Exercises</div><div class="s-val">${wpCurrentPlan.length}</div></div>
+        <div class="wp-summary-pill"><div class="s-label">Total Sets</div><div class="s-val">${totalSets}</div></div>
+        <div class="wp-summary-pill"><div class="s-label">Reps</div><div class="s-val" style="font-size:.85rem">${gc.repRange[level]}</div></div>
+        <div class="wp-summary-pill"><div class="s-label">Rest</div><div class="s-val" style="font-size:.85rem">${restLabel}</div></div>
+      </div>
+      <div class="wp-coverage-row">
+        ${wpCurrentPlan.map(ex => {
+          const subLabel = SUB_TARGET_LABELS[ex.sub] || ex.sub;
+          const subColor = SUB_TARGET_COLORS[ex.sub] || '#64748b';
+          return `<span class="wp-coverage-pill" style="background:${subColor}15;color:${subColor};border:1px solid ${subColor}25">${subLabel}</span>`;
+        }).join('')}
+      </div>
+      <div class="wp-rest-hint">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Rest <strong>${restLabel}</strong> between sets · Each exercise targets a <strong>different muscle zone</strong>
+      </div>
+      <div class="wp-exercises-list">${exHtml}</div>
+      <div class="wp-save-all-bar">
+        <button class="btn btn-outline" onclick="generateWorkoutPlan()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Regenerate
+        </button>
+        <button class="btn btn-primary" onclick="wpSaveAllToLog()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          Save All to Gym Log
+        </button>
+      </div>
+    </div>`;
+}
+
+function wpSaveOne(id) {
+  if (!wpCurrentPlan) return;
+  const ex = wpCurrentPlan.find(e => e.id === id);
+  if (!ex || ex.saved) return;
+  const dateStr = fmt(gymDate);
+  const wd = getGymDay(dateStr);
+  const repsNum = parseInt(String(ex.reps).split('\u2013')[0]) || 10;
+  const newId = Date.now() + Math.floor(Math.random() * 9999);
+  wd.exercises.push({
+    id: newId, name: ex.name, sets: ex.sets, reps: repsNum, weight: 0,
+    notes: (SUB_TARGET_LABELS[ex.sub] || ex.sub) + ' \u2022 ' + ex.sets + '\xD7' + ex.reps,
+  });
+  wd.muscleGroup = WP_MUSCLE_TO_GYM[WP_STATE.muscle] || WP_STATE.muscle;
+  saveGymDay(dateStr, wd);
+  ex.saved = true;
+  const btn = document.getElementById('wp-save-' + id);
+  if (btn) { btn.textContent = '\u2713 Saved'; btn.classList.add('saved'); }
+  showToast(ex.name + ' added to gym log!');
+}
+
+function wpSaveAllToLog() {
+  if (!wpCurrentPlan || !wpCurrentPlan.length) return;
+  let count = 0;
+  wpCurrentPlan.forEach(ex => { if (!ex.saved) { wpSaveOne(ex.id); count++; } });
+  if (count === 0) showToast('All exercises already saved!');
+  else showToast(count + ' exercise' + (count > 1 ? 's' : '') + ' saved to gym log!');
+}
+ENDJS
