@@ -683,30 +683,52 @@ function saveProfile() {
 }
 
 function calcGoals(p) {
+  // Mifflin-St Jeor BMR
   let bmr =
     10 * p.weight +
     6.25 * p.height -
     5 * p.age +
     (p.gender === "male" ? 5 : -161);
+
+  // Activity multiplier
   const mult =
     p.activityLevel === "high"
       ? 1.725
       : p.activityLevel === "moderate"
         ? 1.55
-        : 1.2;
+        : 1.375; // sedentary bumped from 1.2 → 1.375 (lightly active is more realistic)
+
   let tdee = bmr * mult;
-  let proteinMult = 1.6;
+
+  // Goal-specific calorie adjustment & macro targets
+  let calAdj = 0;
+  let proteinMult, fatPct;
+
   if (p.goal === "build_muscle") {
-    tdee += 350;
-    proteinMult = 2.0;
+    calAdj     = 250;          // modest lean-bulk surplus
+    proteinMult = 1.8;         // 1.8 g/kg — solid for hypertrophy
+    fatPct      = 0.25;        // 25 % of calories from fat
   } else if (p.goal === "lose_fat") {
-    tdee -= 300;
-    proteinMult = 2.0;
+    calAdj     = -400;         // moderate deficit (not aggressive)
+    proteinMult = 1.8;         // high protein to spare muscle on a cut
+    fatPct      = 0.28;        // 28 % of calories from fat — keeps hormones healthy
+  } else if (p.goal === "strength") {
+    calAdj     = 150;          // small surplus for strength gains
+    proteinMult = 1.8;
+    fatPct      = 0.30;
+  } else {
+    // maintain
+    calAdj     = 0;
+    proteinMult = 1.6;
+    fatPct      = 0.28;
   }
-  const protein = Math.round(p.weight * proteinMult);
-  const fat = Math.round(p.weight * 0.9);
-  const carbs = Math.max(0, Math.round((tdee - protein * 4 - fat * 9) / 4));
-  return { calories: Math.round(tdee), protein, carbs, fat };
+
+  const calories = Math.round(tdee + calAdj);
+  const protein  = Math.round(p.weight * proteinMult);
+  const fat      = Math.round((calories * fatPct) / 9);
+  const carbs    = Math.max(0, Math.round((calories - protein * 4 - fat * 9) / 4));
+
+  return { calories, protein, carbs, fat };
 }
 
 function showCalcResult(r) {
@@ -2732,6 +2754,14 @@ const MP_GOAL_CONFIG = {
     textClass: 'mp-banner-text-weight_gain',
     desc: 'High-calorie meals to help you reach a calorie surplus and pack on size.',
     tip: '🍽️ Eat every 3–4 hours and aim for calorie-dense whole foods.',
+    targets: {
+      calories: { min: 2500, max: 3000 },
+      protein:  { min: 160,  max: 200,  unit: 'g', note: '1.8–2.2g per kg bodyweight' },
+      carbs:    { min: 350,  max: 420,  unit: 'g', note: 'Primary energy source for size' },
+      fat:      { min: 70,   max: 95,   unit: 'g', note: 'Hormonal health & calorie density' },
+      fiber:    { min: 30,   max: 40,   unit: 'g', note: 'Digestive health' },
+      water:    { min: 3.0,  max: 4.0,  unit: 'L', note: 'Supports muscle volume' },
+    },
   },
   build_muscle: {
     label: 'Build Muscle',
@@ -2742,6 +2772,14 @@ const MP_GOAL_CONFIG = {
     textClass: 'mp-banner-text-build_muscle',
     desc: 'High-protein, balanced-carb meals optimised for hypertrophy and recovery.',
     tip: '💪 Hit your protein target every day — consistency is key to muscle growth.',
+    targets: {
+      calories: { min: 2400, max: 2800 },
+      protein:  { min: 150,  max: 200,  unit: 'g', note: '1.6–2.2g per kg bodyweight' },
+      carbs:    { min: 280,  max: 350,  unit: 'g', note: 'Fuel training & glycogen refill' },
+      fat:      { min: 60,   max: 80,   unit: 'g', note: 'Testosterone & hormone support' },
+      fiber:    { min: 25,   max: 35,   unit: 'g', note: 'Gut health & nutrient absorption' },
+      water:    { min: 3.0,  max: 3.5,  unit: 'L', note: 'Essential for muscle protein synthesis' },
+    },
   },
   lose_weight: {
     label: 'Lose Weight',
@@ -2752,6 +2790,14 @@ const MP_GOAL_CONFIG = {
     textClass: 'mp-banner-text-lose_weight',
     desc: 'Lower-calorie, high-protein meals to preserve muscle while burning fat.',
     tip: '🔥 Stay hydrated and avoid liquid calories to maximise your deficit.',
+    targets: {
+      calories: { min: 1700, max: 2100 },
+      protein:  { min: 130,  max: 170,  unit: 'g', note: '1.6–2.0g per kg — preserves muscle' },
+      carbs:    { min: 150,  max: 220,  unit: 'g', note: 'Prioritise complex, high-fibre carbs' },
+      fat:      { min: 45,   max: 65,   unit: 'g', note: 'Keep saturated fat low' },
+      fiber:    { min: 30,   max: 40,   unit: 'g', note: 'Increases satiety & curbs hunger' },
+      water:    { min: 2.5,  max: 3.5,  unit: 'L', note: 'Suppresses appetite & aids fat loss' },
+    },
   },
   maintain: {
     label: 'Maintain Fitness',
@@ -2762,6 +2808,14 @@ const MP_GOAL_CONFIG = {
     textClass: 'mp-banner-text-maintain',
     desc: 'Balanced macros to fuel your training and sustain your current physique.',
     tip: '⚡ Balanced meals mean balanced energy — keep portions consistent day to day.',
+    targets: {
+      calories: { min: 2100, max: 2500 },
+      protein:  { min: 120,  max: 160,  unit: 'g', note: '1.4–1.8g per kg bodyweight' },
+      carbs:    { min: 240,  max: 310,  unit: 'g', note: 'Balanced energy for daily training' },
+      fat:      { min: 55,   max: 75,   unit: 'g', note: 'Healthy fats for long-term wellbeing' },
+      fiber:    { min: 25,   max: 35,   unit: 'g', note: 'Digestive regularity & gut health' },
+      water:    { min: 2.5,  max: 3.0,  unit: 'L', note: 'Hydration for performance & recovery' },
+    },
   },
 };
 
@@ -2803,21 +2857,63 @@ function mpGeneratePlan() {
 function mpRenderTargetBanner() {
   const gc = MP_GOAL_CONFIG[mpCurrentGoal];
   const banner = document.getElementById('mp-target-banner');
-  const totals = mpCurrentPlan.reduce((a,m) => ({
-    cal: a.cal + m.cal, pro: a.pro + m.pro, carb: a.carb + m.carb, fat: a.fat + m.fat
-  }), { cal:0, pro:0, carb:0, fat:0 });
+  const t = gc.targets;
 
   banner.className = 'mp-target-banner ' + gc.bannerClass;
   banner.innerHTML = `
-    <div>
-      <div class="mp-target-label ${gc.textClass}">${gc.emoji} ${gc.label} · Daily Target</div>
-      <div class="mp-target-range ${gc.textClass}">${gc.calRange}</div>
+    <div class="mp-req-header">
+      <div class="mp-req-title ${gc.textClass}">${gc.emoji} ${gc.label} · Daily Requirements</div>
+      <div class="mp-req-subtitle ${gc.textClass}">${gc.calRange} per day</div>
     </div>
-    <div class="mp-target-pills">
-      <span class="mp-target-pill ${gc.textClass}">🔥 ${totals.cal} kcal</span>
-      <span class="mp-target-pill ${gc.textClass}">🥩 ${totals.pro}g protein</span>
-      <span class="mp-target-pill ${gc.textClass}">🌾 ${totals.carb}g carbs</span>
-      <span class="mp-target-pill ${gc.textClass}">🥑 ${totals.fat}g fat</span>
+    <div class="mp-req-grid">
+      <div class="mp-req-card mp-req-calories">
+        <div class="mp-req-card-icon">🔥</div>
+        <div class="mp-req-card-body">
+          <div class="mp-req-card-label">Calories</div>
+          <div class="mp-req-card-value">${t.calories.min}–${t.calories.max}</div>
+          <div class="mp-req-card-unit">kcal / day</div>
+        </div>
+      </div>
+      <div class="mp-req-card mp-req-protein">
+        <div class="mp-req-card-icon">🥩</div>
+        <div class="mp-req-card-body">
+          <div class="mp-req-card-label">Protein</div>
+          <div class="mp-req-card-value">${t.protein.min}–${t.protein.max}${t.protein.unit}</div>
+          <div class="mp-req-card-note">${t.protein.note}</div>
+        </div>
+      </div>
+      <div class="mp-req-card mp-req-carbs">
+        <div class="mp-req-card-icon">🌾</div>
+        <div class="mp-req-card-body">
+          <div class="mp-req-card-label">Carbohydrates</div>
+          <div class="mp-req-card-value">${t.carbs.min}–${t.carbs.max}${t.carbs.unit}</div>
+          <div class="mp-req-card-note">${t.carbs.note}</div>
+        </div>
+      </div>
+      <div class="mp-req-card mp-req-fat">
+        <div class="mp-req-card-icon">🥑</div>
+        <div class="mp-req-card-body">
+          <div class="mp-req-card-label">Fat</div>
+          <div class="mp-req-card-value">${t.fat.min}–${t.fat.max}${t.fat.unit}</div>
+          <div class="mp-req-card-note">${t.fat.note}</div>
+        </div>
+      </div>
+      <div class="mp-req-card mp-req-fiber">
+        <div class="mp-req-card-icon">🥦</div>
+        <div class="mp-req-card-body">
+          <div class="mp-req-card-label">Fiber</div>
+          <div class="mp-req-card-value">${t.fiber.min}–${t.fiber.max}${t.fiber.unit}</div>
+          <div class="mp-req-card-note">${t.fiber.note}</div>
+        </div>
+      </div>
+      <div class="mp-req-card mp-req-water">
+        <div class="mp-req-card-icon">💧</div>
+        <div class="mp-req-card-body">
+          <div class="mp-req-card-label">Water</div>
+          <div class="mp-req-card-value">${t.water.min}–${t.water.max}${t.water.unit}</div>
+          <div class="mp-req-card-note">${t.water.note}</div>
+        </div>
+      </div>
     </div>
   `;
 }
