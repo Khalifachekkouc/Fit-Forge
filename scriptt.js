@@ -105,29 +105,59 @@ let dashDate = new Date();
 let gymDate = new Date();
 let progressChart = null;
 
+function applyTheme(dark) {
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+}
+
+function toggleDarkMode() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  applyTheme(!isDark);
+  localStorage.setItem('fitforge_theme', !isDark ? 'dark' : 'light');
+}
+
+(function initTheme() {
+  const saved = localStorage.getItem('fitforge_theme');
+  if (saved) {
+    applyTheme(saved === 'dark');
+  } else {
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    applyTheme(prefersDark);
+  }
+})();
+
 function navigate(page) {
   currentPage = page;
-  document
-    .querySelectorAll(".page")
-    .forEach((p) => p.classList.remove("active"));
-  document.getElementById("page-" + page).classList.add("active");
-  document
-    .querySelectorAll(".nav-btn")
-    .forEach((b) => b.classList.remove("active"));
-  document
-    .querySelectorAll(".mobile-nav-btn")
-    .forEach((b) => b.classList.remove("active"));
-  const btns = [
-    ...document.querySelectorAll(".nav-btn"),
-    ...document.querySelectorAll(".mobile-nav-btn"),
-  ];
-  btns
-    .filter((b) => b.getAttribute("onclick") === `navigate('${page}')`)
-    .forEach((b) => b.classList.add("active"));
 
-  if (page === "dashboard") renderDashboard();
-  if (page === "gym") renderGym();
-  if (page === "profile") loadProfile();
+  document.querySelectorAll('.page.active').forEach(p => {
+    p.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+    p.style.opacity = '0';
+    p.style.transform = 'translateY(-6px)';
+  });
+
+  setTimeout(() => {
+    document.querySelectorAll('.page').forEach(p => {
+      p.classList.remove('active');
+      p.style.transition = '';
+      p.style.opacity = '';
+      p.style.transform = '';
+    });
+
+    const target = document.getElementById('page-' + page);
+    if (target) target.classList.add('active');
+
+    const allBtns = [
+      ...document.querySelectorAll('.nav-btn'),
+      ...document.querySelectorAll('.mobile-nav-btn'),
+    ];
+    allBtns.forEach(b => b.classList.remove('active'));
+    allBtns
+      .filter(b => b.getAttribute('onclick') === `navigate('${page}')`)
+      .forEach(b => b.classList.add('active'));
+
+    if (page === 'dashboard') renderDashboard();
+    if (page === 'gym') renderGym();
+    if (page === 'profile') loadProfile();
+  }, 150);
 }
 
 function fmt(d) {
@@ -641,6 +671,16 @@ function saveProfile() {
   const r = calcGoals(p);
   showCalcResult(r);
   showToast("Profile saved!");
+
+  const banner = document.getElementById('onboard-banner');
+  if (banner) {
+    banner.style.transition = 'opacity 0.3s ease';
+    banner.style.opacity = '0';
+    setTimeout(() => {
+      banner.remove();
+      navigate('dashboard');
+    }, 320);
+  }
 }
 
 function calcGoals(p) {
@@ -733,6 +773,63 @@ function escHtml(s) {
 
 renderDashboard();
 updateExerciseSuggestions();
+
+(function initRipple() {
+  function addRipple(e) {
+    const btn = e.currentTarget;
+    btn.classList.add('ripple-host');
+    const existing = btn.querySelector('.ripple-wave');
+    if (existing) existing.remove();
+
+    const rect = btn.getBoundingClientRect();
+    const wave = document.createElement('span');
+    wave.className = 'ripple-wave';
+    wave.style.left = (e.clientX - rect.left) + 'px';
+    wave.style.top  = (e.clientY - rect.top)  + 'px';
+    btn.appendChild(wave);
+    wave.addEventListener('animationend', () => wave.remove(), { once: true });
+  }
+
+  function attachTo(el) {
+    if (el.tagName === 'BUTTON' && !el.dataset.rippleAttached) {
+      el.dataset.rippleAttached = '1';
+      el.addEventListener('click', addRipple);
+    }
+  }
+
+  document.querySelectorAll('button').forEach(attachTo);
+
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(m => m.addedNodes.forEach(node => {
+      if (node.nodeType !== 1) return;
+      if (node.tagName === 'BUTTON') attachTo(node);
+      node.querySelectorAll && node.querySelectorAll('button').forEach(attachTo);
+    }));
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+})();
+
+(function checkFirstTimeUser() {
+  const hasProfile = localStorage.getItem(KEYS.profile);
+  if (!hasProfile) {
+    const profilePage = document.getElementById('page-profile');
+    if (profilePage) {
+      const banner = document.createElement('div');
+      banner.id = 'onboard-banner';
+      banner.className = 'onboard-banner';
+      banner.innerHTML = `
+        <div class="onboard-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="onboard-body">
+          <h2>Welcome to FitForge! 👋</h2>
+          <p>Fill in your details below — age, height, weight, goal and activity level — so we can calculate your personalised macro targets and get you started.</p>
+        </div>`;
+      profilePage.insertBefore(banner, profilePage.firstChild);
+    }
+    setTimeout(() => navigate('profile'), 80);
+  }
+})();
 
 
 const WP_STATE = { gender: 'male', level: 'beginner', goal: 'build_muscle', muscle: 'chest' };
