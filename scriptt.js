@@ -88,8 +88,8 @@ function getProfile() {
   return (
     load(KEYS.profile) || {
       height: 175,
-      weight: 70,
-      age: 30,
+      weight: 60,
+      age: 20,
       gender: "male",
       activityLevel: "moderate",
       goal: "maintain",
@@ -394,7 +394,6 @@ function renderGym() {
   } else lbl.style.display = "none";
 
   renderExercises(workout.exercises || []);
-  renderProgress();
 }
 
 function setMuscleGroup(mg) {
@@ -2947,4 +2946,369 @@ const _origNavigate = navigate;
 window.navigate = function(page) {
   _origNavigate(page);
   if (page === 'meals' && mpCurrentPlan.length === 0) mpGeneratePlan();
+};
+
+const KEYS_PR = 'ns_records';
+const KEYS_WEIGHT_HISTORY = 'ns_weight_history';
+
+function getPRs() {
+  return load(KEYS_PR) || {};
+}
+function savePRs(prs) {
+  save(KEYS_PR, prs);
+}
+
+function checkAndUpdatePR(exerciseName, weight, dateStr) {
+  if (!exerciseName || weight <= 0) return false;
+  const prs = getPRs();
+  const existing = prs[exerciseName];
+  if (!existing || weight > existing.weight) {
+    prs[exerciseName] = { weight, date: dateStr };
+    savePRs(prs);
+    return true;
+  }
+  return false;
+}
+
+function recalculateAllPRs() {
+  const gymData = load(KEYS.gym) || {};
+  const prs = {};
+  Object.entries(gymData).forEach(([date, day]) => {
+    (day.exercises || []).forEach(ex => {
+      if (!ex.name || ex.weight <= 0) return;
+      if (!prs[ex.name] || ex.weight > prs[ex.name].weight) {
+        prs[ex.name] = { weight: ex.weight, date };
+      }
+    });
+  });
+  savePRs(prs);
+}
+
+function renderRecordsPage() {
+  recalculateAllPRs();
+  const prs = getPRs();
+  const entries = Object.entries(prs).sort((a, b) => a[0].localeCompare(b[0]));
+  const grid = document.getElementById('records-grid');
+  const emptyEl = document.getElementById('records-empty');
+
+  if (!entries.length) {
+    grid.innerHTML = '';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  grid.innerHTML = entries.map(([name, pr], i) => {
+    const dateStr = pr.date ? new Date(pr.date).toLocaleDateString('en-US', { day:'2-digit', month:'short', year:'numeric' }) : '—';
+    const isNew = pr.date && (Date.now() - new Date(pr.date).getTime()) < 7 * 24 * 60 * 60 * 1000;
+    return `
+    <div class="pr-card card" style="animation-delay:${i * 0.05}s">
+      ${isNew ? '<div class="pr-new-badge">🏆 New PR!</div>' : ''}
+      <div class="pr-card-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+      </div>
+      <div class="pr-card-body">
+        <div class="pr-card-name">${escHtml(name)}</div>
+        <div class="pr-card-weight">${pr.weight} <span class="pr-card-unit">kg</span></div>
+        <div class="pr-card-date">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+          ${dateStr}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getWeightHistory() {
+  return load(KEYS_WEIGHT_HISTORY) || [];
+}
+function saveWeightHistory(arr) {
+  save(KEYS_WEIGHT_HISTORY, arr);
+}
+function logWeightEntry(weight) {
+  const arr = getWeightHistory();
+  const today = fmt(new Date());
+  const idx = arr.findIndex(e => e.date === today);
+  if (idx >= 0) arr[idx].weight = weight;
+  else arr.push({ date: today, weight });
+  arr.sort((a, b) => a.date.localeCompare(b.date));
+  saveWeightHistory(arr);
+}
+
+let progCharts = { weight: null, calories: null, strength: null };
+
+function switchProgTab(tab) {
+  document.querySelectorAll('.prog-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.prog-panel').forEach(p => p.classList.remove('active'));
+  const tabBtn = document.getElementById('ptab-' + tab);
+  const panel = document.getElementById('prog-panel-' + tab);
+  if (tabBtn) tabBtn.classList.add('active');
+  if (panel) panel.classList.add('active');
+
+  if (tab === 'weight') renderWeightChart();
+  if (tab === 'calories') renderCaloriesChart();
+  if (tab === 'strength') renderStrengthChartInit();
+}
+
+function getChartColors() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  return {
+    grid: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)',
+    tick: isDark ? '#8899aa' : '#65758b',
+  };
+}
+
+function makeLineChart(canvasId, labels, datasets, yLabel) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+  const c = getChartColors();
+  return new Chart(canvas.getContext('2d'), {
+    type: 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: datasets.length > 1, labels: { color: c.tick, font: { size: 11 }, boxWidth: 12, padding: 16 } },
+        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y}${yLabel}` } },
+      },
+      scales: {
+        x: { grid: { color: c.grid }, ticks: { color: c.tick, font: { size: 11 } } },
+        y: { grid: { color: c.grid }, ticks: { color: c.tick, font: { size: 11 }, callback: v => `${v}${yLabel}` } },
+      },
+    },
+  });
+}
+
+function renderWeightChart() {
+  const history = getWeightHistory();
+  const wrap = document.getElementById('prog-chart-wrap-weight');
+  const emptyEl = document.getElementById('prog-weight-empty');
+  const statsEl = document.getElementById('prog-weight-stats');
+
+  if (progCharts.weight) { progCharts.weight.destroy(); progCharts.weight = null; }
+
+  if (history.length < 1) {
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  const labels = history.map(e => {
+    const d = new Date(e.date);
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+  });
+
+  progCharts.weight = makeLineChart('chart-weight', labels, [{
+    label: 'Weight (kg)',
+    data: history.map(e => e.weight),
+    borderColor: '#1fad96',
+    backgroundColor: 'rgba(31,173,150,0.1)',
+    borderWidth: 2.5,
+    tension: 0.35,
+    pointBackgroundColor: '#1fad96',
+    pointRadius: 5,
+    fill: true,
+  }], ' kg');
+
+  const weights = history.map(e => e.weight);
+  const min = Math.min(...weights), max = Math.max(...weights);
+  const latest = weights[weights.length - 1];
+  const change = weights.length > 1 ? (latest - weights[0]).toFixed(1) : null;
+  if (statsEl) statsEl.innerHTML = `
+    <div class="prog-stat-chip"><span class="psc-label">Current</span><span class="psc-val">${latest} kg</span></div>
+    <div class="prog-stat-chip"><span class="psc-label">Min</span><span class="psc-val">${min} kg</span></div>
+    <div class="prog-stat-chip"><span class="psc-label">Max</span><span class="psc-val">${max} kg</span></div>
+    ${change !== null ? `<div class="prog-stat-chip"><span class="psc-label">Change</span><span class="psc-val" style="color:${+change <= 0 ? '#1fad96' : '#f57a3d'}">${+change > 0 ? '+' : ''}${change} kg</span></div>` : ''}
+  `;
+}
+
+function renderCaloriesChart() {
+  const foodData = load(KEYS.food) || {};
+  const goalsData = load(KEYS.goals) || {};
+  const defaultGoal = getDefaultGoals();
+
+  if (progCharts.calories) { progCharts.calories.destroy(); progCharts.calories = null; }
+
+  const dates = Object.keys(foodData).sort();
+  const emptyEl = document.getElementById('prog-cal-empty');
+  const statsEl = document.getElementById('prog-cal-stats');
+
+  if (!dates.length) {
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  const labels = dates.map(d => {
+    const dt = new Date(d);
+    return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}`;
+  });
+  const calIntake = dates.map(d =>
+    (foodData[d] || []).reduce((s, e) => s + (e.calories || 0), 0)
+  );
+  const calGoals = dates.map(d => (goalsData[d] || defaultGoal).calories);
+
+  progCharts.calories = makeLineChart('chart-calories', labels, [
+    {
+      label: 'Intake (kcal)',
+      data: calIntake,
+      borderColor: '#f57a3d',
+      backgroundColor: 'rgba(245,122,61,0.1)',
+      borderWidth: 2.5,
+      tension: 0.35,
+      pointBackgroundColor: '#f57a3d',
+      pointRadius: 5,
+      fill: true,
+    },
+    {
+      label: 'Goal (kcal)',
+      data: calGoals,
+      borderColor: '#1fad96',
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      borderDash: [6, 4],
+      tension: 0,
+      pointRadius: 0,
+    },
+  ], ' kcal');
+
+  const avg = Math.round(calIntake.reduce((a, b) => a + b, 0) / calIntake.length);
+  const maxVal = Math.max(...calIntake);
+  const minVal = Math.min(...calIntake);
+  if (statsEl) statsEl.innerHTML = `
+    <div class="prog-stat-chip"><span class="psc-label">Avg/day</span><span class="psc-val">${avg} kcal</span></div>
+    <div class="prog-stat-chip"><span class="psc-label">Best</span><span class="psc-val">${minVal} kcal</span></div>
+    <div class="prog-stat-chip"><span class="psc-label">Peak</span><span class="psc-val">${maxVal} kcal</span></div>
+    <div class="prog-stat-chip"><span class="psc-label">Days</span><span class="psc-val">${dates.length}</span></div>
+  `;
+}
+
+function renderStrengthChartInit() {
+  const select = document.getElementById('prog-ex-select');
+  if (!select) return;
+  const names = getAllExerciseNames();
+  const currentVal = select.value;
+  select.innerHTML = '<option value="">Select exercise…</option>' +
+    names.map(n => `<option value="${escHtml(n)}" ${n === currentVal ? 'selected' : ''}>${escHtml(n)}</option>`).join('');
+  renderStrengthChart();
+}
+
+function renderStrengthChart() {
+  const select = document.getElementById('prog-ex-select');
+  const name = select ? select.value : '';
+  const emptyEl = document.getElementById('prog-str-empty');
+  const statsEl = document.getElementById('prog-str-stats');
+
+  if (progCharts.strength) { progCharts.strength.destroy(); progCharts.strength = null; }
+
+  if (!name) {
+    if (emptyEl) emptyEl.style.display = 'block';
+    if (statsEl) statsEl.innerHTML = '';
+    return;
+  }
+
+  const data = getExerciseProgress(name);
+  if (!data.length) {
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  const labels = data.map(e => {
+    const d = new Date(e.date);
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+  });
+
+  progCharts.strength = makeLineChart('chart-strength', labels, [{
+    label: 'Weight (kg)',
+    data: data.map(e => e.weight),
+    borderColor: '#8e5eed',
+    backgroundColor: 'rgba(142,94,237,0.1)',
+    borderWidth: 2.5,
+    tension: 0.35,
+    pointBackgroundColor: '#8e5eed',
+    pointRadius: 5,
+    fill: true,
+  }], ' kg');
+
+  const pr = data.reduce((mx, e) => e.weight > mx.weight ? e : mx, data[0]);
+  const latest = data[data.length - 1];
+  const first = data[0];
+  const gained = (latest.weight - first.weight).toFixed(1);
+
+  if (statsEl) statsEl.innerHTML = `
+    <div class="prog-stat-chip"><span class="psc-label">Sessions</span><span class="psc-val">${data.length}</span></div>
+    <div class="prog-stat-chip"><span class="psc-label">Best</span><span class="psc-val" style="color:#f59e0b">${pr.weight} kg</span></div>
+    <div class="prog-stat-chip"><span class="psc-label">Gained</span><span class="psc-val" style="color:${+gained >= 0 ? '#1fad96' : '#ef4444'}">${+gained >= 0 ? '+' : ''}${gained} kg</span></div>
+  `;
+}
+
+const _origSaveProfile = saveProfile_;
+window.saveProfile_ = function(p) {
+  _origSaveProfile(p);
+  if (p.weight) logWeightEntry(p.weight);
+};
+
+const _origAddExercise = addExercise;
+window.addExercise = function() {
+  const name = document.getElementById('e-name').value.trim();
+  const weight = +document.getElementById('e-weight').value || 0;
+  const dateStr = fmt(gymDate);
+  _origAddExercise();
+  if (name && weight > 0) {
+    const isNewPR = checkAndUpdatePR(name, weight, dateStr);
+    if (isNewPR) {
+      setTimeout(() => showToast(`🏆 New Personal Record! ${name}: ${weight} kg`, 'pr'), 300);
+    }
+  }
+};
+
+const _origSaveEdit = saveEdit;
+window.saveEdit = function(id) {
+  _origSaveEdit(id);
+  const dateStr = fmt(gymDate);
+  const wd = getGymDay(dateStr);
+  const ex = (wd.exercises || []).find(
+    e => String(e.id).replace(/[^a-zA-Z0-9_-]/g, '_') === String(id)
+  );
+  if (ex && ex.weight > 0) {
+    const isNewPR = checkAndUpdatePR(ex.name, ex.weight, dateStr);
+    if (isNewPR) {
+      setTimeout(() => showToast(`🏆 New Personal Record! ${ex.name}: ${ex.weight} kg`, 'pr'), 300);
+    }
+  }
+};
+
+const _origNavigate2 = window.navigate;
+window.navigate = function(page) {
+  _origNavigate2(page);
+  if (page === 'progress') {
+    setTimeout(() => {
+      switchProgTab('weight');
+    }, 180);
+  }
+  if (page === 'records') {
+    setTimeout(() => renderRecordsPage(), 180);
+  }
+};
+
+const _origShowToast = showToast;
+window.showToast = function(msg, type) {
+  if (type === 'pr') {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-pr';
+    toast.textContent = msg;
+    container.appendChild(toast);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 400);
+    }, 3500);
+  } else {
+    _origShowToast(msg);
+  }
 };

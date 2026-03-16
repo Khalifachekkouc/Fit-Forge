@@ -35,6 +35,14 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
         Meal Plan
       </button>
+      <button class="nav-btn" onclick="navigate('progress')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Progress
+      </button>
+      <button class="nav-btn" onclick="navigate('records')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        Records
+      </button>
       <button class="nav-btn" onclick="navigate('profile')">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         Profile &amp; Goals
@@ -119,18 +127,93 @@
       </div>
       <div id="exercises-container"></div>
     </div>
+  </div>
 
-    <div class="card progress-section">
-      <div class="flex items-center gap-2 mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-        <h2 class="section-title">Strength Progress</h2>
+  <!-- ===== PROGRESS PAGE ===== -->
+  <div id="page-progress" class="page">
+    <div class="prog-page-header">
+      <div class="prog-page-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
       </div>
-      <div id="progress-section-inner">
-        <div class="empty-state">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto .75rem;opacity:.3"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
-          <p>Log exercises to see your strength progress over time.</p>
+      <div>
+        <h1 class="prog-page-title">Progress Tracker</h1>
+        <p class="prog-page-sub">Visualise your weight, nutrition and strength over time</p>
+      </div>
+    </div>
+    <div class="prog-tab-bar">
+      <button class="prog-tab active" id="ptab-weight" onclick="switchProgTab('weight')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 16 4-4 4 4 4-6"/></svg>
+        Weight
+      </button>
+      <button class="prog-tab" id="ptab-calories" onclick="switchProgTab('calories')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+        Calories
+      </button>
+      <button class="prog-tab" id="ptab-strength" onclick="switchProgTab('strength')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></svg>
+        Strength
+      </button>
+    </div>
+    <div id="prog-panel-weight" class="prog-panel active">
+      <div class="prog-chart-card card">
+        <div class="prog-chart-header">
+          <div><h2 class="prog-chart-title">Body Weight</h2><p class="prog-chart-sub">Weight trend from your saved profile history</p></div>
+          <div class="prog-stats-row" id="prog-weight-stats"></div>
+        </div>
+        <div class="prog-chart-wrap"><canvas id="chart-weight"></canvas></div>
+        <div id="prog-weight-empty" class="prog-empty" style="display:none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto .75rem"><path d="M3 3v18h18"/><path d="m7 16 4-4 4 4 4-6"/></svg>
+          <p>Save your profile with different weights over time to see the trend here.</p>
         </div>
       </div>
+    </div>
+    <div id="prog-panel-calories" class="prog-panel">
+      <div class="prog-chart-card card">
+        <div class="prog-chart-header">
+          <div><h2 class="prog-chart-title">Daily Calorie Intake</h2><p class="prog-chart-sub">Logged calories per day vs. your daily goal</p></div>
+          <div class="prog-stats-row" id="prog-cal-stats"></div>
+        </div>
+        <div class="prog-chart-wrap"><canvas id="chart-calories"></canvas></div>
+        <div id="prog-cal-empty" class="prog-empty" style="display:none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto .75rem"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+          <p>Log food in the Dashboard to see your calorie trend here.</p>
+        </div>
+      </div>
+    </div>
+    <div id="prog-panel-strength" class="prog-panel">
+      <div class="prog-chart-card card">
+        <div class="prog-chart-header">
+          <div><h2 class="prog-chart-title">Strength Progress</h2><p class="prog-chart-sub">Weight lifted per exercise over time</p></div>
+          <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+            <select id="prog-ex-select" class="form-select" style="height:36px;min-width:180px;font-size:.85rem" onchange="renderStrengthChart()">
+              <option value="">Select exercise…</option>
+            </select>
+            <div class="prog-stats-row" id="prog-str-stats"></div>
+          </div>
+        </div>
+        <div class="prog-chart-wrap"><canvas id="chart-strength"></canvas></div>
+        <div id="prog-str-empty" class="prog-empty" style="display:none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto .75rem"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></svg>
+          <p>Log gym exercises to see strength progress here.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="page-records" class="page">
+    <div class="prog-page-header">
+      <div class="prog-page-icon" style="background:linear-gradient(135deg,#f59e0b,#f57a3d)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+      </div>
+      <div>
+        <h1 class="prog-page-title">Personal Records</h1>
+        <p class="prog-page-sub">Your all-time best lifts — auto-updated when you log workouts</p>
+      </div>
+    </div>
+    <div id="records-grid" class="records-grid"></div>
+    <div id="records-empty" class="prog-empty card" style="display:none;padding:2.5rem;text-align:center">
+      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.2;margin:0 auto 1rem;display:block"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+      <p style="margin-bottom:1rem">No personal records yet. Start logging exercises in the Gym tab!</p>
+      <button class="btn btn-primary" onclick="navigate('gym')">Go to Gym</button>
     </div>
   </div>
 
@@ -335,6 +418,14 @@
   <button class="mobile-nav-btn" onclick="navigate('meals')">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
     Meals
+  </button>
+  <button class="mobile-nav-btn" onclick="navigate('progress')">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Progress
+  </button>
+  <button class="mobile-nav-btn" onclick="navigate('records')">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+    Records
   </button>
   <button class="mobile-nav-btn" onclick="navigate('profile')">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
