@@ -457,6 +457,55 @@
         <div class="form-group"><label class="form-label">Fat (g)</label><input id="f-fat" type="number" class="form-input"
                 value="0" min="0"></div>
     </div>
+
+    <div class="qty-calc-wrapper">
+      <button class="qty-calc-toggle" id="qty-calc-toggle-btn" onclick="toggleQtyCalc()" type="button">
+        <span class="qty-calc-toggle-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
+        </span>
+        <span>Calculate from label (per 100g / 100ml)</span>
+        <svg class="qty-calc-chevron" id="qty-calc-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+
+      <div class="qty-calc-panel" id="qty-calc-panel">
+        <div class="qty-calc-inner">
+          <p class="qty-calc-hint">Enter the nutrition values from the food label, then set how much you consumed.</p>
+
+          <div class="qty-calc-amounts">
+            <div class="form-group">
+              <label class="form-label">Base Amount (g or ml)</label>
+              <input id="qc-base" type="number" class="form-input" value="100" min="1" placeholder="e.g. 100">
+            </div>
+            <div class="qty-calc-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Consumed Amount</label>
+              <input id="qc-consumed" type="number" class="form-input" min="0" placeholder="e.g. 350">
+            </div>
+          </div>
+
+          <p class="qty-calc-section-label">Nutrition per base amount</p>
+          <div class="form-grid-2" style="margin-bottom:.75rem">
+            <div class="form-group"><label class="form-label">Calories</label><input id="qc-cal" type="number" class="form-input" value="0" min="0"></div>
+            <div class="form-group"><label class="form-label">Protein (g)</label><input id="qc-pro" type="number" class="form-input" value="0" min="0"></div>
+            <div class="form-group"><label class="form-label">Carbs (g)</label><input id="qc-carb" type="number" class="form-input" value="0" min="0"></div>
+            <div class="form-group"><label class="form-label">Fat (g)</label><input id="qc-fat" type="number" class="form-input" value="0" min="0"></div>
+          </div>
+
+          <button class="qty-calc-btn" onclick="runQtyCalc()" type="button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
+            Calculate &amp; Fill Values
+          </button>
+
+          <div class="qty-calc-result" id="qty-calc-result" style="display:none">
+            <div class="qty-calc-result-label">Calculated result</div>
+            <div class="qty-calc-result-chips" id="qty-calc-result-chips"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <button class="submit-btn" onclick="addFood()">Log Entry</button>
   </div>
 </div>

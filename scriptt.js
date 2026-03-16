@@ -3411,3 +3411,66 @@ window.showToast = function(msg, type) {
     _origShowToast(msg);
   }
 };
+
+function toggleQtyCalc() {
+  const panel   = document.getElementById('qty-calc-panel');
+  const chevron = document.getElementById('qty-calc-chevron');
+  const btn     = document.getElementById('qty-calc-toggle-btn');
+  const isOpen  = panel.classList.contains('open');
+
+  panel.classList.toggle('open', !isOpen);
+  chevron.classList.toggle('open', !isOpen);
+  btn.classList.toggle('active', !isOpen);
+}
+
+function runQtyCalc() {
+  const base     = parseFloat(document.getElementById('qc-base').value)     || 0;
+  const consumed = parseFloat(document.getElementById('qc-consumed').value) || 0;
+  const cal      = parseFloat(document.getElementById('qc-cal').value)      || 0;
+  const pro      = parseFloat(document.getElementById('qc-pro').value)      || 0;
+  const carb     = parseFloat(document.getElementById('qc-carb').value)     || 0;
+  const fat      = parseFloat(document.getElementById('qc-fat').value)      || 0;
+
+  if (base <= 0) { showToast('Base amount must be greater than 0.'); return; }
+  if (consumed <= 0) { showToast('Please enter the consumed amount.'); return; }
+
+  const m = consumed / base;
+
+  const rCal  = Math.round(cal  * m * 10) / 10;
+  const rPro  = Math.round(pro  * m * 10) / 10;
+  const rCarb = Math.round(carb * m * 10) / 10;
+  const rFat  = Math.round(fat  * m * 10) / 10;
+
+  document.getElementById('f-cal').value  = rCal;
+  document.getElementById('f-pro').value  = rPro;
+  document.getElementById('f-carb').value = rCarb;
+  document.getElementById('f-fat').value  = rFat;
+
+  const chips = document.getElementById('qty-calc-result-chips');
+  chips.innerHTML = `
+    <div class="qc-chip"><span class="qc-chip-label">Cals</span><span class="qc-chip-val calories-color">${rCal}</span></div>
+    <div class="qc-chip"><span class="qc-chip-label">Protein</span><span class="qc-chip-val protein-color">${rPro}g</span></div>
+    <div class="qc-chip"><span class="qc-chip-label">Carbs</span><span class="qc-chip-val carbs-color">${rCarb}g</span></div>
+    <div class="qc-chip"><span class="qc-chip-label">Fat</span><span class="qc-chip-val fat-color">${rFat}g</span></div>
+  `;
+  document.getElementById('qty-calc-result').style.display = 'block';
+}
+
+const _origCloseModal = closeModal;
+window.closeModal = function(id) {
+  _origCloseModal(id);
+  if (id === 'add-food-modal') {
+    const panel   = document.getElementById('qty-calc-panel');
+    const chevron = document.getElementById('qty-calc-chevron');
+    const btn     = document.getElementById('qty-calc-toggle-btn');
+    if (panel)   panel.classList.remove('open');
+    if (chevron) chevron.classList.remove('open');
+    if (btn)     btn.classList.remove('active');
+    const result = document.getElementById('qty-calc-result');
+    if (result) result.style.display = 'none';
+    ['qc-base','qc-consumed','qc-cal','qc-pro','qc-carb','qc-fat'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = id === 'qc-base' ? '100' : '0';
+    });
+  }
+};
