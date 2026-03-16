@@ -52,7 +52,6 @@ This project was created as a **learning project** to practice building a small 
 
 Possible improvements:
 
-* Add charts to track progress
 * Add user profiles
 * Add automatic calorie and macro calculations
 * Improve the UI design
