@@ -642,7 +642,9 @@ function loadProfile() {
   document.getElementById("p-weight").value = p.weight;
   document.getElementById("p-age").value = p.age;
   document.getElementById("p-gender").value = p.gender;
-  document.getElementById("p-activity").value = p.activityLevel;
+  const activityMap = { low: "sedentary", moderate: "moderate5", high: "high" };
+  const activity = activityMap[p.activityLevel] || p.activityLevel || "moderate5";
+  document.getElementById("p-activity").value = activity;
   document.getElementById("p-goal").value = p.goal;
 }
 
@@ -683,41 +685,42 @@ function saveProfile() {
 }
 
 function calcGoals(p) {
-  // Mifflin-St Jeor BMR
   let bmr =
     10 * p.weight +
     6.25 * p.height -
     5 * p.age +
     (p.gender === "male" ? 5 : -161);
 
-  // Activity multiplier
-  const mult =
-    p.activityLevel === "high"
-      ? 1.725
-      : p.activityLevel === "moderate"
-        ? 1.55
-        : 1.375; // sedentary bumped from 1.2 → 1.375 (lightly active is more realistic)
+  const multMap = {
+    sedentary: 1.2,
+    light:     1.375,
+    moderate3: 1.465,
+    moderate5: 1.55,
+    high:      1.725,
+    athlete:   1.9,
+    low:      1.2,
+    moderate: 1.55,
+  };
+  const mult = multMap[p.activityLevel] || 1.55;
 
   let tdee = bmr * mult;
 
-  // Goal-specific calorie adjustment & macro targets
   let calAdj = 0;
   let proteinMult, fatPct;
 
   if (p.goal === "build_muscle") {
-    calAdj     = 250;          // modest lean-bulk surplus
-    proteinMult = 1.8;         // 1.8 g/kg — solid for hypertrophy
-    fatPct      = 0.25;        // 25 % of calories from fat
+    calAdj     = 250;       
+    proteinMult = 1.8;         
+    fatPct      = 0.25;        
   } else if (p.goal === "lose_fat") {
-    calAdj     = -400;         // moderate deficit (not aggressive)
-    proteinMult = 1.8;         // high protein to spare muscle on a cut
-    fatPct      = 0.28;        // 28 % of calories from fat — keeps hormones healthy
+    calAdj     = -400;
+    proteinMult = 1.8;  
+    fatPct      = 0.28;    
   } else if (p.goal === "strength") {
-    calAdj     = 150;          // small surplus for strength gains
+    calAdj     = 150;     
     proteinMult = 1.8;
     fatPct      = 0.30;
   } else {
-    // maintain
     calAdj     = 0;
     proteinMult = 1.6;
     fatPct      = 0.28;
