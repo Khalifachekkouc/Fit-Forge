@@ -1,3 +1,4 @@
+// localStorage key constants used throughout the app
 const KEYS = {
   food: "ns_food",
   goals: "ns_goals",
@@ -6,11 +7,13 @@ const KEYS = {
   profile: "ns_profile",
 };
 
+// Counter used to generate unique numeric IDs
 let _uidCounter = 0;
 function uniqueId() {
   return Date.now() * 1000 + (++_uidCounter % 1000);
 }
 
+// Generic localStorage read helper — returns parsed JSON or null
 function load(key) {
   try {
     return JSON.parse(localStorage.getItem(key) || "null");
@@ -18,30 +21,36 @@ function load(key) {
     return null;
   }
 }
+// Generic localStorage write helper — serialises value to JSON
 function save(key, val) {
   localStorage.setItem(key, JSON.stringify(val));
 }
 
+// Returns array of food entries logged on the given date
 function getFoodLog(dateStr) {
   const d = load(KEYS.food) || {};
   return d[dateStr] || [];
 }
+// Persists the food log array for a specific date
 function saveFoodLog(dateStr, entries) {
   const d = load(KEYS.food) || {};
   d[dateStr] = entries;
   save(KEYS.food, d);
 }
 
+// Returns macro goals for a date, falling back to the default goals
 function getGoals(dateStr) {
   const d = load(KEYS.goals) || {};
   if (d[dateStr]) return d[dateStr];
   return getDefaultGoals();
 }
+// Saves macro goals that apply only to a specific date
 function saveGoalsForDate(dateStr, g) {
   const d = load(KEYS.goals) || {};
   d[dateStr] = g;
   save(KEYS.goals, d);
 }
+// Returns the user's default daily macro goals
 function getDefaultGoals() {
   return (
     load(KEYS.default_goals) || {
@@ -52,19 +61,23 @@ function getDefaultGoals() {
     }
   );
 }
+// Persists the default goals so they apply to all future dates
 function saveDefaultGoals(g) {
   save(KEYS.default_goals, g);
 }
 
+// Returns the workout object (muscle group + exercise list) for a date
 function getGymDay(dateStr) {
   const d = load(KEYS.gym) || {};
   return d[dateStr] || { muscleGroup: "", exercises: [] };
 }
+// Persists a workout object for the given date
 function saveGymDay(dateStr, wd) {
   const d = load(KEYS.gym) || {};
   d[dateStr] = wd;
   save(KEYS.gym, d);
 }
+// Collects every unique exercise name logged across all gym days
 function getAllExerciseNames() {
   const d = load(KEYS.gym) || {};
   const names = new Set();
@@ -73,6 +86,7 @@ function getAllExerciseNames() {
   );
   return [...names].sort();
 }
+// Returns a chronologically sorted array of weight/sets/reps entries for one exercise
 function getExerciseProgress(name) {
   const d = load(KEYS.gym) || {};
   return Object.entries(d)
@@ -84,6 +98,7 @@ function getExerciseProgress(name) {
     .sort((a, b) => a.date.localeCompare(b.date));
 }
 
+// Returns the stored user profile or sensible defaults
 function getProfile() {
   return (
     load(KEYS.profile) || {
@@ -96,6 +111,7 @@ function getProfile() {
     }
   );
 }
+// Saves the user profile object to localStorage
 function saveProfile_(p) {
   save(KEYS.profile, p);
 }
@@ -105,16 +121,19 @@ let dashDate = new Date();
 let gymDate = new Date();
 let progressChart = null;
 
+// Switches the page between light and dark themes
 function applyTheme(dark) {
   document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
 }
 
+// Toggles dark mode and persists the preference
 function toggleDarkMode() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   applyTheme(!isDark);
   localStorage.setItem('fitforge_theme', !isDark ? 'dark' : 'light');
 }
 
+// Immediately-invoked function: restores the saved theme on page load
 (function initTheme() {
   const saved = localStorage.getItem('fitforge_theme');
   if (saved) {
@@ -125,6 +144,7 @@ function toggleDarkMode() {
   }
 })();
 
+// Fades out the current page, then fades in the requested one
 function navigate(page) {
   currentPage = page;
 
@@ -160,12 +180,15 @@ function navigate(page) {
   }, 150);
 }
 
+// Formats a Date object as YYYY-MM-DD (used as localStorage key)
 function fmt(d) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
+// Returns true if the given Date is today
 function isToday(d) {
   return fmt(d) === fmt(new Date());
 }
+// Returns a human-readable label — 'Today' or a formatted date string
 function displayDate(d) {
   if (isToday(d)) return "Today";
   return d.toLocaleDateString("en-US", {
@@ -174,20 +197,24 @@ function displayDate(d) {
     year: "numeric",
   });
 }
+// Returns the full weekday name for a Date object
 function weekday(d) {
   return d.toLocaleDateString("en-US", { weekday: "long" });
 }
+// Returns a new Date shifted by n days relative to d
 function addDays(d, n) {
   const r = new Date(d);
   r.setDate(r.getDate() + n);
   return r;
 }
 
+// Advances or retreats the dashboard date by n days, then re-renders
 function changeDay(n) {
   dashDate = addDays(dashDate, n);
   renderDashboard();
 }
 
+// Rebuilds the entire dashboard view for the currently selected date
 function renderDashboard() {
   const dateStr = fmt(dashDate);
   document.getElementById("dash-date-label").textContent =
@@ -217,6 +244,7 @@ function renderDashboard() {
   renderFoodLog(entries);
 }
 
+// Generates the four macro cards (calories, protein, carbs, fat)
 function renderMacros(totals, goals) {
   const macros = [
     {
@@ -289,6 +317,7 @@ function renderMacros(totals, goals) {
     .join("");
 }
 
+// Renders the list of food entries or an empty-state message
 function renderFoodLog(entries) {
   const el = document.getElementById("food-entries");
   if (!entries.length) {
@@ -316,6 +345,7 @@ function renderFoodLog(entries) {
     .join("");
 }
 
+// Reads the Add-Food modal inputs, validates, and saves a new entry
 function addFood() {
   const name = document.getElementById("f-name").value.trim();
   if (!name) {
@@ -344,6 +374,7 @@ function addFood() {
   showToast("Food logged!");
 }
 
+// Removes a single food entry by ID and refreshes the dashboard
 function deleteFood(id) {
   const dateStr = fmt(dashDate);
   const numId = Number(id);
@@ -352,6 +383,7 @@ function deleteFood(id) {
   renderDashboard();
 }
 
+// Reads the Edit-Goals modal inputs and persists goals for the current date
 function saveGoals() {
   const dateStr = fmt(dashDate);
   const g = {
@@ -366,15 +398,18 @@ function saveGoals() {
   showToast("Goals updated!");
 }
 
+// Available muscle-group labels shown as selectable chips on the Gym page
 const MUSCLE_GROUPS = [
   "Chest", "Back", "Legs", "Shoulders", "Arms", "Core / Abs", "Glutes", "Full Body", "Cardio",
 ];
 
+// Advances or retreats the gym date by n days, then re-renders
 function changeGymDay(n) {
   gymDate = addDays(gymDate, n);
   renderGym();
 }
 
+// Rebuilds the Gym page (date header, muscle chips, exercise list)
 function renderGym() {
   const dateStr = fmt(gymDate);
   document.getElementById("gym-date-label").textContent = displayDate(gymDate);
@@ -396,6 +431,7 @@ function renderGym() {
   renderExercises(workout.exercises || []);
 }
 
+// Saves the chosen muscle group for the current gym date
 function setMuscleGroup(mg) {
   const dateStr = fmt(gymDate);
   const wd = getGymDay(dateStr);
@@ -404,6 +440,7 @@ function setMuscleGroup(mg) {
   renderGym();
 }
 
+// Generates the exercise table rows with inline edit panels
 function renderExercises(exercises) {
   const el = document.getElementById("exercises-container");
   if (!exercises.length) {
@@ -459,6 +496,7 @@ function renderExercises(exercises) {
     </div>`;
 }
 
+// Reads the Add-Exercise modal inputs, validates, and saves a new exercise
 function addExercise() {
   const name = document.getElementById("e-name").value.trim();
   if (!name) {
@@ -491,6 +529,7 @@ function addExercise() {
   showToast("Exercise added!");
 }
 
+// Removes a single exercise by safe ID and refreshes the gym view
 function deleteExercise(id) {
   const dateStr = fmt(gymDate);
   const wd = getGymDay(dateStr);
@@ -501,17 +540,20 @@ function deleteExercise(id) {
   renderGym();
 }
 
+// Opens the inline edit panel for one exercise row
 function startEdit(id) {
   document.querySelectorAll(".ex-edit-panel.open").forEach((p) => p.classList.remove("open"));
   const panel = document.getElementById(`edit-row-${id}`);
   if (panel) panel.classList.add("open");
 }
 
+// Closes the inline edit panel without saving
 function cancelEdit(id) {
   const panel = document.getElementById(`edit-row-${id}`);
   if (panel) panel.classList.remove("open");
 }
 
+// Reads the inline edit inputs and updates the matching exercise
 function saveEdit(id) {
   const dateStr = fmt(gymDate);
   const wd = getGymDay(dateStr);
@@ -529,6 +571,7 @@ function saveEdit(id) {
   showToast("Exercise updated!");
 }
 
+// Renders the legacy strength-progress section (deprecated in favour of progress page)
 function renderProgress() {
   const names = getAllExerciseNames();
   const el = document.getElementById("progress-section-inner");
@@ -551,6 +594,7 @@ function renderProgress() {
     </div>`;
 }
 
+// Draws a Chart.js line chart for the selected exercise
 function updateProgressChart() {
   const name = document.getElementById("progress-select").value;
   const area = document.getElementById("progress-chart-area");
@@ -629,6 +673,7 @@ function updateProgressChart() {
     <div class="stat-pill"><div class="s-label">Latest</div><div class="s-val">${data[data.length - 1].weight} kg</div></div>`;
 }
 
+// Populates the datalist for the Add-Exercise input with known exercise names
 function updateExerciseSuggestions() {
   const names = getAllExerciseNames();
   document.getElementById("exercise-suggestions").innerHTML = names
@@ -636,6 +681,7 @@ function updateExerciseSuggestions() {
     .join("");
 }
 
+// Populates the Profile form fields from stored profile data
 function loadProfile() {
   const p = getProfile();
   document.getElementById("p-height").value = p.height;
@@ -648,6 +694,7 @@ function loadProfile() {
   document.getElementById("p-goal").value = p.goal;
 }
 
+// Reads the Profile form, validates, saves, calculates macros, and navigates
 function saveProfile() {
   const p = {
     height: +document.getElementById("p-height").value,
@@ -684,6 +731,7 @@ function saveProfile() {
   }
 }
 
+// Calculates TDEE and recommended macros using Mifflin-St Jeor + adjustments
 function calcGoals(p) {
   let bmr =
     10 * p.weight +
@@ -734,6 +782,7 @@ function calcGoals(p) {
   return { calories, protein, carbs, fat };
 }
 
+// Renders the recommended-goals panel with calories and macro pills
 function showCalcResult(r) {
   document.getElementById("calc-result").innerHTML = `
     <div class="calories-display">
@@ -752,18 +801,22 @@ function showCalcResult(r) {
     </button>`;
 }
 
+// Saves the calculated macro targets as the user's default daily goals
 function applyGoals(cal, pro, carb, fat) {
   const g = { calories: cal, protein: pro, carbs: carb, fat: fat };
   saveDefaultGoals(g);
   showToast("Applied to today & future days!");
 }
 
+// Shows a modal overlay by adding the 'open' class
 function openModal(id) {
   document.getElementById(id).classList.add("open");
 }
+// Hides a modal overlay by removing the 'open' class
 function closeModal(id) {
   document.getElementById(id).classList.remove("open");
 }
+// Closes a modal when the user clicks the semi-transparent overlay backdrop
 function overlayClose(ev, id) {
   if (ev.target.id === id) closeModal(id);
 }
@@ -774,6 +827,7 @@ document.addEventListener("keydown", (e) => {
       .forEach((m) => m.classList.remove("open"));
 });
 
+// Displays a brief notification toast, then fades it out after 2.5 s
 function showToast(msg) {
   const c = document.getElementById("toast-container");
   const t = document.createElement("div");
@@ -787,6 +841,7 @@ function showToast(msg) {
   }, 2500);
 }
 
+// Escapes special HTML characters to prevent XSS when inserting user content
 function escHtml(s) {
   return String(s)
     .replace(/&/g, "&amp;")
@@ -795,9 +850,11 @@ function escHtml(s) {
     .replace(/"/g, "&quot;");
 }
 
+// Kick-start the app on first page load
 renderDashboard();
 updateExerciseSuggestions();
 
+// Attaches click-ripple animations to all present and future buttons
 (function initRipple() {
   function addRipple(e) {
     const btn = e.currentTarget;
@@ -833,6 +890,7 @@ updateExerciseSuggestions();
   observer.observe(document.body, { childList: true, subtree: true });
 })();
 
+// Detects a first-time visitor (no saved profile) and redirects to the Profile page
 (function checkFirstTimeUser() {
   const hasProfile = localStorage.getItem(KEYS.profile);
   if (!hasProfile) {
@@ -856,9 +914,11 @@ updateExerciseSuggestions();
 })();
 
 
+// Current filter selections for the Workout Programs page
 const WP_STATE = { gender: 'male', level: 'beginner', goal: 'build_muscle', muscle: 'chest' };
 const WP_MUSCLE_TO_GYM = { chest:'Chest', back:'Back', legs:'Legs', shoulders:'Shoulders', arms:'Arms', core:'Core / Abs', glutes:'Glutes' };
 
+// Human-readable labels for each sub-target muscle zone used in exercise cards
 const SUB_TARGET_LABELS = {
   // Chest
   'mid-chest':    'Mid Chest',
@@ -904,6 +964,7 @@ const SUB_TARGET_LABELS = {
   'abductors':    'Abductors',
 };
 
+// Brand colours assigned to each muscle sub-target for badge styling
 const SUB_TARGET_COLORS = {
   // Chest
   'mid-chest':    '#0ea5e9','upper-chest':'#7c3aed','lower-chest':'#ea580c',
@@ -928,6 +989,7 @@ const SUB_TARGET_COLORS = {
   'hamstring-glute':'#16a34a','abductors':'#db2777',
 };
 
+// Per-goal training parameters: rep ranges, set counts, rest periods and exercise filters
 const GOAL_CONFIG = {
   build_muscle: {
     label: '\uD83D\uDCAA Build Muscle',
@@ -971,6 +1033,7 @@ const GOAL_CONFIG = {
   },
 };
 
+// Master exercise database keyed by muscle → gender → level
 const EXERCISE_DB = {
   chest: {
     male: {
@@ -2150,6 +2213,7 @@ const EXERCISE_DB = {
   },
 };
 
+// Selects a diverse set of exercises ensuring no two share the same sub-target
 function wpPickExercises(muscle, gender, level, goal) {
   const pool = ((EXERCISE_DB[muscle] || {})[gender] || {})[level] || [];
   const gc = GOAL_CONFIG[goal];
@@ -2182,6 +2246,7 @@ function wpPickExercises(muscle, gender, level, goal) {
   return selected;
 }
 
+// Accent colours and backgrounds used to theme each goal's plan card
 const GOAL_STYLES = {
   build_muscle: { color:'#7c3aed', bg:'rgba(139,92,246,.08)', border:'rgba(139,92,246,.25)' },
   lose_fat:     { color:'#ea580c', bg:'rgba(249,115,22,.08)',  border:'rgba(249,115,22,.25)'  },
@@ -2191,19 +2256,23 @@ const GOAL_STYLES = {
 const WP_MUSCLE_LABELS = { chest:'Chest', back:'Back', legs:'Legs', shoulders:'Shoulders', arms:'Arms', core:'Core / Abs', glutes:'Glutes' };
 const LEVEL_LABELS = { beginner:'Beginner', intermediate:'Intermediate', advanced:'Advanced' };
 
+// Updates the active state of a toggle button group and the WP_STATE object
 function wpSetToggle(type, val) {
   WP_STATE[type] = val;
   const groupId = { gender:'wp-gender-group', level:'wp-level-group', goal:'wp-goal-group', muscle:'wp-muscle-group' }[type];
   document.querySelectorAll('#' + groupId + ' .wp-toggle').forEach(b => b.classList.toggle('active', b.dataset.val === val));
 }
 
+// Picks a random set count within the range defined for the goal/level combo
 function wpGetSets(goal, level) {
   const [min, max] = GOAL_CONFIG[goal].setsRange[level];
   return min + Math.floor(Math.random() * (max - min + 1));
 }
 
+// Holds the currently generated workout plan so save/undo actions can reference it
 let wpCurrentPlan = null;
 
+// Picks exercises and builds wpCurrentPlan, then renders it
 function generateWorkoutPlan() {
   const { gender, level, goal, muscle } = WP_STATE;
   const gc = GOAL_CONFIG[goal];
@@ -2220,6 +2289,7 @@ function generateWorkoutPlan() {
   wpRenderPlan(gender, level, goal, muscle);
 }
 
+// Renders the workout plan card with badges, stats, exercise list and action buttons
 function wpRenderPlan(gender, level, goal, muscle) {
   const gc = GOAL_CONFIG[goal];
   const gs = GOAL_STYLES[goal];
@@ -2300,6 +2370,7 @@ function wpRenderPlan(gender, level, goal, muscle) {
     </div>`;
 }
 
+// Toggles a single plan exercise in/out of the gym log for today
 function wpSaveOne(id) {
   if (!wpCurrentPlan) return;
   const ex = wpCurrentPlan.find(e => e.id === id);
@@ -2334,6 +2405,7 @@ function wpSaveOne(id) {
   }
 }
 
+// Saves all unsaved plan exercises to the gym log at once
 function wpSaveAllToLog() {
   if (!wpCurrentPlan || !wpCurrentPlan.length) return;
   let count = 0;
@@ -2342,6 +2414,7 @@ function wpSaveAllToLog() {
   else showToast(count + ' exercise' + (count > 1 ? 's' : '') + ' saved to gym log!');
 }
 
+// Meal database keyed by goal → meal type, each entry containing name/ingredients/macros
 const MEAL_DB = {
 
   weight_gain: {
@@ -2747,6 +2820,7 @@ const MEAL_DB = {
 };
 
 
+// Per-goal meal plan config: labels, calorie ranges, macro targets and tips
 const MP_GOAL_CONFIG = {
   weight_gain: {
     label: 'Weight Gain',
@@ -2822,6 +2896,7 @@ const MP_GOAL_CONFIG = {
   },
 };
 
+// Display metadata (label, emoji, CSS classes) for each meal type slot
 const MP_MEAL_TYPE_META = {
   breakfast:    { label:'Breakfast',     emoji:'🌅', numClass:'mp-num-breakfast', badgeClass:'mp-badge-breakfast' },
   lunch:        { label:'Lunch',         emoji:'☀️',  numClass:'mp-num-lunch',     badgeClass:'mp-badge-lunch'     },
@@ -2829,9 +2904,12 @@ const MP_MEAL_TYPE_META = {
   dinner:       { label:'Dinner',        emoji:'🌙', numClass:'mp-num-dinner',    badgeClass:'mp-badge-dinner'    },
 };
 
-let mpCurrentGoal = 'lose_weight';
+// Active goal selection on the Meals page (default: lose weight)
+let mpCurrentGoal = 'weight_gain';
+// Array of meal objects that make up the current generated plan
 let mpCurrentPlan = [];
 
+// Updates the active goal chip and regenerates the meal plan
 function mpSetGoal(goal) {
   mpCurrentGoal = goal;
   document.querySelectorAll('.mp-goal-chip').forEach(b =>
@@ -2840,11 +2918,13 @@ function mpSetGoal(goal) {
   mpGeneratePlan();
 }
 
+// Randomly selects one meal from the database for the given goal and meal type
 function mpPickMeal(goal, type) {
   const pool = (MEAL_DB[goal] || {})[type] || [];
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
+// Generates a full day plan (one meal per slot) and triggers a render
 function mpGeneratePlan() {
   const gc = MP_GOAL_CONFIG[mpCurrentGoal];
 
@@ -2857,6 +2937,7 @@ function mpGeneratePlan() {
   mpRenderPlan();
 }
 
+// Renders the daily nutrition targets banner at the top of the meals plan
 function mpRenderTargetBanner() {
   const gc = MP_GOAL_CONFIG[mpCurrentGoal];
   const banner = document.getElementById('mp-target-banner');
@@ -2921,6 +3002,7 @@ function mpRenderTargetBanner() {
   `;
 }
 
+// Renders the meal cards and totals summary for the current plan
 function mpRenderPlan() {
   const gc = MP_GOAL_CONFIG[mpCurrentGoal];
   const totals = mpCurrentPlan.reduce((a,m) => ({
@@ -2977,6 +3059,7 @@ function mpRenderPlan() {
   document.getElementById('mp-log-all-bar').style.display = 'flex';
 }
 
+// Returns an inline-style string for the goal banner's colour theme
 function mpGoalBannerClass(goal) {
   const map = {
     weight_gain: 'style="border-color:rgba(245,122,61,.25);background:rgba(245,122,61,.06);color:#c2410c"',
@@ -2987,6 +3070,7 @@ function mpGoalBannerClass(goal) {
   return map[goal] || '';
 }
 
+// Toggles a single meal's logged state and adds/removes it from the food log
 function mpLogMeal(idStr) {
   const meal = mpCurrentPlan.find(m => String(m.id) === idStr);
   if (!meal) return;
@@ -3029,6 +3113,7 @@ function mpLogMeal(idStr) {
   }
 }
 
+// Logs every unlogged meal in the current plan to the food log at once
 function mpLogAllMeals() {
   let count = 0;
   mpCurrentPlan.forEach(meal => {
@@ -3047,16 +3132,21 @@ window.navigate = function(page) {
   if (page === 'meals' && mpCurrentPlan.length === 0) mpGeneratePlan();
 };
 
+// localStorage key for personal records
 const KEYS_PR = 'ns_records';
+// localStorage key for the user's weight history log
 const KEYS_WEIGHT_HISTORY = 'ns_weight_history';
 
+// Returns the saved personal records object (exercise → {weight, date})
 function getPRs() {
   return load(KEYS_PR) || {};
 }
+// Persists the personal records object
 function savePRs(prs) {
   save(KEYS_PR, prs);
 }
 
+// Compares a new lift to the stored PR and updates it if it's heavier
 function checkAndUpdatePR(exerciseName, weight, dateStr) {
   if (!exerciseName || weight <= 0) return false;
   const prs = getPRs();
@@ -3069,6 +3159,7 @@ function checkAndUpdatePR(exerciseName, weight, dateStr) {
   return false;
 }
 
+// Scans the entire gym history and rebuilds all personal records from scratch
 function recalculateAllPRs() {
   const gymData = load(KEYS.gym) || {};
   const prs = {};
@@ -3083,6 +3174,7 @@ function recalculateAllPRs() {
   savePRs(prs);
 }
 
+// Recalculates PRs and renders the trophy-card grid on the Records page
 function renderRecordsPage() {
   recalculateAllPRs();
   const prs = getPRs();
@@ -3118,12 +3210,15 @@ function renderRecordsPage() {
   }).join('');
 }
 
+// Returns the array of {date, weight} entries
 function getWeightHistory() {
   return load(KEYS_WEIGHT_HISTORY) || [];
 }
+// Persists the weight history array
 function saveWeightHistory(arr) {
   save(KEYS_WEIGHT_HISTORY, arr);
 }
+// Adds or updates a weight entry for today (upserts by date)
 function logWeightEntry(weight) {
   const arr = getWeightHistory();
   const today = fmt(new Date());
@@ -3134,8 +3229,10 @@ function logWeightEntry(weight) {
   saveWeightHistory(arr);
 }
 
-let progCharts = { weight: null, calories: null, strength: null };
+// Holds active Chart.js instances so they can be destroyed before re-drawing
+let progCharts = { weight: null, calories: null, strength: null, protein: null, carbs: null, fat: null };
 
+// Activates the selected progress tab and renders its corresponding chart
 function switchProgTab(tab) {
   document.querySelectorAll('.prog-tab').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.prog-panel').forEach(p => p.classList.remove('active'));
@@ -3147,8 +3244,12 @@ function switchProgTab(tab) {
   if (tab === 'weight') renderWeightChart();
   if (tab === 'calories') renderCaloriesChart();
   if (tab === 'strength') renderStrengthChartInit();
+  if (tab === 'protein') renderMacroChart('protein');
+  if (tab === 'carbs') renderMacroChart('carbs');
+  if (tab === 'fat') renderMacroChart('fat');
 }
 
+// Returns grid and tick colours appropriate for the current theme
 function getChartColors() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   return {
@@ -3157,6 +3258,7 @@ function getChartColors() {
   };
 }
 
+// Factory that creates a Chart.js line chart with consistent theme and options
 function makeLineChart(canvasId, labels, datasets, yLabel) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return null;
@@ -3180,6 +3282,7 @@ function makeLineChart(canvasId, labels, datasets, yLabel) {
   });
 }
 
+// Draws the body-weight trend line chart from the stored weight history
 function renderWeightChart() {
   const history = getWeightHistory();
   const wrap = document.getElementById('prog-chart-wrap-weight');
@@ -3223,6 +3326,7 @@ function renderWeightChart() {
   `;
 }
 
+// Draws daily calorie intake vs goal as a dual-dataset line chart
 function renderCaloriesChart() {
   const foodData = load(KEYS.food) || {};
   const goalsData = load(KEYS.goals) || {};
@@ -3284,6 +3388,85 @@ function renderCaloriesChart() {
   `;
 }
 
+// Config objects for the three macro charts (protein, carbs, fat)
+const MACRO_CONFIG = {
+  protein: { label: 'Protein',  unit: 'g', color: '#6366f1', goalKey: 'protein',  emptyId: 'prog-protein-empty', statsId: 'prog-protein-stats', chartId: 'chart-protein' },
+  carbs:   { label: 'Carbs',    unit: 'g', color: '#f59e0b', goalKey: 'carbs',    emptyId: 'prog-carbs-empty',   statsId: 'prog-carbs-stats',   chartId: 'chart-carbs'   },
+  fat:     { label: 'Fat',      unit: 'g', color: '#ec4899', goalKey: 'fat',      emptyId: 'prog-fat-empty',     statsId: 'prog-fat-stats',     chartId: 'chart-fat'     },
+};
+
+// Draws a macro intake-vs-goal chart for the given macro key
+function renderMacroChart(macro) {
+  const cfg = MACRO_CONFIG[macro];
+  if (!cfg) return;
+  const foodData = load(KEYS.food) || {};
+  const goalsData = load(KEYS.goals) || {};
+  const defaultGoal = getDefaultGoals();
+
+  if (progCharts[macro]) { progCharts[macro].destroy(); progCharts[macro] = null; }
+
+  const dates = Object.keys(foodData).sort();
+  const emptyEl = document.getElementById(cfg.emptyId);
+  const statsEl = document.getElementById(cfg.statsId);
+
+  if (!dates.length) {
+    if (emptyEl) emptyEl.style.display = 'block';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  const labels = dates.map(d => {
+    const dt = new Date(d);
+    return `${String(dt.getDate()).padStart(2,'0')}/${String(dt.getMonth()+1).padStart(2,'0')}`;
+  });
+  const intake = dates.map(d =>
+    Math.round((foodData[d] || []).reduce((s, e) => s + (e[macro] || 0), 0) * 10) / 10
+  );
+  const goals = dates.map(d => (goalsData[d] || defaultGoal)[cfg.goalKey] || 0);
+
+  const hexToRgba = (hex, a) => {
+    const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+    return `rgba(${r},${g},${b},${a})`;
+  };
+
+  progCharts[macro] = makeLineChart(cfg.chartId, labels, [
+    {
+      label: `${cfg.label} (${cfg.unit})`,
+      data: intake,
+      borderColor: cfg.color,
+      backgroundColor: hexToRgba(cfg.color, 0.1),
+      borderWidth: 2.5,
+      tension: 0.35,
+      pointBackgroundColor: cfg.color,
+      pointRadius: 5,
+      fill: true,
+    },
+    {
+      label: `Goal (${cfg.unit})`,
+      data: goals,
+      borderColor: '#1fad96',
+      backgroundColor: 'transparent',
+      borderWidth: 2,
+      borderDash: [6, 4],
+      tension: 0,
+      pointRadius: 0,
+    },
+  ], cfg.unit);
+
+  if (statsEl && intake.length) {
+    const avg = Math.round(intake.reduce((a, b) => a + b, 0) / intake.length * 10) / 10;
+    const maxVal = Math.max(...intake);
+    const minVal = Math.min(...intake);
+    statsEl.innerHTML = `
+      <div class="prog-stat-chip"><span class="psc-label">Avg/day</span><span class="psc-val">${avg}${cfg.unit}</span></div>
+      <div class="prog-stat-chip"><span class="psc-label">Min</span><span class="psc-val">${minVal}${cfg.unit}</span></div>
+      <div class="prog-stat-chip"><span class="psc-label">Max</span><span class="psc-val">${maxVal}${cfg.unit}</span></div>
+      <div class="prog-stat-chip"><span class="psc-label">Days</span><span class="psc-val">${dates.length}</span></div>
+    `;
+  }
+}
+
+// Populates the exercise dropdown on the Strength tab and triggers the chart
 function renderStrengthChartInit() {
   const select = document.getElementById('prog-ex-select');
   if (!select) return;
@@ -3294,6 +3477,7 @@ function renderStrengthChartInit() {
   renderStrengthChart();
 }
 
+// Draws the weight-over-time line chart for the selected exercise
 function renderStrengthChart() {
   const select = document.getElementById('prog-ex-select');
   const name = select ? select.value : '';
@@ -3385,7 +3569,7 @@ window.navigate = function(page) {
   _origNavigate2(page);
   if (page === 'progress') {
     setTimeout(() => {
-      switchProgTab('weight');
+      switchProgTab('calories');
     }, 180);
   }
   if (page === 'records') {
@@ -3412,6 +3596,7 @@ window.showToast = function(msg, type) {
   }
 };
 
+// Expands or collapses the label-based quantity calculator panel
 function toggleQtyCalc() {
   const panel   = document.getElementById('qty-calc-panel');
   const chevron = document.getElementById('qty-calc-chevron');
@@ -3423,6 +3608,7 @@ function toggleQtyCalc() {
   btn.classList.toggle('active', !isOpen);
 }
 
+// Scales per-100g nutrition values to the consumed amount and fills the form
 function runQtyCalc() {
   const base     = parseFloat(document.getElementById('qc-base').value)     || 0;
   const consumed = parseFloat(document.getElementById('qc-consumed').value) || 0;
@@ -3476,21 +3662,26 @@ window.closeModal = function(id) {
 };
 
 
+// Prefix for per-date water intake keys in localStorage
 const WATER_KEY_PREFIX = 'water_';
 
+// Builds the full localStorage key for a given date's water intake
 function getWaterKey(dateStr) {
   return WATER_KEY_PREFIX + dateStr;
 }
 
+// Returns the total water intake in ml for the given date
 function getWaterIntake(dateStr) {
   const raw = localStorage.getItem(getWaterKey(dateStr));
   return raw !== null ? parseInt(raw, 10) : 0;
 }
 
+// Persists the water intake value (in ml) for the given date
 function saveWaterIntake(dateStr, ml) {
   localStorage.setItem(getWaterKey(dateStr), String(ml));
 }
 
+// Calculates a personalised daily water target based on weight and goal
 function calcWaterGoal() {
   const profile = getProfile();
   const weight  = parseFloat(profile.weight) || 70;
@@ -3505,6 +3696,7 @@ function calcWaterGoal() {
   return Math.round(goalMl);
 }
 
+// Updates the water-intake card UI (bar, percentage badge, remaining label)
 function renderWaterCard() {
   const dateStr  = fmt(dashDate);
   const intake   = getWaterIntake(dateStr);
@@ -3540,6 +3732,7 @@ function renderWaterCard() {
   }
 }
 
+// Decreases the day's water intake by ml (undo last cup)
 function cancelWater(ml) {
   if (!isToday(dashDate)) {
     showToast('Water tracking only available for today.');
@@ -3565,6 +3758,7 @@ function cancelWater(ml) {
   showToast('💧 Removed 250 ml.');
 }
 
+// Increases the day's water intake by ml and re-renders the card
 function addWater(ml) {
   if (!isToday(dashDate)) {
     showToast('Water tracking only available for today.');

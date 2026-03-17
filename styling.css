@@ -1,3 +1,4 @@
+/* ── CSS Custom Properties (light theme defaults) ── */
 :root {
     --bg-color:        #ffffff;
     --card-color:      #ffffff;
@@ -25,6 +26,7 @@
     --section-gap: 1.5rem;
 }
 
+/* ── Dark theme overrides ── */
 [data-theme="dark"] {
     --bg-color:        #0d1117;
     --card-color:      #1c2230;
@@ -44,10 +46,12 @@
     --scroll-thumb:    rgba(255, 255, 255, .15);
 }
 
+/* ── Global dark-mode transition so colour changes animate smoothly ── */
 *, *::before, *::after {
     transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
+/* ── Box-sizing reset ── */
 *,
 *::before,
 *::after {
@@ -57,6 +61,7 @@
     border-color: var(--border-subtle);
 }
 
+/* ── Base body styles ── */
 body {
     font-family: 'DM Sans', sans-serif;
     background: var(--bg-color);
@@ -67,6 +72,7 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+/* ── Heading font override ── */
 h1,
 h2,
 h3,
@@ -77,6 +83,7 @@ h6 {
     letter-spacing: -0.02em;
 }
 
+/* ── Custom scrollbar styling ── */
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -91,6 +98,7 @@ h6 {
     border-radius: 999px;
 }
 
+/* ── Sticky top header bar ── */
 header {
     position: sticky;
     top: 0;
@@ -102,6 +110,7 @@ header {
     -webkit-backdrop-filter: blur(20px);
 }
 
+/* ── Inner header layout container ── */
 .header-inner {
     max-width: 1000px;
     margin: 0 auto;
@@ -113,6 +122,7 @@ header {
     gap: .75rem;
 }
 
+/* ── Logo flex row ── */
 .logo {
     display: flex;
     align-items: center;
@@ -134,12 +144,14 @@ header {
     color: #1fad96;
 }
 
+/* ── Desktop navigation bar ── */
 nav {
     display: flex;
     align-items: center;
     gap: .25rem;
 }
 
+/* ── Navigation button base styles ── */
 .nav-btn {
     display: flex;
     align-items: center;
@@ -179,6 +191,7 @@ nav {
     height: 16px;
 }
 
+/* ── Main content area ── */
 main {
     flex: 1;
     max-width: 1000px;
@@ -187,6 +200,7 @@ main {
     padding: 1.5rem 1.25rem 6rem;
 }
 
+/* ── Fixed bottom nav bar (mobile only) ── */
 .mobile-nav {
     display: none;
     position: fixed;
@@ -235,6 +249,7 @@ main {
     height: 20px;
 }
 
+/* ── Page sections — hidden by default, shown when .active ── */
 .page {
     display: none;
 }
@@ -243,6 +258,7 @@ main {
     display: block;
 }
 
+/* ── Generic card surface ── */
 .card {
     background: var(--card-color);
     border: 1px solid var(--border-color);
@@ -252,6 +268,7 @@ main {
                 background-color 0.3s ease, border-color 0.3s ease;
 }
 
+/* ── Date navigation row (prev / label / next) ── */
 .date-nav {
     display: flex;
     align-items: center;
@@ -304,6 +321,7 @@ main {
     height: 20px;
 }
 
+/* ── 2 or 4-column macro summary grid ── */
 .macros-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -311,6 +329,7 @@ main {
     margin-bottom: var(--section-gap);
 }
 
+/* ── Individual macro summary card ── */
 .macro-card {
     padding: 1.25rem;
     animation: slideUp .4s ease both;
@@ -422,6 +441,7 @@ main {
     background: rgba(250, 200, 47, .15);
 }
 
+/* ── Section header row (title + action button) ── */
 .section-header {
     display: flex;
     align-items: center;
@@ -435,6 +455,7 @@ main {
     font-weight: 700;
 }
 
+/* ── Base button styles shared by all variants ── */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -454,6 +475,7 @@ main {
     transform: none;
 }
 
+/* ── Primary action button ── */
 .btn-primary {
     background: #1fad96;
     color: #ffffff;
@@ -472,6 +494,7 @@ main {
     transform: none;
 }
 
+/* ── Outline / secondary button ── */
 .btn-outline {
     background: transparent;
     color: var(--text-color);
@@ -541,6 +564,7 @@ main {
     height: 16px;
 }
 
+/* ── Food log card wrapper ── */
 .food-log-card {
     padding: 1.5rem;
 }
@@ -552,6 +576,7 @@ main {
     margin-top: var(--space-md);
 }
 
+/* ── Single food log entry row ── */
 .food-entry {
     display: flex;
     align-items: flex-start;
@@ -630,6 +655,7 @@ main {
     margin-top: .35rem;
 }
 
+/* ── Full-screen modal backdrop ── */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -646,6 +672,7 @@ main {
     display: flex;
 }
 
+/* ── Modal dialog box ── */
 .modal {
     background: var(--card-color);
     border-radius: 24px;
@@ -697,6 +724,7 @@ main {
     height: 16px;
 }
 
+/* ── Form field wrapper (label + input) ── */
 .form-group {
     display: flex;
     flex-direction: column;
@@ -721,6 +749,7 @@ main {
     gap: .75rem;
 }
 
+/* ── Text / number input ── */
 .form-input {
     height: 48px;
     padding: 0 .9rem;
@@ -744,6 +773,7 @@ main {
     text-align: center;
 }
 
+/* ── Custom-styled select element ── */
 .form-select {
     height: 48px;
     padding: 0 .9rem;
@@ -791,6 +821,7 @@ main {
     box-shadow: 0 0 0 2px #1fad96;
 }
 
+/* ── Full-width submit button inside modals and forms ── */
 .submit-btn {
     width: 100%;
     height: 52px;
@@ -857,6 +888,7 @@ main {
     z-index: 1;
 }
 
+/* ── Profile page two-column grid ── */
 .profile-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -1277,6 +1309,7 @@ main {
     margin-top: .15rem;
 }
 
+/* ── Toast notification container ── */
 .toast-container {
     position: fixed;
     bottom: 5.5rem;
@@ -1303,6 +1336,7 @@ main {
     animation: toastOut .3s ease forwards;
 }
 
+/* ── Animations ── */
 @keyframes slideUp {
     from {
         opacity: 0;
@@ -1358,6 +1392,7 @@ main {
     }
 }
 
+/* ── Desktop breakpoint overrides ── */
 @media (min-width: 640px) {
     .macros-grid {
         grid-template-columns: repeat(4, 1fr);
@@ -1380,6 +1415,7 @@ main {
     }
 }
 
+/* ── Mobile breakpoint overrides ── */
 @media (max-width: 639px) {
     nav {
         display: none;
@@ -1474,6 +1510,7 @@ main {
     --primary: #1fad96;
 }
 
+/* ── Workout Programs page styles ── */
 .wp-profile-grid {
     display: flex;
     flex-direction: column;
@@ -1793,6 +1830,7 @@ main {
     flex-wrap: wrap;
 }
 
+/* ── Smart Meal Program page styles ── */
 .mp-header-card {
   padding: 1.5rem;
   margin-bottom: 1.25rem;
@@ -2308,6 +2346,7 @@ main {
     opacity: .8;
 }
 
+/* ── Dark / light mode toggle button ── */
 .dark-toggle {
     width: 40px;
     height: 40px;
@@ -2362,6 +2401,7 @@ main {
     animation: pageFadeIn 0.25s ease forwards;
 }
 
+/* ── First-time-user onboarding banner ── */
 .onboard-banner {
     background: linear-gradient(135deg, rgba(31,173,150,.1), rgba(6,182,212,.06));
     border: 1.5px solid rgba(31,173,150,.28);
@@ -2423,6 +2463,7 @@ main {
     animation: ripple 0.5s ease-out forwards;
 }
 
+/* ── Shared Progress / Records page header ── */
 .prog-page-header {
   display: flex;
   align-items: center;
@@ -2458,6 +2499,7 @@ main {
   margin: .2rem 0 0;
 }
 
+/* ── Progress tab bar ── */
 .prog-tab-bar {
   display: flex;
   gap: .5rem;
@@ -2504,6 +2546,7 @@ main {
     display: block;
 }
 
+/* ── Chart card on the Progress page ── */
 .prog-chart-card {
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -2579,6 +2622,7 @@ main {
   line-height: 1.55;
 }
 
+/* ── Personal Records trophy-card grid ── */
 .records-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -2687,11 +2731,16 @@ main {
 @media (max-width: 639px) {
     .prog-tab-bar {
         width: 100%;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: .3rem;
     }
 
     .prog-tab {
-        flex: 1;
         justify-content: center;
+        padding: .5rem .4rem;
+        font-size: .78rem;
+        white-space: nowrap;
     }
 
     .prog-chart-header {
@@ -2710,8 +2759,18 @@ main {
     .prog-chart-wrap {
         height: 220px;
     }
+
+    .prog-page-header {
+        flex-wrap: wrap;
+    }
+
+    .mp-regen-btn {
+        margin-left: 0;
+        width: 100%;
+    }
 }
 
+/* ── Quantity calculator (label-to-portion) panel ── */
 .qty-calc-wrapper {
     margin-top: .25rem;
 }
@@ -2920,6 +2979,7 @@ main {
 }
 
 
+/* ── Water intake tracker card ── */
 .water-card {
     margin-bottom: var(--section-gap);
     animation: slideUp .4s ease both;

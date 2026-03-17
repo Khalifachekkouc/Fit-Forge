@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- ── Document metadata, fonts and external scripts ── -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
   <title>FitForge</title>
@@ -10,8 +11,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <link rel="stylesheet" href="styling.css">
 </head>
-<body> 
-
+<body>
+<!-- ── Sticky top navigation header ── -->
 <header>
   <div class="header-inner">
     <div class="logo">
@@ -24,7 +25,7 @@
         Dashboard
       </button>
       <button class="nav-btn" onclick="navigate('meals')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
         Meals
       </button>
       <button class="nav-btn" onclick="navigate('programs')">
@@ -55,7 +56,10 @@
   </div>
 </header>
 
+
+<!-- ── Page content: each #page-* div is one view ── -->
 <main>
+  <!-- Dashboard page: daily macro summary, water tracker, food log -->
   <div id="page-dashboard" class="page active">
     <div class="date-nav card">
       <button class="icon-btn" onclick="changeDay(-1)">
@@ -130,7 +134,7 @@
       <div id="food-entries" class="food-entries"></div>
     </div>
   </div>
-
+  <!-- Gym page: workout type chips and exercise log -->
   <div id="page-gym" class="page">
     <div class="date-nav card">
       <button class="icon-btn" onclick="changeGymDay(-1)">
@@ -167,6 +171,7 @@
       <div id="exercises-container"></div>
     </div>
   </div>
+  <!-- Progress page: chart tabs for weight, calories, macros and strength -->
   <div id="page-progress" class="page">
     <div class="prog-page-header">
       <div class="prog-page-icon">
@@ -178,20 +183,32 @@
       </div>
     </div>
     <div class="prog-tab-bar">
-      <button class="prog-tab active" id="ptab-weight" onclick="switchProgTab('weight')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 16 4-4 4 4 4-6"/></svg>
-        Weight
-      </button>
-      <button class="prog-tab" id="ptab-calories" onclick="switchProgTab('calories')">
+      <button class="prog-tab active" id="ptab-calories" onclick="switchProgTab('calories')">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
         Calories
+      </button>
+       <button class="prog-tab" id="ptab-protein" onclick="switchProgTab('protein')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M15.45 15.4c-2.13 2.12-4.9 2.86-7.37 2.27L5 21l-2-2 3.33-3.08c-.59-2.47.15-5.24 2.27-7.36 2.87-2.87 7.12-3.44 9.46-1.1 2.34 2.34 1.77 6.59-1.1 9.46v-.53z"/></svg>
+        Protein
+      </button>
+      <button class="prog-tab" id="ptab-carbs" onclick="switchProgTab('carbs')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2v20"/><path d="M8 6c0 0 .5-2 4-2s4 2 4 2"/><path d="M7 10c0 0-1-2 2-3"/><path d="M17 10c0 0 1-2-2-3"/><path d="M7 14c0 0-1-2 2-3"/><path d="M17 14c0 0 1-2-2-3"/><path d="M8 18c0 0 .5-2 4-2s4 2 4 2"/></svg>
+        Carbs
+      </button>
+      <button class="prog-tab" id="ptab-fat" onclick="switchProgTab('fat')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+        Fat
+      </button>
+      <button class="prog-tab" id="ptab-weight" onclick="switchProgTab('weight')">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 16 4-4 4 4 4-6"/></svg>
+        Weight
       </button>
       <button class="prog-tab" id="ptab-strength" onclick="switchProgTab('strength')">
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></svg>
         Strength
       </button>
     </div>
-    <div id="prog-panel-weight" class="prog-panel active">
+    <div id="prog-panel-weight" class="prog-panel">
       <div class="prog-chart-card card">
         <div class="prog-chart-header">
           <div><h2 class="prog-chart-title">Body Weight</h2><p class="prog-chart-sub">Weight trend from your saved profile history</p></div>
@@ -204,7 +221,7 @@
         </div>
       </div>
     </div>
-    <div id="prog-panel-calories" class="prog-panel">
+    <div id="prog-panel-calories" class="prog-panel active">
       <div class="prog-chart-card card">
         <div class="prog-chart-header">
           <div><h2 class="prog-chart-title">Daily Calorie Intake</h2><p class="prog-chart-sub">Logged calories per day vs. your daily goal</p></div>
@@ -235,7 +252,50 @@
         </div>
       </div>
     </div>
+
+    <div id="prog-panel-protein" class="prog-panel">
+      <div class="prog-chart-card card">
+        <div class="prog-chart-header">
+          <div><h2 class="prog-chart-title">Daily Protein Intake</h2><p class="prog-chart-sub">Logged protein per day vs. your daily goal</p></div>
+          <div class="prog-stats-row" id="prog-protein-stats"></div>
+        </div>
+        <div class="prog-chart-wrap"><canvas id="chart-protein"></canvas></div>
+        <div id="prog-protein-empty" class="prog-empty" style="display:none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto .75rem"><path d="M15.45 15.4c-2.13 2.12-4.9 2.86-7.37 2.27L5 21l-2-2 3.33-3.08c-.59-2.47.15-5.24 2.27-7.36 2.87-2.87 7.12-3.44 9.46-1.1 2.34 2.34 1.77 6.59-1.1 9.46v-.53z"/></svg>
+          <p>Log food in the Dashboard to see your protein trend here.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="prog-panel-carbs" class="prog-panel">
+      <div class="prog-chart-card card">
+        <div class="prog-chart-header">
+          <div><h2 class="prog-chart-title">Daily Carbs Intake</h2><p class="prog-chart-sub">Logged carbohydrates per day vs. your daily goal</p></div>
+          <div class="prog-stats-row" id="prog-carbs-stats"></div>
+        </div>
+        <div class="prog-chart-wrap"><canvas id="chart-carbs"></canvas></div>
+        <div id="prog-carbs-empty" class="prog-empty" style="display:none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto .75rem"><path d="M12 2v20"/><path d="M8 6c0 0 .5-2 4-2s4 2 4 2"/><path d="M7 10c0 0-1-2 2-3"/><path d="M17 10c0 0 1-2-2-3"/><path d="M7 14c0 0-1-2 2-3"/><path d="M17 14c0 0 1-2-2-3"/><path d="M8 18c0 0 .5-2 4-2s4 2 4 2"/></svg>
+          <p>Log food in the Dashboard to see your carbs trend here.</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="prog-panel-fat" class="prog-panel">
+      <div class="prog-chart-card card">
+        <div class="prog-chart-header">
+          <div><h2 class="prog-chart-title">Daily Fat Intake</h2><p class="prog-chart-sub">Logged fats per day vs. your daily goal</p></div>
+          <div class="prog-stats-row" id="prog-fat-stats"></div>
+        </div>
+        <div class="prog-chart-wrap"><canvas id="chart-fat"></canvas></div>
+        <div id="prog-fat-empty" class="prog-empty" style="display:none">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto .75rem"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+          <p>Log food in the Dashboard to see your fat intake trend here.</p>
+        </div>
+      </div>
+    </div>
   </div>
+  <!-- Records page: auto-updated personal-best lift cards -->
   <div id="page-records" class="page">
     <div class="prog-page-header">
       <div class="prog-page-icon" style="background:linear-gradient(135deg,#f59e0b,#f57a3d)">
@@ -253,13 +313,15 @@
       <button class="btn btn-primary" onclick="navigate('gym')">Go to Gym</button>
     </div>
   </div>
-
+  <!-- Profile page: body stats form and macro calculator -->
   <div id="page-profile" class="page">
-    <div class="card hero-banner">
-      <div class="hero-gradient"></div>
-      <div class="hero-content">
-        <h1>Body Profile &amp; Goals</h1>
-        <p>Enter your physical stats to automatically calculate your optimal macronutrient targets using the scientifically backed Mifflin-St Jeor formula.</p>
+    <div class="prog-page-header">
+      <div class="prog-page-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div>
+        <h1 class="prog-page-title">Body Profile &amp; Goals</h1>
+        <p class="prog-page-sub">Enter your stats to auto-calculate optimal macronutrient targets</p>
       </div>
     </div>
 
@@ -332,12 +394,15 @@
       </div>
     </div>
   </div>
+  <!-- Programs page: AI-style workout plan generator -->
   <div id="page-programs" class="page">
-    <div class="card hero-banner" style="margin-bottom:2rem;">
-      <div class="hero-gradient"></div>
-      <div class="hero-content">
-        <h1>🏋️ Workout Programs</h1>
-        <p>Each plan targets a <strong>different muscle zone</strong> — no two exercises overlap the same sub-muscle, so every rep counts.</p>
+    <div class="prog-page-header">
+      <div class="prog-page-icon" style="background:linear-gradient(135deg,#f57a3d,#e85d04)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <div>
+        <h1 class="prog-page-title">Workout Programs</h1>
+        <p class="prog-page-sub">Each plan targets a different muscle zone — no two exercises overlap</p>
       </div>
     </div>
     <div class="card" style="padding:1.5rem; margin-bottom:1.5rem;">
@@ -392,28 +457,25 @@
     </div>
     <div id="wp-plan-output"></div>
   </div>
+  <!-- Meals page: personalised daily meal plan -->
   <div id="page-meals" class="page">
-    <div class="mp-header-card card">
-      <div class="mp-header-inner">
-        <div class="mp-header-text">
-          <div class="mp-header-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
-          </div>
-          <div>
-            <h1 class="mp-title">Smart Meal Program</h1>
-            <p class="mp-subtitle">Personalized daily meal plan based on your fitness goal</p>
-          </div>
-        </div>
-        <button class="btn btn-outline mp-regen-btn" onclick="mpGeneratePlan()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-          Regenerate Meal Plan
-        </button>
+    <div class="prog-page-header">
+      <div class="prog-page-icon" style="background:linear-gradient(135deg,#1fad96,#0e8f7d)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
       </div>
+      <div style="flex:1">
+        <h1 class="prog-page-title">Smart Meal Program</h1>
+        <p class="prog-page-sub">Personalized daily meal plan based on your fitness goal</p>
+      </div>
+      <button class="btn btn-outline mp-regen-btn" onclick="mpGeneratePlan()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        Regenerate
+      </button>
     </div>
     <div class="card mp-goal-card">
       <div class="mp-goal-label">Select Your Goal</div>
       <div class="mp-goal-chips" id="mp-goal-chips">
-        <button class="mp-goal-chip" data-goal="weight_gain" onclick="mpSetGoal('weight_gain')">
+        <button class="mp-goal-chip active" data-goal="weight_gain" onclick="mpSetGoal('weight_gain')">
           <span class="mp-chip-icon">📈</span>
           <span class="mp-chip-text">Weight Gain</span>
         </button>
@@ -421,7 +483,7 @@
           <span class="mp-chip-icon">💪</span>
           <span class="mp-chip-text">Build Muscle</span>
         </button>
-        <button class="mp-goal-chip active" data-goal="lose_weight" onclick="mpSetGoal('lose_weight')">
+        <button class="mp-goal-chip" data-goal="lose_weight" onclick="mpSetGoal('lose_weight')">
           <span class="mp-chip-icon">🔥</span>
           <span class="mp-chip-text">Lose Weight</span>
         </button>
@@ -441,23 +503,24 @@
     </div>
   </div>
 </main>
-
+<!-- ── Fixed bottom navigation bar (mobile only) ── -->
 <nav class="mobile-nav">
   <button class="mobile-nav-btn active" onclick="navigate('dashboard')">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
     Dashboard
   </button>
-  <button class="mobile-nav-btn" onclick="navigate('gym')">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></svg>
-    Gym
+  <button class="mobile-nav-btn" onclick="navigate('meals')">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
+    Meals
   </button>
   <button class="mobile-nav-btn" onclick="navigate('programs')">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     Programs
   </button>
-  <button class="mobile-nav-btn" onclick="navigate('meals')">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
-    Meals
+
+  <button class="mobile-nav-btn" onclick="navigate('gym')">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></svg>
+    Gym
   </button>
   <button class="mobile-nav-btn" onclick="navigate('progress')">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -472,7 +535,7 @@
     Profile
   </button>
 </nav>
-
+<!-- ── Add Food modal ── -->
 <div id="add-food-modal" class="modal-overlay" onclick="overlayClose(event,'add-food-modal')">
   <div class="modal" style="position:relative">
     <button class="modal-close" onclick="closeModal('add-food-modal')">
@@ -486,13 +549,17 @@
     </div>
     <div class="form-grid-2" style="margin-bottom:.75rem">
         <div class="form-group"><label class="form-label">Calories</label><input id="f-cal" type="number" class="form-input"
-                value="0" min="0"></div>
+          value="0" min="0">
+        </div>
         <div class="form-group"><label class="form-label">Protein (g)</label><input id="f-pro" type="number"
-                class="form-input" value="0" min="0"></div>
+          class="form-input" value="0" min="0">
+        </div>
         <div class="form-group"><label class="form-label">Carbs (g)</label><input id="f-carb" type="number"
-                class="form-input" value="0" min="0"></div>
+          class="form-input" value="0" min="0">
+        </div>
         <div class="form-group"><label class="form-label">Fat (g)</label><input id="f-fat" type="number" class="form-input"
-                value="0" min="0"></div>
+          value="0" min="0">
+        </div>
     </div>
 
     <div class="qty-calc-wrapper">
@@ -546,7 +613,7 @@
     <button class="submit-btn" onclick="addFood()">Log Entry</button>
   </div>
 </div>
-
+<!-- ── Edit Goals modal ── -->
 <div id="edit-goals-modal" class="modal-overlay" onclick="overlayClose(event,'edit-goals-modal')">
   <div class="modal" style="position:relative">
     <button class="modal-close" onclick="closeModal('edit-goals-modal')">
@@ -555,18 +622,22 @@
     <div id="edit-goals-title" class="modal-title">Edit Goals for Today</div>
     <div class="form-grid-2" style="margin-bottom:.75rem">
         <div class="form-group"><label class="form-label">Calories (kcal)</label><input id="g-cal" type="number"
-                class="form-input" value="2000"></div>
+          class="form-input" value="2000">
+        </div>
         <div class="form-group"><label class="form-label">Protein (g)</label><input id="g-pro" type="number"
-                class="form-input" value="150"></div>
+          class="form-input" value="150">
+        </div>
         <div class="form-group"><label class="form-label">Carbs (g)</label><input id="g-carb" type="number"
-                class="form-input" value="200"></div>
+          class="form-input" value="200">
+        </div>
         <div class="form-group"><label class="form-label">Fat (g)</label><input id="g-fat" type="number" class="form-input"
-                value="65"></div>
+          value="65">
+        </div>
     </div>
     <button class="submit-btn" onclick="saveGoals()">Save Goals</button>
   </div>
 </div>
-
+<!-- ── Add Exercise modal ── -->
 <div id="add-exercise-modal" class="modal-overlay" onclick="overlayClose(event,'add-exercise-modal')">
   <div class="modal" style="position:relative">
     <button class="modal-close" onclick="closeModal('add-exercise-modal')">
@@ -581,11 +652,14 @@
     </div>
     <div class="form-grid-3" style="margin-bottom:1rem">
         <div class="form-group"><label class="form-label">Sets</label><input id="e-sets" type="number"
-                class="form-input form-input-sm" value="3" min="1"></div>
+          class="form-input form-input-sm" value="3" min="1">
+        </div>
         <div class="form-group"><label class="form-label">Reps</label><input id="e-reps" type="number"
-                class="form-input form-input-sm" value="10" min="1"></div>
+          class="form-input form-input-sm" value="10" min="1">
+        </div>
         <div class="form-group"><label class="form-label">Weight (kg)</label><input id="e-weight" type="number" step="0.5"
-                class="form-input form-input-sm" value="0" min="0"></div>
+          class="form-input form-input-sm" value="0" min="0">
+        </div>
     </div>
     <div class="form-group" style="margin-bottom:.5rem">
       <label class="form-label">Notes <span class="text-muted">(optional)</span></label>
@@ -594,8 +668,9 @@
     <button class="submit-btn" onclick="addExercise()">Add Exercise</button>
   </div>
 </div>
-
+<!-- ── Toast notification container ── -->
 <div class="toast-container" id="toast-container"></div>
+<!-- ── Main application script ── -->
 <script src="scriptt.js"></script>
 </body>
 </html>
