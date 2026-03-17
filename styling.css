@@ -679,6 +679,7 @@ main {
     width: 100%;
     max-width: 440px;
     padding: 1.75rem;
+    padding-top: 1.6rem;
     animation: modalIn .25s ease;
     max-height: 90vh;
     overflow-y: auto;
@@ -689,24 +690,27 @@ main {
     font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 1.25rem;
-    padding-right: 2.5rem;
+    padding-right: 3rem;
+    padding-top: .15rem;
+    line-height: 1.25;
 }
 
 .modal-close {
     position: absolute;
-    top: 1.25rem;
-    right: 1.25rem;
-    width: 32px;
-    height: 32px;
+    top: 1.35rem;
+    right: 1.35rem;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
-    border: none;
+    border: 1.5px solid var(--border-color);
     background: var(--hover-bg);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.18s ease, transform 0.12s ease;
-    z-index: 1;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
+    z-index: 2;
+    flex-shrink: 0;
 }
 
 .modal-close:hover {
