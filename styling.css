@@ -2918,3 +2918,248 @@ main {
     font-weight: 700;
     margin-top: .1rem;
 }
+
+
+.water-card {
+    margin-bottom: var(--section-gap);
+    animation: slideUp .4s ease both;
+    animation-delay: .35s;
+    overflow: hidden;
+}
+
+.water-card-inner {
+    padding: 1.25rem 1.35rem 1.15rem;
+}
+
+.water-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    gap: .75rem;
+}
+
+.water-card-title-row {
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+}
+
+.water-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 6px rgba(56, 189, 248, .35));
+}
+
+.water-card-label {
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--text-muted);
+    margin-bottom: .15rem;
+}
+
+.water-amount-row {
+    display: flex;
+    align-items: baseline;
+    gap: .15rem;
+}
+
+.water-consumed {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #38bdf8;
+    letter-spacing: -.03em;
+    transition: color .3s ease;
+}
+
+.water-sep {
+    font-size: .9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.water-goal-display {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.water-unit {
+    font-size: .82rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-left: .05rem;
+}
+
+.water-pct-badge {
+    flex-shrink: 0;
+    min-width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: rgba(56, 189, 248, .12);
+    color: #38bdf8;
+    font-family: 'Outfit', sans-serif;
+    font-size: .88rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 .5rem;
+    transition: background .3s ease, color .3s ease;
+}
+
+.water-pct-badge.done {
+    background: rgba(31, 173, 150, .15);
+    color: #1fad96;
+}
+
+.water-bar-track {
+    height: 10px;
+    background: var(--macro-bar-track);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: .9rem;
+}
+
+.water-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #38bdf8 0%, #0ea5e9 60%, #1fad96 100%);
+    transition: width 1s cubic-bezier(.22, 1, .36, 1);
+    position: relative;
+}
+
+.water-bar-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 30px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.25));
+    border-radius: 999px;
+}
+
+.water-bar-fill.complete {
+    background: linear-gradient(90deg, #1fad96, #38bdf8);
+}
+
+.water-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    flex-wrap: wrap;
+}
+
+.water-remaining {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .82rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
+.water-remaining svg {
+    color: #38bdf8;
+    flex-shrink: 0;
+}
+
+.water-remaining.complete {
+    color: #1fad96;
+}
+
+.water-remaining.complete svg {
+    color: #1fad96;
+}
+
+.water-add-btn {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .48rem 1.1rem;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(56, 189, 248, .35);
+    transition: transform .13s ease, box-shadow .18s ease, background .18s ease;
+    white-space: nowrap;
+}
+
+.water-add-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 16px rgba(56, 189, 248, .45);
+}
+
+.water-add-btn:active {
+    transform: scale(.96);
+    box-shadow: 0 1px 6px rgba(56, 189, 248, .3);
+}
+
+.water-btn-group {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.water-cancel-btn {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .48rem 1rem;
+    border-radius: 999px;
+    border: 1.5px solid var(--border-color);
+    background: transparent;
+    color: var(--text-muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: .88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .13s ease, background .18s ease, border-color .18s ease, color .18s ease;
+    white-space: nowrap;
+}
+
+.water-cancel-btn:hover {
+    background: rgba(239, 68, 68, .08);
+    border-color: #ef4444;
+    color: #ef4444;
+    transform: translateY(-2px);
+}
+
+.water-cancel-btn:active {
+    transform: scale(.96);
+}
+
+@keyframes waterPulse {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.06); }
+    100% { transform: scale(1); }
+}
+
+.water-consumed.pulse {
+    animation: waterPulse .35s cubic-bezier(.22, 1, .36, 1);
+}
+
+@media (max-width: 480px) {
+    .water-card-inner {
+        padding: 1rem;
+    }
+    .water-consumed {
+        font-size: 1.3rem;
+    }
+    .water-add-btn {
+        padding: .42rem .85rem;
+        font-size: .82rem;
+    }
+}

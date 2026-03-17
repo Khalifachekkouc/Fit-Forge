@@ -3474,3 +3474,135 @@ window.closeModal = function(id) {
     });
   }
 };
+
+
+const WATER_KEY_PREFIX = 'water_';
+
+function getWaterKey(dateStr) {
+  return WATER_KEY_PREFIX + dateStr;
+}
+
+function getWaterIntake(dateStr) {
+  const raw = localStorage.getItem(getWaterKey(dateStr));
+  return raw !== null ? parseInt(raw, 10) : 0;
+}
+
+function saveWaterIntake(dateStr, ml) {
+  localStorage.setItem(getWaterKey(dateStr), String(ml));
+}
+
+function calcWaterGoal() {
+  const profile = getProfile();
+  const weight  = parseFloat(profile.weight) || 70;
+  const goal    = (profile.goal || 'maintain').toLowerCase();
+
+  let goalMl = weight * 35;
+  if (goal === 'lose fat' || goal === 'lose_fat' || goal === 'losefat') {
+    goalMl += 300;
+  } else if (goal === 'build muscle' || goal === 'build_muscle' || goal === 'buildmuscle') {
+    goalMl += 500;
+  }
+  return Math.round(goalMl);
+}
+
+function renderWaterCard() {
+  const dateStr  = fmt(dashDate);
+  const intake   = getWaterIntake(dateStr);
+  const goalMl   = calcWaterGoal();
+  const pct      = Math.min(Math.round((intake / goalMl) * 100), 100);
+  const done     = intake >= goalMl;
+  const remaining = Math.max(goalMl - intake, 0);
+
+  const consumedEl  = document.getElementById('water-consumed-display');
+  const goalEl      = document.getElementById('water-goal-display');
+  const barEl       = document.getElementById('water-bar-fill');
+  const pctEl       = document.getElementById('water-pct-badge');
+  const remainEl    = document.getElementById('water-remaining-label');
+  const remainRow   = document.getElementById('water-remaining-text');
+
+  if (!consumedEl) return;
+
+  consumedEl.textContent = intake.toLocaleString();
+  goalEl.textContent     = goalMl.toLocaleString();
+  barEl.style.width      = pct + '%';
+  pctEl.textContent      = pct + '% completed';
+
+  if (done) {
+    barEl.classList.add('complete');
+    pctEl.classList.add('done');
+    remainEl.textContent = '🎉 Goal reached!';
+    remainRow.classList.add('complete');
+  } else {
+    barEl.classList.remove('complete');
+    pctEl.classList.remove('done');
+    remainEl.textContent = remaining.toLocaleString() + ' ml left';
+    remainRow.classList.remove('complete');
+  }
+}
+
+function cancelWater(ml) {
+  if (!isToday(dashDate)) {
+    showToast('Water tracking only available for today.');
+    return;
+  }
+  const dateStr = fmt(dashDate);
+  const current = getWaterIntake(dateStr);
+  if (current <= 0) {
+    showToast('No water intake to cancel.');
+    return;
+  }
+  const newVal = Math.max(current - ml, 0);
+  saveWaterIntake(dateStr, newVal);
+
+  const consumedEl = document.getElementById('water-consumed-display');
+  if (consumedEl) {
+    consumedEl.classList.remove('pulse');
+    void consumedEl.offsetWidth;
+    consumedEl.classList.add('pulse');
+  }
+
+  renderWaterCard();
+  showToast('💧 Removed 250 ml.');
+}
+
+function addWater(ml) {
+  if (!isToday(dashDate)) {
+    showToast('Water tracking only available for today.');
+    return;
+  }
+
+  const dateStr = fmt(dashDate);
+  const current = getWaterIntake(dateStr);
+  const newVal  = current + ml;
+  saveWaterIntake(dateStr, newVal);
+
+  const consumedEl = document.getElementById('water-consumed-display');
+  if (consumedEl) {
+    consumedEl.classList.remove('pulse');
+    void consumedEl.offsetWidth;
+    consumedEl.classList.add('pulse');
+  }
+
+  renderWaterCard();
+
+  const goalMl = calcWaterGoal();
+  if (newVal >= goalMl && (newVal - ml) < goalMl) {
+    showToast('💧 Daily water goal reached! Great job!');
+  }
+}
+
+const _origRenderDashboard = renderDashboard;
+window.renderDashboard = function() {
+  _origRenderDashboard();
+  renderWaterCard();
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+  renderWaterCard();
+});
+
+const _origSaveProfileWater = window.saveProfile_;
+window.saveProfile_ = function(p) {
+  _origSaveProfileWater(p);
+  renderWaterCard();
+};

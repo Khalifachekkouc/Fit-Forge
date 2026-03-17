@@ -80,6 +80,45 @@
 
     <div class="macros-grid" id="macros-grid"></div>
 
+    <div class="card water-card" id="water-card">
+      <div class="water-card-inner">
+        <div class="water-card-header">
+          <div class="water-card-title-row">
+            <span class="water-icon">💧</span>
+            <div>
+              <div class="water-card-label">Water Intake</div>
+              <div class="water-amount-row">
+                <span class="water-consumed" id="water-consumed-display">0</span>
+                <span class="water-sep"> / </span>
+                <span class="water-goal-display" id="water-goal-display">2450</span>
+                <span class="water-unit"> ml</span>
+              </div>
+            </div>
+          </div>
+          <div class="water-pct-badge" id="water-pct-badge">0%</div>
+        </div>
+
+        <div class="water-bar-track">
+          <div class="water-bar-fill" id="water-bar-fill" style="width:0%"></div>
+        </div>
+
+        <div class="water-footer">
+          <div class="water-remaining" id="water-remaining-text">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            <span id="water-remaining-label">2450 ml left</span>
+          </div>
+          <div class="water-btn-group">
+            <button class="water-cancel-btn" id="water-cancel-btn" onclick="cancelWater(250)" title="Cancel last cup">
+              −250 ml
+            </button>
+            <button class="water-add-btn" id="water-add-btn" onclick="addWater(250)">
+              +250 ml
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="card food-log-card">
       <div class="section-header">
         <h2 class="section-title">Food Log</h2>
@@ -128,8 +167,6 @@
       <div id="exercises-container"></div>
     </div>
   </div>
-
-  <!-- ===== PROGRESS PAGE ===== -->
   <div id="page-progress" class="page">
     <div class="prog-page-header">
       <div class="prog-page-icon">
