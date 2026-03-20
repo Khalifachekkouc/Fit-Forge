@@ -2,12 +2,33 @@
   "name": "Fitness Tracker",
   "short_name": "FitForge",
   "description": "Track your workouts, nutrition, and fitness progress.",
-  "start_url": "/index.html",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0f172a",
   "theme_color": "#1fad96",
   "icons": [
+    {
+      "src": "icons/icon-120.png",
+      "sizes": "120x120",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-167.png",
+      "sizes": "167x167",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
@@ -21,5 +42,9 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["fitness", "health", "sports"]
+  "categories": [
+    "fitness",
+    "health",
+    "sports"
+  ]
 }

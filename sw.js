@@ -1,11 +1,18 @@
 // sw.js — FitForge Service Worker
-const CACHE_NAME = 'fitforge-v1';
+const CACHE_NAME = 'fitforge-v2';
 
-// Files to cache for offline access
 const ASSETS_TO_CACHE = [
-  '/index.html',
-  '/scriptt.js',
-  '/styling.css'
+  './',
+  './index.html',
+  './scriptt.js',
+  './styling.css',
+  './manifest.json',
+  './icons/icon-120.png',
+  './icons/icon-152.png',
+  './icons/icon-167.png',
+  './icons/icon-180.png',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
 
 // ── Install: cache all essential assets ──
@@ -16,7 +23,6 @@ self.addEventListener('install', (event) => {
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
-  // Activate immediately without waiting for old tabs to close
   self.skipWaiting();
 });
 
@@ -34,38 +40,37 @@ self.addEventListener('activate', (event) => {
       )
     )
   );
-  // Take control of all open pages right away
   self.clients.claim();
 });
 
-// ── Fetch: serve from cache, fall back to network ──
+// ── Fetch: cache-first for app shell, network-first for others ──
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
   if (event.request.method !== 'GET') return;
 
+  // For navigation requests (HTML pages) — network first, cache fallback
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  // For everything else — cache first, then network
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse; // Serve from cache (works offline)
-      }
-      // Not in cache — fetch from network and cache a copy
+      if (cachedResponse) return cachedResponse;
+
       return fetch(event.request).then((networkResponse) => {
-        // Only cache valid same-origin responses
         if (
           networkResponse &&
           networkResponse.status === 200 &&
           networkResponse.type === 'basic'
         ) {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
+          const clone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return networkResponse;
-      });
-    }).catch(() => {
-      // If both cache and network fail, return the cached index.html as fallback
-      return caches.match('/index.html');
+      }).catch(() => caches.match('./index.html'));
     })
   );
 });

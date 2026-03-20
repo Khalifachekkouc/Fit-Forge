@@ -1,23 +1,22 @@
 // ── PWA Install Prompt ──────────────────────────────────────────────
 let pwaInstallPrompt = null;
 
-window.addEventListener('beforeinstallprompt', (e) => {
+window.addEventListener("beforeinstallprompt", (e) => {
   e.preventDefault();
   pwaInstallPrompt = e;
-  // Show install toast when prompt is ready
-  showToast('📲 Install FitForge on your device!', 'success');
+  showToast("📲 Install FitForge on your device!", "success");
 });
 
 async function triggerPWAInstall() {
   if (!pwaInstallPrompt) return;
   pwaInstallPrompt.prompt();
   const { outcome } = await pwaInstallPrompt.userChoice;
-  console.log('[PWA] Install outcome:', outcome);
+  console.log("[PWA] Install outcome:", outcome);
   pwaInstallPrompt = null;
 }
 
-window.addEventListener('appinstalled', () => {
-  console.log('[PWA] App installed!');
+window.addEventListener("appinstalled", () => {
+  console.log("[PWA] App installed!");
   pwaInstallPrompt = null;
 });
 // ── End PWA Install Prompt ──────────────────────────────────────────
