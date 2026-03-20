@@ -69,10 +69,12 @@
         <h2 id="dash-date-label">Today</h2>
         <p id="dash-weekday" class="text-muted"></p>
       </div>
-      <button class="icon-btn" onclick="changeDay(1)">
+      <button class="icon-btn" id="dash-fwd-btn" onclick="changeDay(1)">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
       </button>
     </div>
+
+    <div id="dash-lock-banner" style="display:none"></div>
 
     <div class="section-header">
       <h2 class="section-title">Daily Summary</h2>
@@ -126,7 +128,7 @@
     <div class="card food-log-card">
       <div class="section-header">
         <h2 class="section-title">Food Log</h2>
-        <button class="btn btn-primary" onclick="openModal('add-food-modal')">
+        <button class="btn btn-primary" id="add-food-btn" onclick="openModal('add-food-modal')">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
           Add Food
         </button>
@@ -144,10 +146,12 @@
         <h2 id="gym-date-label">Today</h2>
         <p id="gym-weekday" class="text-muted"></p>
       </div>
-      <button class="icon-btn" onclick="changeGymDay(1)">
+      <button class="icon-btn" id="gym-fwd-btn" onclick="changeGymDay(1)">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
       </button>
     </div>
+
+    <div id="gym-lock-banner" style="display:none"></div>
 
     <div class="card" style="padding:1.25rem; margin-bottom:1.5rem;">
       <div class="section-header" style="margin-bottom:.75rem">
@@ -163,7 +167,7 @@
     <div class="card" style="padding:1.25rem; margin-bottom:1.5rem;">
       <div class="section-header">
         <h2 class="section-title">Exercises</h2>
-        <button class="btn btn-primary" onclick="openModal('add-exercise-modal')">
+        <button class="btn btn-primary" id="add-exercise-btn" onclick="openModal('add-exercise-modal')">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
           Add Exercise
         </button>

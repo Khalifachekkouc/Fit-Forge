@@ -214,6 +214,38 @@ function changeDay(n) {
   renderDashboard();
 }
 
+// Updates date-nav arrow states and shows/hides the logging-locked banner
+function updateDateNavUI(date, forwardBtnId, bannerContainerId) {
+  const todayStr = fmt(new Date());
+  const dateStr  = fmt(date);
+  const isNow    = dateStr === todayStr;
+  const isFuture = dateStr > todayStr;
+
+  // Disable forward arrow if already on today or beyond
+  const fwdBtn = document.getElementById(forwardBtnId);
+  if (fwdBtn) {
+    fwdBtn.disabled = isNow || isFuture;
+    fwdBtn.style.opacity = (isNow || isFuture) ? '0.3' : '';
+    fwdBtn.style.cursor  = (isNow || isFuture) ? 'not-allowed' : '';
+  }
+
+  // Show/hide the "read-only day" banner
+  const banner = document.getElementById(bannerContainerId);
+  if (banner) {
+    if (!isNow) {
+      banner.innerHTML = `
+        <div class="date-lock-banner">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span>${isFuture ? 'Future dates are read-only.' : 'Past dates are read-only.'} Logging is only allowed for today.</span>
+        </div>`;
+      banner.style.display = 'block';
+    } else {
+      banner.style.display = 'none';
+      banner.innerHTML = '';
+    }
+  }
+}
+
 // Rebuilds the entire dashboard view for the currently selected date
 function renderDashboard() {
   const dateStr = fmt(dashDate);
@@ -242,6 +274,9 @@ function renderDashboard() {
 
   renderMacros(totals, goals);
   renderFoodLog(entries);
+  updateDateNavUI(dashDate, 'dash-fwd-btn', 'dash-lock-banner');
+  const addFoodBtn = document.getElementById('add-food-btn');
+  if (addFoodBtn) addFoodBtn.style.display = isToday(dashDate) ? '' : 'none';
 }
 
 // Generates the four macro cards (calories, protein, carbs, fat)
@@ -347,6 +382,11 @@ function renderFoodLog(entries) {
 
 // Reads the Add-Food modal inputs, validates, and saves a new entry
 function addFood() {
+  if (!isToday(dashDate)) {
+    closeModal("add-food-modal");
+    showToast("You can only log data for today.");
+    return;
+  }
   const name = document.getElementById("f-name").value.trim();
   if (!name) {
     document.getElementById("f-name-err").style.display = "block";
@@ -376,6 +416,10 @@ function addFood() {
 
 // Removes a single food entry by ID and refreshes the dashboard
 function deleteFood(id) {
+  if (!isToday(dashDate)) {
+    showToast("Logging is only allowed for the current day.");
+    return;
+  }
   const dateStr = fmt(dashDate);
   const numId = Number(id);
   const entries = getFoodLog(dateStr).filter((e) => Number(e.id) !== numId);
@@ -429,10 +473,19 @@ function renderGym() {
   } else lbl.style.display = "none";
 
   renderExercises(workout.exercises || []);
+  updateDateNavUI(gymDate, 'gym-fwd-btn', 'gym-lock-banner');
+  const addExBtn = document.getElementById('add-exercise-btn');
+  const setMuscleContainer = document.getElementById('muscle-chips');
+  if (addExBtn) addExBtn.style.display = isToday(gymDate) ? '' : 'none';
+  if (setMuscleContainer) { const chips = setMuscleContainer.querySelectorAll('.muscle-chip'); chips.forEach(c => { c.style.pointerEvents = isToday(gymDate) ? '' : 'none'; c.style.opacity = isToday(gymDate) ? '' : '0.4'; }); }
 }
 
 // Saves the chosen muscle group for the current gym date
 function setMuscleGroup(mg) {
+  if (!isToday(gymDate)) {
+    showToast("You can only log data for today.");
+    return;
+  }
   const dateStr = fmt(gymDate);
   const wd = getGymDay(dateStr);
   wd.muscleGroup = mg;
@@ -498,6 +551,11 @@ function renderExercises(exercises) {
 
 // Reads the Add-Exercise modal inputs, validates, and saves a new exercise
 function addExercise() {
+  if (!isToday(gymDate)) {
+    closeModal("add-exercise-modal");
+    showToast("You can only log data for today.");
+    return;
+  }
   const name = document.getElementById("e-name").value.trim();
   if (!name) {
     document.getElementById("e-name-err").style.display = "block";
@@ -531,6 +589,10 @@ function addExercise() {
 
 // Removes a single exercise by safe ID and refreshes the gym view
 function deleteExercise(id) {
+  if (!isToday(gymDate)) {
+    showToast("Logging is only allowed for the current day.");
+    return;
+  }
   const dateStr = fmt(gymDate);
   const wd = getGymDay(dateStr);
   wd.exercises = (wd.exercises || []).filter(
@@ -555,6 +617,11 @@ function cancelEdit(id) {
 
 // Reads the inline edit inputs and updates the matching exercise
 function saveEdit(id) {
+  if (!isToday(gymDate)) {
+    showToast("Logging is only allowed for the current day.");
+    cancelEdit(id);
+    return;
+  }
   const dateStr = fmt(gymDate);
   const wd = getGymDay(dateStr);
   const ex = (wd.exercises || []).find(
