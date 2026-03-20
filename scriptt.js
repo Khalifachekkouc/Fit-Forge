@@ -4125,3 +4125,373 @@ window.addFood = function () {
   // renderDashboard already called inside addFood, which now calls renderSmartMessages
 };
 
+
+/* ═══════════════════════════════════════════════════════════════════
+   ENHANCEMENT 4 — Mobile Toast + Undo system for Meals & Programs
+   Applies ONLY when window.innerWidth < 768px (mobile devices).
+   Desktop keeps the original "+ Log → ✓ Saved / Logged" behaviour.
+   ═══════════════════════════════════════════════════════════════════ */
+
+(function initMobileUndoToast() {
+
+  /* ── Helpers ── */
+  function isMobile() {
+    return window.innerWidth < 768;
+  }
+
+  /* ── State ── */
+  const MUT = {
+    timer:      null,   // auto-save timeout handle
+    undoFn:     null,   // function to call when UNDO is tapped
+    commitFn:   null,   // function to call when item becomes permanent
+    active:     false,  // is a toast currently pending?
+  };
+
+  /* ── DOM refs (resolved lazily after DOMContentLoaded) ── */
+  function getToast()    { return document.getElementById('mobile-undo-toast'); }
+  function getMsgText()  { return document.getElementById('mut-msg-text'); }
+  function getProgress() { return document.getElementById('mut-progress'); }
+
+  /* ── Show a new undo toast ──
+       msg      : string shown in the toast
+       undoFn   : called immediately if user taps UNDO
+       commitFn : called when item is permanently saved (auto or next-tap)
+  ── */
+  function showMobileToast(msg, undoFn, commitFn) {
+    // If a previous item is still pending → commit it first
+    if (MUT.active) {
+      _commitPending();
+    }
+
+    MUT.undoFn   = undoFn;
+    MUT.commitFn = commitFn;
+    MUT.active   = true;
+
+    // Update message
+    const msgEl = getMsgText();
+    if (msgEl) msgEl.textContent = msg;
+
+    // Restart progress bar animation by toggling the class
+    const toast = getToast();
+    if (!toast) return;
+
+    // Reset animation
+    const prog = getProgress();
+    if (prog) {
+      prog.style.animation = 'none';
+      void prog.offsetWidth; // reflow
+      prog.style.animation = '';
+    }
+
+    // Show
+    toast.style.display = 'flex';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => toast.classList.add('show'));
+    });
+
+    // Auto-save after 4 seconds
+    clearTimeout(MUT.timer);
+    MUT.timer = setTimeout(() => {
+      _commitPending();
+      _hideToast();
+    }, 4000);
+  }
+
+  /* ── Commit the pending item (make it permanent) ── */
+  function _commitPending() {
+    if (!MUT.active) return;
+    clearTimeout(MUT.timer);
+    if (typeof MUT.commitFn === 'function') MUT.commitFn();
+    MUT.active   = false;
+    MUT.undoFn   = null;
+    MUT.commitFn = null;
+  }
+
+  /* ── Hide the toast with slide-out animation ── */
+  function _hideToast() {
+    const toast = getToast();
+    if (!toast) return;
+    toast.classList.remove('show');
+    setTimeout(() => {
+      if (!MUT.active) toast.style.display = 'none';
+    }, 320);
+  }
+
+  /* ── Public: called by the UNDO button in the HTML ── */
+  window.mobileUndoAction = function () {
+    if (!MUT.active) return;
+    clearTimeout(MUT.timer);
+    if (typeof MUT.undoFn === 'function') MUT.undoFn();
+    MUT.active   = false;
+    MUT.undoFn   = null;
+    MUT.commitFn = null;
+    _hideToast();
+  };
+
+  /* ════════════════════════════════════════════════
+     INTERCEPT 1 — Programs page: wpSaveOne(id)
+     "+" Log button on workout exercise cards
+  ════════════════════════════════════════════════ */
+  const _origWpSaveOne = window.wpSaveOne || wpSaveOne;
+
+  window.wpSaveOne = function (id) {
+    // Desktop → original behaviour unchanged
+    if (!isMobile()) {
+      _origWpSaveOne(id);
+      return;
+    }
+
+    if (!wpCurrentPlan) return;
+    const ex = wpCurrentPlan.find(e => e.id === id);
+    if (!ex) return;
+
+    // If already saved → act as undo (toggle off), same as desktop
+    if (ex.saved) {
+      _origWpSaveOne(id);
+      return;
+    }
+
+    /* ── Add to gym log immediately (temporary) ── */
+    const dateStr = fmt(gymDate);
+    const wd      = getGymDay(dateStr);
+    const repsNum = parseInt(String(ex.reps).split('\u2013')[0]) || 10;
+    const newId   = uniqueId();
+    ex.gymEntryId = newId;
+    wd.exercises.push({
+      id:    newId,
+      name:  ex.name,
+      sets:  ex.sets,
+      reps:  repsNum,
+      weight: 0,
+      notes: (SUB_TARGET_LABELS[ex.sub] || ex.sub) + ' \u2022 ' + ex.sets + '\xD7' + ex.reps,
+    });
+    wd.muscleGroup = WP_MUSCLE_TO_GYM[WP_STATE.muscle] || WP_STATE.muscle;
+    saveGymDay(dateStr, wd);
+    ex.saved = true;
+
+    // Update button to "✓ Saved"
+    const btn = document.getElementById('wp-save-' + id);
+    if (btn) { btn.textContent = '\u2713 Saved'; btn.classList.add('saved'); }
+
+    /* ── Show mobile undo toast ── */
+    showMobileToast(
+      ex.name + ' added to Gym Log',
+      /* undoFn */ function () {
+        // Remove from gym log
+        const wdUndo = getGymDay(dateStr);
+        wdUndo.exercises = wdUndo.exercises.filter(e => e.id !== ex.gymEntryId);
+        saveGymDay(dateStr, wdUndo);
+        ex.saved      = false;
+        ex.gymEntryId = null;
+        const btnU = document.getElementById('wp-save-' + id);
+        if (btnU) { btnU.textContent = '+ Log'; btnU.classList.remove('saved'); }
+      },
+      /* commitFn — item already in localStorage, nothing extra needed */ null
+    );
+  };
+
+  /* ════════════════════════════════════════════════
+     INTERCEPT 2 — Meals page: mpLogMeal(idStr)
+     "Log Meal" button on meal plan cards
+  ════════════════════════════════════════════════ */
+  const _origMpLogMeal = window.mpLogMeal || mpLogMeal;
+
+  window.mpLogMeal = function (idStr) {
+    // Desktop → original behaviour unchanged
+    if (!isMobile()) {
+      _origMpLogMeal(idStr);
+      return;
+    }
+
+    const meal = mpCurrentPlan.find(m => String(m.id) === idStr);
+    if (!meal) return;
+
+    // If already logged → act as undo (toggle off), same as desktop
+    if (meal.logged) {
+      _origMpLogMeal(idStr);
+      return;
+    }
+
+    /* ── Add to food log immediately (temporary) ── */
+    const dateStr = fmt(dashDate);
+    const logId   = uniqueId();
+    meal.logEntryId = logId;
+    const entries = getFoodLog(dateStr);
+    entries.push({
+      id:          logId,
+      name:        meal.name,
+      ingredients: meal.ingredients,
+      calories:    meal.cal,
+      protein:     meal.pro,
+      carbs:       meal.carb,
+      fat:         meal.fat,
+    });
+    saveFoodLog(dateStr, entries);
+    meal.logged = true;
+
+    // Update button to "✓ Logged"
+    const btn = document.getElementById('mp-log-' + idStr);
+    if (btn) {
+      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Logged';
+      btn.classList.add('logged');
+    }
+
+    /* ── Show mobile undo toast ── */
+    showMobileToast(
+      meal.name + ' added to Food Log',
+      /* undoFn */ function () {
+        // Remove from food log
+        const undoEntries = getFoodLog(dateStr).filter(e => e.id !== meal.logEntryId);
+        saveFoodLog(dateStr, undoEntries);
+        meal.logged     = false;
+        meal.logEntryId = null;
+        const btnU = document.getElementById('mp-log-' + idStr);
+        if (btnU) {
+          btnU.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Log Meal';
+          btnU.classList.remove('logged');
+        }
+      },
+      /* commitFn — item already in localStorage, nothing extra needed */ null
+    );
+  };
+
+  /* ════════════════════════════════════════════════
+     INTERCEPT 3 — Meals page: mpLogAllMeals()
+     "Log All Meals" button — batch undo on mobile
+  ════════════════════════════════════════════════ */
+  const _origMpLogAllMeals = window.mpLogAllMeals || mpLogAllMeals;
+
+  window.mpLogAllMeals = function () {
+    if (!isMobile()) {
+      _origMpLogAllMeals();
+      return;
+    }
+
+    // Commit any existing single-item pending toast first
+    if (MUT.active) _commitPending();
+
+    const dateStr   = fmt(dashDate);
+    const loggedBatch = []; // { meal, logId }
+
+    mpCurrentPlan.forEach(meal => {
+      if (meal.logged) return;
+
+      const logId = uniqueId();
+      meal.logEntryId = logId;
+      const entries = getFoodLog(dateStr);
+      entries.push({
+        id:          logId,
+        name:        meal.name,
+        ingredients: meal.ingredients,
+        calories:    meal.cal,
+        protein:     meal.pro,
+        carbs:       meal.carb,
+        fat:         meal.fat,
+      });
+      saveFoodLog(dateStr, entries);
+      meal.logged = true;
+      loggedBatch.push({ meal, logId });
+
+      const btn = document.getElementById('mp-log-' + meal.id);
+      if (btn) {
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Logged';
+        btn.classList.add('logged');
+      }
+    });
+
+    if (loggedBatch.length === 0) {
+      showToast('All meals already logged!');
+      return;
+    }
+
+    showMobileToast(
+      loggedBatch.length + ' meal' + (loggedBatch.length > 1 ? 's' : '') + ' added to Food Log',
+      function () {
+        // Undo ALL items at once
+        const idsToRemove = new Set(loggedBatch.map(x => x.logId));
+        const remaining = getFoodLog(dateStr).filter(e => !idsToRemove.has(e.id));
+        saveFoodLog(dateStr, remaining);
+        loggedBatch.forEach(({ meal }) => {
+          meal.logged     = false;
+          meal.logEntryId = null;
+          const btnU = document.getElementById('mp-log-' + meal.id);
+          if (btnU) {
+            btnU.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Log Meal';
+            btnU.classList.remove('logged');
+          }
+        });
+      },
+      null
+    );
+  };
+
+  /* ════════════════════════════════════════════════
+     INTERCEPT 4 — Programs page: wpSaveAllToLog()
+     "Save All to Gym Log" button — batch undo on mobile
+  ════════════════════════════════════════════════ */
+  const _origWpSaveAllToLog = window.wpSaveAllToLog || wpSaveAllToLog;
+
+  window.wpSaveAllToLog = function () {
+    if (!isMobile()) {
+      _origWpSaveAllToLog();
+      return;
+    }
+
+    if (!wpCurrentPlan || !wpCurrentPlan.length) return;
+
+    // Commit any existing single-item pending toast first
+    if (MUT.active) _commitPending();
+
+    const dateStr    = fmt(gymDate);
+    const savedBatch = []; // ex references
+
+    wpCurrentPlan.forEach(ex => {
+      if (ex.saved) return;
+
+      const repsNum = parseInt(String(ex.reps).split('\u2013')[0]) || 10;
+      const newId   = uniqueId();
+      const wd      = getGymDay(dateStr);
+      ex.gymEntryId = newId;
+      wd.exercises.push({
+        id:     newId,
+        name:   ex.name,
+        sets:   ex.sets,
+        reps:   repsNum,
+        weight: 0,
+        notes:  (SUB_TARGET_LABELS[ex.sub] || ex.sub) + ' \u2022 ' + ex.sets + '\xD7' + ex.reps,
+      });
+      wd.muscleGroup = WP_MUSCLE_TO_GYM[WP_STATE.muscle] || WP_STATE.muscle;
+      saveGymDay(dateStr, wd);
+      ex.saved = true;
+      savedBatch.push(ex);
+
+      const btn = document.getElementById('wp-save-' + ex.id);
+      if (btn) { btn.textContent = '\u2713 Saved'; btn.classList.add('saved'); }
+    });
+
+    if (savedBatch.length === 0) {
+      showToast('All exercises already saved!');
+      return;
+    }
+
+    showMobileToast(
+      savedBatch.length + ' exercise' + (savedBatch.length > 1 ? 's' : '') + ' added to Gym Log',
+      function () {
+        // Undo ALL items at once
+        const idsToRemove = new Set(savedBatch.map(ex => ex.gymEntryId));
+        const wd = getGymDay(dateStr);
+        wd.exercises = wd.exercises.filter(e => !idsToRemove.has(e.id));
+        saveGymDay(dateStr, wd);
+        savedBatch.forEach(ex => {
+          ex.saved      = false;
+          ex.gymEntryId = null;
+          const btnU = document.getElementById('wp-save-' + ex.id);
+          if (btnU) { btnU.textContent = '+ Log'; btnU.classList.remove('saved'); }
+        });
+      },
+      null
+    );
+  };
+
+})();
+

@@ -677,6 +677,15 @@
 </div>
 <!-- ── Toast notification container ── -->
 <div class="toast-container" id="toast-container"></div>
+<!-- ── Mobile Undo Toast (Meals & Programs, mobile only) ── -->
+<div id="mobile-undo-toast" role="status" aria-live="polite">
+  <span class="mut-msg">
+    <span class="mut-msg-icon">✓</span>
+    <span id="mut-msg-text">Item added</span>
+  </span>
+  <button class="mut-undo-btn" id="mut-undo-btn" onclick="mobileUndoAction()">UNDO</button>
+  <div class="mut-progress" id="mut-progress"></div>
+</div>
 <!-- ── Main application script ── -->
 <script src="scriptt.js"></script>
 </body>

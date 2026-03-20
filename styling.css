@@ -1401,6 +1401,92 @@ main {
     }
 }
 
+/* ── Mobile Undo Toast ── */
+#mobile-undo-toast {
+    display: none;
+    position: fixed;
+    bottom: 5.5rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    z-index: 300;
+    background: #1a2540;
+    color: #ffffff;
+    padding: .75rem 1rem .75rem 1.25rem;
+    border-radius: 16px;
+    font-size: .88rem;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    box-shadow: 0 8px 32px rgba(0,0,0,.35), 0 2px 8px rgba(0,0,0,.2);
+    white-space: nowrap;
+    pointer-events: auto;
+    opacity: 0;
+    transition: opacity 0.28s ease, transform 0.28s cubic-bezier(.34,1.56,.64,1);
+    min-width: 240px;
+    max-width: calc(100vw - 2rem);
+    align-items: center;
+    gap: .75rem;
+    border: 1px solid rgba(255,255,255,.08);
+}
+
+#mobile-undo-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    display: flex;
+}
+
+#mobile-undo-toast .mut-msg {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#mobile-undo-toast .mut-msg-icon {
+    margin-right: .4rem;
+    opacity: .8;
+}
+
+#mobile-undo-toast .mut-undo-btn {
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    color: #fff;
+    border-radius: 10px;
+    padding: .35rem .85rem;
+    font-size: .82rem;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    letter-spacing: .02em;
+    transition: background .15s ease, transform .1s ease;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+#mobile-undo-toast .mut-undo-btn:active {
+    background: rgba(255,255,255,.22);
+    transform: scale(.96);
+}
+
+#mobile-undo-toast .mut-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #1fad96, #4ade80);
+    border-radius: 0 0 16px 16px;
+    width: 100%;
+    transform-origin: left;
+    animation: none;
+}
+
+#mobile-undo-toast.show .mut-progress {
+    animation: mutProgress 4s linear forwards;
+}
+
+@keyframes mutProgress {
+    from { transform: scaleX(1); }
+    to   { transform: scaleX(0); }
+}
+
 /* ── Desktop breakpoint overrides ── */
 @media (min-width: 640px) {
     .macros-grid {
