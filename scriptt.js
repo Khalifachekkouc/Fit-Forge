@@ -1,3 +1,27 @@
+// ── PWA Install Prompt ──────────────────────────────────────────────
+let pwaInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  pwaInstallPrompt = e;
+  // Show install toast when prompt is ready
+  showToast('📲 Install FitForge on your device!', 'success');
+});
+
+async function triggerPWAInstall() {
+  if (!pwaInstallPrompt) return;
+  pwaInstallPrompt.prompt();
+  const { outcome } = await pwaInstallPrompt.userChoice;
+  console.log('[PWA] Install outcome:', outcome);
+  pwaInstallPrompt = null;
+}
+
+window.addEventListener('appinstalled', () => {
+  console.log('[PWA] App installed!');
+  pwaInstallPrompt = null;
+});
+// ── End PWA Install Prompt ──────────────────────────────────────────
+
 // localStorage key constants used throughout the app
 const KEYS = {
   food: "ns_food",
@@ -12,7 +36,7 @@ let _uidCounter = 0;
 function uniqueId() {
   return Date.now() * 1000 + (++_uidCounter % 1000);
 }
-
+ 
 // Generic localStorage read helper — returns parsed JSON or null
 function load(key) {
   try {
@@ -4048,9 +4072,7 @@ window.saveProfile_ = function(p) {
   renderWaterCard();
 };
 
-/* ═══════════════════════════════════════════════════════════════════
-   ENHANCEMENT 1 — Loading state for Generate Workout Plan
-   ═══════════════════════════════════════════════════════════════════ */
+/*ENHANCEMENT 1 — Loading state for Generate Workout Plan*/
 
 // Wrap the original generateWorkoutPlan with a loading state
 (function wrapGenerateWorkoutPlan() {
@@ -4090,9 +4112,7 @@ window.saveProfile_ = function(p) {
 })();
 
 
-/* ═══════════════════════════════════════════════════════════════════
-   ENHANCEMENT 2 — Loading state for Profile Goal Calculation
-   ═══════════════════════════════════════════════════════════════════ */
+/* ENHANCEMENT 2 — Loading state for Profile Goal Calculation*/
 
 (function wrapSaveProfile() {
   const _origSave = window.saveProfile || saveProfile;
@@ -4157,9 +4177,7 @@ window.saveProfile_ = function(p) {
 })();
 
 
-/* ═══════════════════════════════════════════════════════════════════
-   ENHANCEMENT 3 — Smart Messages System (Dashboard)
-   ═══════════════════════════════════════════════════════════════════ */
+/*ENHANCEMENT 3 — Smart Messages System (Dashboard)*/
 
 function computeSmartMessages(totals, goals, foodEntries) {
   const messages = [];
@@ -4306,11 +4324,9 @@ window.addFood = function () {
 };
 
 
-/* ═══════════════════════════════════════════════════════════════════
-   ENHANCEMENT 4 — Mobile Toast + Undo system for Meals & Programs
+/* ENHANCEMENT 4 — Mobile Toast + Undo system for Meals & Programs
    Applies ONLY when window.innerWidth < 768px (mobile devices).
-   Desktop keeps the original "+ Log → ✓ Saved / Logged" behaviour.
-   ═══════════════════════════════════════════════════════════════════ */
+   Desktop keeps the original "+ Log → ✓ Saved / Logged" behaviour. */
 
 (function initMobileUndoToast() {
 
@@ -4408,10 +4424,7 @@ window.addFood = function () {
     _hideToast();
   };
 
-  /* ════════════════════════════════════════════════
-     INTERCEPT 1 — Programs page: wpSaveOne(id)
-     "+" Log button on workout exercise cards
-  ════════════════════════════════════════════════ */
+  /*INTERCEPT 1 — Programs page: wpSaveOne(id) "+" Log button on workout exercise cards*/
   const _origWpSaveOne = window.wpSaveOne || wpSaveOne;
 
   window.wpSaveOne = function (id) {
