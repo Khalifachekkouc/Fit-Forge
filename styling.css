@@ -494,6 +494,25 @@ main {
     transform: none;
 }
 
+/* ── Danger / destructive button ── */
+.btn-danger {
+    background: #e53e3e;
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(229, 62, 62, .25);
+}
+
+.btn-danger:hover {
+    filter: brightness(1.08);
+    box-shadow: 0 6px 20px rgba(229, 62, 62, .38);
+    transform: translateY(-1px);
+}
+
+.btn-danger:active {
+    filter: brightness(0.94);
+    box-shadow: 0 2px 8px rgba(229, 62, 62, .2);
+    transform: none;
+}
+
 /* ── Outline / secondary button ── */
 .btn-outline {
     background: transparent;

@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- ── Document metadata, fonts and external scripts ── -->
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-  <title>FitForge</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <link rel="stylesheet" href="styling.css">
+  <title>FitForge</title>
 </head>
 <body>
 <!-- ── Sticky top navigation header ── -->
@@ -503,7 +502,7 @@
     <div class="mp-target-banner" id="mp-target-banner"></div>
     <div id="mp-plan-output"></div>
     <div id="mp-log-all-bar" style="display:none" class="mp-log-all-bar">
-      <button class="btn btn-primary" style="height:48px;padding:0 2rem;font-size:.95rem" onclick="mpLogAllMeals()">
+      <button id="mp-log-all-btn" class="btn btn-primary" style="height:48px;padding:0 2rem;font-size:.95rem" onclick="mpLogAllMeals()">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         Log All Meals to Food Log
       </button>

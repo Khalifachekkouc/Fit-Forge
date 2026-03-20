@@ -2353,6 +2353,11 @@ function generateWorkoutPlan() {
     rest: gc.restSec[level],
     saved: false,
   }));
+
+  // Reset batch-save state whenever a fresh plan is generated
+  wpAllSaved    = false;
+  wpAllSavedIds = [];
+
   wpRenderPlan(gender, level, goal, muscle);
 }
 
@@ -2429,7 +2434,7 @@ function wpRenderPlan(gender, level, goal, muscle) {
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
           Regenerate
         </button>
-        <button class="btn btn-primary" onclick="wpSaveAllToLog()">
+        <button id="wp-save-all-btn" class="btn btn-primary" onclick="wpSaveAllToLog()">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
           Save All to Gym Log
         </button>
@@ -2472,13 +2477,97 @@ function wpSaveOne(id) {
   }
 }
 
-// Saves all unsaved plan exercises to the gym log at once
+// Tracks whether all exercises have been batch-saved (for toggle button state)
+let wpAllSaved = false;
+// Stores the gym entry IDs added by the last "Save All" action for bulk removal
+let wpAllSavedIds = [];
+
+// Helper SVG icons for the Save All button
+const WP_SAVE_ALL_ICON   = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
+const WP_UNSAVE_ALL_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
+
+// Resets the Save All button back to its default state
+function wpResetSaveAllBtn() {
+  const btn = document.getElementById('wp-save-all-btn');
+  if (!btn) return;
+  btn.innerHTML = WP_SAVE_ALL_ICON + ' Save All to Gym Log';
+  btn.classList.remove('btn-danger');
+  btn.classList.add('btn-primary');
+}
+
+// Switches the Save All button to "Unsave All" state
+function wpSetUnsaveAllBtn() {
+  const btn = document.getElementById('wp-save-all-btn');
+  if (!btn) return;
+  btn.innerHTML = WP_UNSAVE_ALL_ICON + ' Unsave All Exercises';
+  btn.classList.remove('btn-primary');
+  btn.classList.add('btn-danger');
+}
+
+// Saves all unsaved plan exercises to the gym log at once,
+// or removes them all if already batch-saved (toggle behaviour)
 function wpSaveAllToLog() {
   if (!wpCurrentPlan || !wpCurrentPlan.length) return;
-  let count = 0;
-  wpCurrentPlan.forEach(ex => { if (!ex.saved) { wpSaveOne(ex.id); count++; } });
-  if (count === 0) showToast('All exercises already saved!');
-  else showToast(count + ' exercise' + (count > 1 ? 's' : '') + ' saved to gym log!');
+  const dateStr = fmt(gymDate);
+
+  if (wpAllSaved && wpAllSavedIds.length > 0) {
+    // ── UNSAVE ALL ──
+    const idsToRemove = new Set(wpAllSavedIds);
+    const wd = getGymDay(dateStr);
+    wd.exercises = wd.exercises.filter(e => !idsToRemove.has(e.id));
+    saveGymDay(dateStr, wd);
+
+    // Reset every exercise card button
+    wpCurrentPlan.forEach(ex => {
+      if (wpAllSavedIds.includes(ex.gymEntryId)) {
+        ex.saved      = false;
+        ex.gymEntryId = null;
+      }
+      const btn = document.getElementById('wp-save-' + ex.id);
+      if (btn && !ex.saved) { btn.textContent = '+ Log'; btn.classList.remove('saved'); }
+    });
+
+    wpAllSaved    = false;
+    wpAllSavedIds = [];
+    wpResetSaveAllBtn();
+    showToast('All exercises removed from Gym Log.');
+    return;
+  }
+
+  // ── SAVE ALL ──
+  const newIds = [];
+  wpCurrentPlan.forEach(ex => {
+    if (ex.saved) return;
+    const repsNum = parseInt(String(ex.reps).split('\u2013')[0]) || 10;
+    const newId   = uniqueId();
+    const wd      = getGymDay(dateStr);
+    ex.gymEntryId = newId;
+    wd.exercises.push({
+      id:     newId,
+      name:   ex.name,
+      sets:   ex.sets,
+      reps:   repsNum,
+      weight: 0,
+      notes:  (SUB_TARGET_LABELS[ex.sub] || ex.sub) + ' \u2022 ' + ex.sets + '\xD7' + ex.reps,
+    });
+    wd.muscleGroup = WP_MUSCLE_TO_GYM[WP_STATE.muscle] || WP_STATE.muscle;
+    saveGymDay(dateStr, wd);
+    ex.saved = true;
+    newIds.push(newId);
+
+    const btn = document.getElementById('wp-save-' + ex.id);
+    if (btn) { btn.textContent = '\u2713 Saved'; btn.classList.add('saved'); }
+  });
+
+  if (newIds.length === 0) {
+    showToast('All exercises already saved!');
+    return;
+  }
+
+  wpAllSaved    = true;
+  wpAllSavedIds = newIds;
+  wpSetUnsaveAllBtn();
+  showToast(newIds.length + ' exercise' + (newIds.length > 1 ? 's' : '') + ' saved to gym log!');
 }
 
 // Meal database keyed by goal → meal type, each entry containing name/ingredients/macros
@@ -3000,6 +3089,11 @@ function mpGeneratePlan() {
     return meal ? { ...meal, type, id: uniqueId(), logged: false } : null;
   }).filter(Boolean);
 
+  // Reset batch-log state whenever a fresh plan is generated
+  mpAllLogged    = false;
+  mpAllLoggedIds = [];
+  mpResetLogAllBtn();
+
   mpRenderTargetBanner();
   mpRenderPlan();
 }
@@ -3180,17 +3274,103 @@ function mpLogMeal(idStr) {
   }
 }
 
-// Logs every unlogged meal in the current plan to the food log at once
+// Tracks whether all meals have been batch-logged (for toggle button state)
+let mpAllLogged = false;
+// Stores the log entry IDs added by the last "Log All" action for bulk removal
+let mpAllLoggedIds = [];
+
+// Helper SVG icons for the Log All button
+const MP_LOG_ALL_ICON  = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
+const MP_UNSAVE_ALL_ICON = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>';
+
+// Resets the Log All button back to its default "Log All" state
+function mpResetLogAllBtn() {
+  const btn = document.getElementById('mp-log-all-btn');
+  if (!btn) return;
+  btn.innerHTML = MP_LOG_ALL_ICON + ' Log All Meals to Food Log';
+  btn.classList.remove('btn-danger');
+  btn.classList.add('btn-primary');
+}
+
+// Switches the Log All button to "Unsave All" state
+function mpSetUnsaveAllBtn() {
+  const btn = document.getElementById('mp-log-all-btn');
+  if (!btn) return;
+  btn.innerHTML = MP_UNSAVE_ALL_ICON + ' Unsave All Meals';
+  btn.classList.remove('btn-primary');
+  btn.classList.add('btn-danger');
+}
+
+// Logs every unlogged meal in the current plan to the food log at once,
+// or removes them all if already batch-logged (toggle behaviour)
 function mpLogAllMeals() {
-  let count = 0;
+  const dateStr = fmt(dashDate);
+
+  if (mpAllLogged && mpAllLoggedIds.length > 0) {
+    // ── UNSAVE ALL ──
+    const idsToRemove = new Set(mpAllLoggedIds);
+    const remaining = getFoodLog(dateStr).filter(e => !idsToRemove.has(e.id));
+    saveFoodLog(dateStr, remaining);
+
+    // Reset every meal card button
+    mpCurrentPlan.forEach(meal => {
+      if (mpAllLoggedIds.includes(meal.logEntryId)) {
+        meal.logged     = false;
+        meal.logEntryId = null;
+      }
+      const btn = document.getElementById('mp-log-' + meal.id);
+      if (btn && !meal.logged) {
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Log Meal';
+        btn.classList.remove('logged');
+      }
+    });
+
+    mpAllLogged    = false;
+    mpAllLoggedIds = [];
+    mpResetLogAllBtn();
+    showToast('All meals removed from Food Log.');
+    return;
+  }
+
+  // ── LOG ALL ──
+  // Commit any pending single-item mobile toast first
+  if (typeof MUT !== 'undefined' && MUT.active) MUT.active = false;
+
+  const newIds = [];
   mpCurrentPlan.forEach(meal => {
-    if (!meal.logged) {
-      mpLogMeal(String(meal.id));
-      count++;
+    if (meal.logged) return;
+    const logId = uniqueId();
+    meal.logEntryId = logId;
+    const entries = getFoodLog(dateStr);
+    entries.push({
+      id:          logId,
+      name:        meal.name,
+      ingredients: meal.ingredients,
+      calories:    meal.cal,
+      protein:     meal.pro,
+      carbs:       meal.carb,
+      fat:         meal.fat,
+    });
+    saveFoodLog(dateStr, entries);
+    meal.logged = true;
+    newIds.push(logId);
+
+    const btn = document.getElementById('mp-log-' + meal.id);
+    if (btn) {
+      btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Logged';
+      btn.classList.add('logged');
     }
   });
-  if (count === 0) showToast('All meals already logged!');
-  else showToast(count + ' meal' + (count > 1 ? 's' : '') + ' added to Food Log!');
+
+  if (newIds.length === 0) {
+    showToast('All meals already logged!');
+    return;
+  }
+
+  mpAllLogged    = true;
+  mpAllLoggedIds = newIds;
+  mpSetUnsaveAllBtn();
+  showToast(newIds.length + ' meal' + (newIds.length > 1 ? 's' : '') + ' added to Food Log!');
 }
 
 const _origNavigate = navigate;
@@ -4352,144 +4532,6 @@ window.addFood = function () {
         }
       },
       /* commitFn — item already in localStorage, nothing extra needed */ null
-    );
-  };
-
-  /* ════════════════════════════════════════════════
-     INTERCEPT 3 — Meals page: mpLogAllMeals()
-     "Log All Meals" button — batch undo on mobile
-  ════════════════════════════════════════════════ */
-  const _origMpLogAllMeals = window.mpLogAllMeals || mpLogAllMeals;
-
-  window.mpLogAllMeals = function () {
-    if (!isMobile()) {
-      _origMpLogAllMeals();
-      return;
-    }
-
-    // Commit any existing single-item pending toast first
-    if (MUT.active) _commitPending();
-
-    const dateStr   = fmt(dashDate);
-    const loggedBatch = []; // { meal, logId }
-
-    mpCurrentPlan.forEach(meal => {
-      if (meal.logged) return;
-
-      const logId = uniqueId();
-      meal.logEntryId = logId;
-      const entries = getFoodLog(dateStr);
-      entries.push({
-        id:          logId,
-        name:        meal.name,
-        ingredients: meal.ingredients,
-        calories:    meal.cal,
-        protein:     meal.pro,
-        carbs:       meal.carb,
-        fat:         meal.fat,
-      });
-      saveFoodLog(dateStr, entries);
-      meal.logged = true;
-      loggedBatch.push({ meal, logId });
-
-      const btn = document.getElementById('mp-log-' + meal.id);
-      if (btn) {
-        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Logged';
-        btn.classList.add('logged');
-      }
-    });
-
-    if (loggedBatch.length === 0) {
-      showToast('All meals already logged!');
-      return;
-    }
-
-    showMobileToast(
-      loggedBatch.length + ' meal' + (loggedBatch.length > 1 ? 's' : '') + ' added to Food Log',
-      function () {
-        // Undo ALL items at once
-        const idsToRemove = new Set(loggedBatch.map(x => x.logId));
-        const remaining = getFoodLog(dateStr).filter(e => !idsToRemove.has(e.id));
-        saveFoodLog(dateStr, remaining);
-        loggedBatch.forEach(({ meal }) => {
-          meal.logged     = false;
-          meal.logEntryId = null;
-          const btnU = document.getElementById('mp-log-' + meal.id);
-          if (btnU) {
-            btnU.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg> Log Meal';
-            btnU.classList.remove('logged');
-          }
-        });
-      },
-      null
-    );
-  };
-
-  /* ════════════════════════════════════════════════
-     INTERCEPT 4 — Programs page: wpSaveAllToLog()
-     "Save All to Gym Log" button — batch undo on mobile
-  ════════════════════════════════════════════════ */
-  const _origWpSaveAllToLog = window.wpSaveAllToLog || wpSaveAllToLog;
-
-  window.wpSaveAllToLog = function () {
-    if (!isMobile()) {
-      _origWpSaveAllToLog();
-      return;
-    }
-
-    if (!wpCurrentPlan || !wpCurrentPlan.length) return;
-
-    // Commit any existing single-item pending toast first
-    if (MUT.active) _commitPending();
-
-    const dateStr    = fmt(gymDate);
-    const savedBatch = []; // ex references
-
-    wpCurrentPlan.forEach(ex => {
-      if (ex.saved) return;
-
-      const repsNum = parseInt(String(ex.reps).split('\u2013')[0]) || 10;
-      const newId   = uniqueId();
-      const wd      = getGymDay(dateStr);
-      ex.gymEntryId = newId;
-      wd.exercises.push({
-        id:     newId,
-        name:   ex.name,
-        sets:   ex.sets,
-        reps:   repsNum,
-        weight: 0,
-        notes:  (SUB_TARGET_LABELS[ex.sub] || ex.sub) + ' \u2022 ' + ex.sets + '\xD7' + ex.reps,
-      });
-      wd.muscleGroup = WP_MUSCLE_TO_GYM[WP_STATE.muscle] || WP_STATE.muscle;
-      saveGymDay(dateStr, wd);
-      ex.saved = true;
-      savedBatch.push(ex);
-
-      const btn = document.getElementById('wp-save-' + ex.id);
-      if (btn) { btn.textContent = '\u2713 Saved'; btn.classList.add('saved'); }
-    });
-
-    if (savedBatch.length === 0) {
-      showToast('All exercises already saved!');
-      return;
-    }
-
-    showMobileToast(
-      savedBatch.length + ' exercise' + (savedBatch.length > 1 ? 's' : '') + ' added to Gym Log',
-      function () {
-        // Undo ALL items at once
-        const idsToRemove = new Set(savedBatch.map(ex => ex.gymEntryId));
-        const wd = getGymDay(dateStr);
-        wd.exercises = wd.exercises.filter(e => !idsToRemove.has(e.id));
-        saveGymDay(dateStr, wd);
-        savedBatch.forEach(ex => {
-          ex.saved      = false;
-          ex.gymEntryId = null;
-          const btnU = document.getElementById('wp-save-' + ex.id);
-          if (btnU) { btnU.textContent = '+ Log'; btnU.classList.remove('saved'); }
-        });
-      },
-      null
     );
   };
 
