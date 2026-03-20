@@ -3867,3 +3867,261 @@ window.saveProfile_ = function(p) {
   _origSaveProfileWater(p);
   renderWaterCard();
 };
+
+/* ═══════════════════════════════════════════════════════════════════
+   ENHANCEMENT 1 — Loading state for Generate Workout Plan
+   ═══════════════════════════════════════════════════════════════════ */
+
+// Wrap the original generateWorkoutPlan with a loading state
+(function wrapGenerateWorkoutPlan() {
+  const _orig = window.generateWorkoutPlan || generateWorkoutPlan;
+
+  window.generateWorkoutPlan = function () {
+    const output = document.getElementById('wp-plan-output');
+    if (!output) { _orig(); return; }
+
+    // Show skeleton + spinner
+    output.innerHTML = `
+      <div class="wp-loading-state">
+        <div class="wp-loading-spinner-wrap">
+          <div class="wp-loading-ring"></div>
+          <div class="wp-loading-icon">🏋️</div>
+        </div>
+        <div class="wp-loading-msg">Generating your workout plan…</div>
+        <div class="wp-loading-sub">Selecting optimal exercises for your goal &amp; level</div>
+      </div>
+      <div class="wp-skeleton-card" style="margin-top:.75rem">
+        <div class="wp-skeleton-bar bar-title"></div>
+        <div class="wp-skeleton-bar bar-badge"></div>
+        <div class="wp-skeleton-bar bar-desc"></div>
+        <div class="wp-skeleton-bar bar-desc2"></div>
+        <div class="wp-skeleton-bar bar-row"></div>
+        <div style="height:.5rem"></div>
+        <div class="wp-skeleton-bar bar-row2"></div>
+        <div style="height:.5rem"></div>
+        <div class="wp-skeleton-bar bar-row3"></div>
+      </div>`;
+
+    // Simulate 1.5 s processing, then render real plan
+    setTimeout(() => {
+      _orig();
+    }, 1500);
+  };
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ENHANCEMENT 2 — Loading state for Profile Goal Calculation
+   ═══════════════════════════════════════════════════════════════════ */
+
+(function wrapSaveProfile() {
+  const _origSave = window.saveProfile || saveProfile;
+
+  window.saveProfile = function () {
+    // Validate first (re-use original logic for error check)
+    const p = {
+      height: +document.getElementById('p-height').value,
+      weight: +document.getElementById('p-weight').value,
+      age:    +document.getElementById('p-age').value,
+      gender: document.getElementById('p-gender').value,
+      activityLevel: document.getElementById('p-activity').value,
+      goal:   document.getElementById('p-goal').value,
+    };
+    if (p.height < 50 || p.height > 300 || p.weight < 20 || p.weight > 400 || p.age < 10 || p.age > 120) {
+      showToast('Please check your inputs.');
+      return;
+    }
+
+    const resultEl = document.getElementById('calc-result');
+    if (!resultEl) { _origSave(); return; }
+
+    // Show skeleton loading
+    resultEl.innerHTML = `
+      <div class="goals-loading-state">
+        <div class="goals-loading-ring"></div>
+        <div class="goals-loading-msg">Calculating your goals…</div>
+        <div class="goals-loading-dots">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+      <div class="goals-skeleton">
+        <div class="goals-skeleton-big"></div>
+        <div class="goals-skeleton-pill">
+          <div class="goals-skeleton-item"></div>
+          <div class="goals-skeleton-item"></div>
+          <div class="goals-skeleton-item"></div>
+        </div>
+      </div>`;
+
+    // Save profile immediately in background
+    saveProfile_(p);
+    showToast('Profile saved!');
+
+    const banner = document.getElementById('onboard-banner');
+
+    // After 1 second show results
+    setTimeout(() => {
+      const r = calcGoals(p);
+      showCalcResult(r);
+
+      if (banner) {
+        banner.style.transition = 'opacity 0.3s ease';
+        banner.style.opacity = '0';
+        setTimeout(() => {
+          banner.remove();
+          navigate('dashboard');
+        }, 320);
+      }
+    }, 1000);
+  };
+})();
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ENHANCEMENT 3 — Smart Messages System (Dashboard)
+   ═══════════════════════════════════════════════════════════════════ */
+
+function computeSmartMessages(totals, goals, foodEntries) {
+  const messages = [];
+  const hasLogged = foodEntries.length > 0;
+
+  // 1. No activity at all today
+  if (!hasLogged) {
+    messages.push({
+      type: 'neutral',
+      icon: '📋',
+      text: "You haven't logged anything today. Start now!",
+    });
+    return messages; // only show this one when nothing logged
+  }
+
+  const calPct   = goals.calories > 0 ? totals.calories / goals.calories : 0;
+  const protPct  = goals.protein  > 0 ? totals.protein  / goals.protein  : 0;
+  const carbsPct = goals.carbs    > 0 ? totals.carbs    / goals.carbs    : 0;
+  const fatPct   = goals.fat      > 0 ? totals.fat      / goals.fat      : 0;
+
+  const allGoalsMet = calPct >= 0.95 && protPct >= 0.95 && carbsPct >= 0.95 && fatPct >= 0.95;
+
+  // 2. All goals reached — celebratory message
+  if (allGoalsMet) {
+    messages.push({
+      type: 'success',
+      icon: '🎉',
+      text: 'Great job! You hit your daily goals today!',
+    });
+    return messages;
+  }
+
+  // 3. Calorie under goal
+  if (calPct < 0.85 && goals.calories > 0) {
+    const remaining = Math.round(goals.calories - totals.calories);
+    messages.push({
+      type: 'warning',
+      icon: '🔥',
+      text: `You are under your calorie goal by ${remaining} kcal. Eat more to stay on track.`,
+    });
+  }
+
+  // 4. Calorie over goal
+  if (calPct > 1.1 && goals.calories > 0) {
+    const over = Math.round(totals.calories - goals.calories);
+    messages.push({
+      type: 'warning',
+      icon: '⚠️',
+      text: `You're ${over} kcal over your calorie goal today. Consider lighter meals.`,
+    });
+  }
+
+  // 5. Protein low
+  if (protPct < 0.75 && goals.protein > 0) {
+    const needed = Math.round(goals.protein - totals.protein);
+    messages.push({
+      type: 'info',
+      icon: '💪',
+      text: `You still need ${needed}g more protein today. Add a high-protein meal or snack.`,
+    });
+  }
+
+  // 6. Protein reached
+  if (protPct >= 0.95 && calPct < 0.95) {
+    messages.push({
+      type: 'success',
+      icon: '✅',
+      text: 'Protein goal reached! Focus on hitting your calorie target next.',
+    });
+  }
+
+  // 7. Carbs low (only mention if calorie goal not also low — avoid redundancy)
+  if (carbsPct < 0.70 && calPct >= 0.85 && goals.carbs > 0) {
+    messages.push({
+      type: 'info',
+      icon: '🌾',
+      text: `Carbs are low today — you still need ${Math.round(goals.carbs - totals.carbs)}g to hit your carb goal.`,
+    });
+  }
+
+  // 8. Good progress message (50-85% across all)
+  if (calPct >= 0.5 && calPct < 0.95 && protPct >= 0.5 && messages.length === 0) {
+    messages.push({
+      type: 'info',
+      icon: '📈',
+      text: `Good progress! You're ${Math.round(calPct * 100)}% of the way to your calorie goal. Keep it up!`,
+    });
+  }
+
+  return messages;
+}
+
+function renderSmartMessages() {
+  const panel = document.getElementById('smart-messages-panel');
+  if (!panel) return;
+
+  // Only show for today
+  if (!isToday(dashDate)) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  const dateStr = fmt(dashDate);
+  const entries = getFoodLog(dateStr);
+  const goals   = getGoals(dateStr);
+  const totals  = entries.reduce(
+    (a, e) => ({
+      calories: a.calories + e.calories,
+      protein:  a.protein  + e.protein,
+      carbs:    a.carbs    + e.carbs,
+      fat:      a.fat      + e.fat,
+    }),
+    { calories: 0, protein: 0, carbs: 0, fat: 0 }
+  );
+
+  const messages = computeSmartMessages(totals, goals, entries);
+
+  if (!messages.length) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.innerHTML = messages.map(m => `
+    <div class="smart-msg msg-${m.type}">
+      <span class="smart-msg-icon">${m.icon}</span>
+      <span class="smart-msg-text">${m.text}</span>
+    </div>
+  `).join('');
+  panel.style.display = 'flex';
+}
+
+// Hook into renderDashboard to always refresh smart messages
+const _origRenderDashForSmartMsg = window.renderDashboard;
+window.renderDashboard = function () {
+  _origRenderDashForSmartMsg();
+  renderSmartMessages();
+};
+
+// Also refresh smart messages after food is added/deleted
+const _origAddFoodSmart = window.addFood;
+window.addFood = function () {
+  _origAddFoodSmart();
+  // renderDashboard already called inside addFood, which now calls renderSmartMessages
+};
+
