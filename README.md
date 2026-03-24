@@ -1,65 +1,37 @@
-# 💪 FitForge
+# 🏋️‍♂️ FitForge - Professional Fitness & Nutrition Tracker
 
-**FitForge** is a simple fitness tracking web app that helps users track their daily food intake and gym workouts.
+**FitForge** is a modern, lightweight, and fully responsive Web Application designed to help users track their workouts, nutrition, and fitness progress. Built as a **Progressive Web App (PWA)**, it offers a seamless experience on both desktop and mobile, even offline.
 
-This project was built using **HTML, CSS, and JavaScript**.
+## 🌟 Key Features
 
-## 🚀 Features
+* **⚡ PWA Ready:** Install it on your phone or desktop just like a native app.
+* **🍏 Nutrition Tracking:** Log meals, track calories, and monitor macros (Protein, Carbs, Fats) with visual progress bars.
+* **💪 Workout Planner:** Create and manage workout programs, log exercises, sets, reps, and weights.
+* **📊 Progress Analytics:** Keep track of your daily goals and historical data.
+* **🌙 Dark/Light Mode:** Automatically adapts to your system preferences or manual toggle.
+* **💾 Local Storage:** Your data stays on your device—no account required, total privacy.
+* **🔄 Offline Support:** Works without an internet connection thanks to Service Workers.
 
-### 🍎 Food Tracking
+## 🛠️ Tech Stack
 
-Users can log foods with their nutritional values:
+* **Frontend:** HTML5, CSS3 (Custom properties, Flexbox/Grid)
+* **Logic:** Vanilla JavaScript (ES6+)
+* **PWA:** Web Manifest & Service Workers
+* **Storage:** Browser `localStorage` API
+* **Typography:** Google Fonts (DM Sans & Outfit)
 
-* Calories
-* Protein
-* Carbohydrates
-* Fat
 
-The app calculates daily totals to help users track their nutrition.
+## 📱 Installation (PWA)
 
-### 🏋️ Gym Workout Logging
+* **On Mobile:** Open the site in Chrome or Safari and click "Add to Home Screen".
+* **On Desktop:** Click the install icon in the browser address bar.
 
-Users can log their workouts by adding:
+## 📁 Project Structure
 
-* Exercise name
-* Sets
-* Reps
-* Weight (kg)
-
-Workouts can be organized by muscle groups such as:
-
-* Back
-* Chest
-* Legs
-* Arms
-* Shoulders
-
-### 📅 Daily Tracking
-
-Data can be logged for different days to track progress over time.
-
-## 🛠️ Built With
-
-* HTML
-* CSS
-* JavaScript
-
-## 🎯 Purpose
-
-This project was created as a **learning project** to practice building a small fitness tracking web application and managing data with JavaScript.
-
-## 📌 Future Improvements
-
-Possible improvements:
-
-* Add user profiles
-* Add automatic calorie and macro calculations
-* Improve the UI design
-
-## 👨‍💻 Author
-
-Created by **[Khalifa Chekkouch]**
-
-## ⭐ GitHub
-
-If you like this project, feel free to **star the repository ⭐**
+```text
+├── index.html       # Main application structure
+├── styling.css      # Custom UI components & themes
+├── scriptt.js       # Core application logic & state management
+├── sw.js            # Service Worker for offline capabilities
+├── manifest.json    # PWA configuration
+└── icons/           # App icons and splash screens
