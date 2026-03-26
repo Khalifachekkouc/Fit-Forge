@@ -22,8 +22,15 @@
 
   auth.onAuthStateChanged(user => {
     currentUser = user;
-    if (user) { hideAuthGate(); injectUserButton(user); }
-    else       { showAuthGate(); removeUserButton(); }
+    if (user) {
+      hideAuthGate();
+      injectUserButton(user);
+      _dbInit(user.uid);
+    } else {
+      showAuthGate();
+      removeUserButton();
+      _dbClear();
+    }
   });
 
   function showAuthGate() {
@@ -297,23 +304,68 @@ const KEYS = {
   profile: "ns_profile",
 };
 
+// ── Firestore DB Layer ──────────────────────────────────────────────
+// In-memory cache keyed by the same key strings used throughout the app.
+// On login the cache is populated from Firestore; load/save operate on
+// the cache synchronously so the rest of the code stays unchanged.
+const _dbCache = {};
+let _dbUserId  = null;
+let _db        = null;
+
+// Called once when the user logs in — fetches all user data from Firestore
+async function _dbInit(uid) {
+  _dbUserId = uid;
+  try {
+    _db = firebase.firestore();
+    const doc = await _db.collection('users').doc(uid).get();
+    if (doc.exists) {
+      const data = doc.data();
+      Object.assign(_dbCache, data);
+    }
+  } catch (e) {
+    console.warn('[DB] Failed to load from Firestore, using cache only:', e);
+  }
+  // After loading, refresh the UI with the now-populated cache
+  if (typeof checkFirstTimeUser === 'function') checkFirstTimeUser();
+  if (typeof renderDashboard === 'function') renderDashboard();
+  if (typeof loadProfile     === 'function' && typeof currentPage !== 'undefined' && currentPage === 'profile') loadProfile();
+}
+
+// Persists the full cache to Firestore (called after every save)
+function _dbFlush() {
+  if (!_db || !_dbUserId) return;
+  _db.collection('users').doc(_dbUserId).set(JSON.parse(JSON.stringify(_dbCache))).catch(e => {
+    console.warn('[DB] Firestore write failed:', e);
+  });
+}
+
+// Called on sign-out — clear the cache
+function _dbClear() {
+  Object.keys(_dbCache).forEach(k => delete _dbCache[k]);
+  _dbUserId = null;
+}
+
+// ── End Firestore DB Layer ──────────────────────────────────────────
+
 // Counter used to generate unique numeric IDs
 let _uidCounter = 0;
 function uniqueId() {
   return Date.now() * 1000 + (++_uidCounter % 1000);
 }
- 
-// Generic localStorage read helper — returns parsed JSON or null
+
+// Generic DB read helper — reads from in-memory cache (backed by Firestore)
 function load(key) {
   try {
-    return JSON.parse(localStorage.getItem(key) || "null");
+    const val = _dbCache[key];
+    return val !== undefined ? val : null;
   } catch {
     return null;
   }
 }
-// Generic localStorage write helper — serialises value to JSON
+// Generic DB write helper — updates cache and syncs to Firestore
 function save(key, val) {
-  localStorage.setItem(key, JSON.stringify(val));
+  _dbCache[key] = val;
+  _dbFlush();
 }
 
 // Returns array of food entries logged on the given date
@@ -1248,11 +1300,11 @@ updateExerciseSuggestions();
 })();
 
 // Detects a first-time visitor (no saved profile) and redirects to the Profile page
-(function checkFirstTimeUser() {
-  const hasProfile = localStorage.getItem(KEYS.profile);
+function checkFirstTimeUser() {
+  const hasProfile = _dbCache[KEYS.profile];
   if (!hasProfile) {
     const profilePage = document.getElementById('page-profile');
-    if (profilePage) {
+    if (profilePage && !document.getElementById('onboard-banner')) {
       const banner = document.createElement('div');
       banner.id = 'onboard-banner';
       banner.className = 'onboard-banner';
@@ -1268,7 +1320,8 @@ updateExerciseSuggestions();
     }
     setTimeout(() => navigate('profile'), 80);
   }
-})();
+}
+checkFirstTimeUser();
 
 
 // Current filter selections for the Workout Programs page
@@ -4209,13 +4262,14 @@ function getWaterKey(dateStr) {
 
 // Returns the total water intake in ml for the given date
 function getWaterIntake(dateStr) {
-  const raw = localStorage.getItem(getWaterKey(dateStr));
-  return raw !== null ? parseInt(raw, 10) : 0;
+  const val = _dbCache[getWaterKey(dateStr)];
+  return val !== undefined && val !== null ? parseInt(val, 10) : 0;
 }
 
 // Persists the water intake value (in ml) for the given date
 function saveWaterIntake(dateStr, ml) {
-  localStorage.setItem(getWaterKey(dateStr), String(ml));
+  _dbCache[getWaterKey(dateStr)] = String(ml);
+  _dbFlush();
 }
 
 // Calculates a personalised daily water target based on weight and goal
