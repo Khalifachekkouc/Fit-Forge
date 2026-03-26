@@ -64,7 +64,7 @@ self.addEventListener('fetch', (event) => {
         if (
           networkResponse &&
           networkResponse.status === 200 &&
-          networkResponse.type === 'basic'
+          networkResponse.type === 'basic' 
         ) {
           const clone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
