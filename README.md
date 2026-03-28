@@ -20,7 +20,6 @@
 * **Storage:** Browser `localStorage` API
 * **Typography:** Google Fonts (DM Sans & Outfit)
 
-
 ## 📱 Installation (PWA)
 
 * **On Mobile:** Open the site in Chrome or Safari and click "Add to Home Screen".
