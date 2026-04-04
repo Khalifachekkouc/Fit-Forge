@@ -1,7 +1,7 @@
 // ==================================//
 // ==== Main application script =====//
 //  ================================//
-
+ 
 //Firebase Auth Logic
 (function () {
   const firebaseConfig = {
