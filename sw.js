@@ -1,5 +1,5 @@
 // sw.js — FitForge Service Worker
-const CACHE_NAME = 'fitforge-v3';
+const CACHE_NAME = 'fitforge-v4';
 
 const ASSETS_TO_CACHE = [
   './',
@@ -7,12 +7,8 @@ const ASSETS_TO_CACHE = [
   './scriptt.js',
   './styling.css',
   './manifest.json',
-  './icons/icon-120.png',
-  './icons/icon-152.png',
-  './icons/icon-167.png',
-  './icons/icon-180.png',
-  './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 // ── Install: cache all essential assets ──
