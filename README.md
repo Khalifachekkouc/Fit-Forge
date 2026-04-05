@@ -9,7 +9,7 @@
 * **💪 Workout Planner:** Create and manage workout programs, log exercises, sets, reps, and weights.
 * **📊 Progress Analytics:** Keep track of your daily goals and historical data.
 * **🌙 Dark/Light Mode:** Automatically adapts to your system preferences or manual toggle.
-* **💾 Local Storage:** Your data stays on your device—no account required, total privacy.
+* **☁️ Cloud Sync:** Securely save your data to the cloud using Firebase, allowing you to access it from any device with your account.
 * **🔄 Offline Support:** Works without an internet connection thanks to Service Workers.
 
 ## 🛠️ Tech Stack
@@ -17,7 +17,7 @@
 * **Frontend:** HTML5, CSS3 (Custom properties, Flexbox/Grid)
 * **Logic:** Vanilla JavaScript (ES6+)
 * **PWA:** Web Manifest & Service Workers
-* **Storage:** Browser `localStorage` API
+* **Database & Auth:** Firebase Firestore & Firebase Authentication
 * **Typography:** Google Fonts (DM Sans & Outfit)
 
 ## 📱 Installation (PWA)
