@@ -8,7 +8,7 @@
     --text-muted: #65758b;
     --input-bg: rgba(210, 224, 240, .25);
     --header-bg: rgba(253, 253, 253, .85);
-    --mobile-nav-bg: rgba(253, 253, 253, .92);
+    --mobile-nav-bg: rgba(255, 255, 255, .3);
     --hover-bg: #f1f5f9;
     --entry-bg: rgba(210, 224, 240, .15);
     --entry-bg-hover: rgba(210, 224, 240, .3);
@@ -36,7 +36,7 @@
     --text-muted: #8899aa;
     --input-bg: rgba(255, 255, 255, .07);
     --header-bg: rgba(13, 17, 23, .92);
-    --mobile-nav-bg: rgba(13, 17, 23, .96);
+    --mobile-nav-bg: rgba(28, 34, 48, .25);
     --hover-bg: rgba(255, 255, 255, .06);
     --entry-bg: rgba(255, 255, 255, .04);
     --entry-bg-hover: rgba(255, 255, 255, .08);
@@ -202,19 +202,23 @@ main {
     padding: 1.5rem 1.25rem 6rem;
 }
 
-/* ── Fixed bottom nav bar (mobile only) ── */
+/* ── Fixed floating nav bar (mobile only) ── */
 .mobile-nav {
     display: none;
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    border-top: 1px solid var(--border-color);
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 2.5rem);
+    max-width: 400px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.15); /* More subtle translucent border for glass effect */
     background: var(--mobile-nav-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1), 0 2px 10px rgba(0, 0, 0, 0.04);
+    backdrop-filter: blur(36px) saturate(200%);
+    -webkit-backdrop-filter: blur(36px) saturate(200%);
     z-index: 50;
-    padding: .5rem;
+    padding: 0.5rem 1rem;
     justify-content: space-around;
     align-items: center;
 }
@@ -266,8 +270,23 @@ main {
     border: 1px solid var(--border-color);
     border-radius: 24px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, .04);
-    transition: box-shadow 0.22s ease, transform 0.22s ease,
-        background-color 0.3s ease, border-color 0.3s ease;
+    transition: 
+        box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+        transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        background-color 0.3s ease, 
+        border-color 0.3s ease;
+    cursor: pointer;
+}
+
+.card:hover {
+    box-shadow: 0 8px 30px rgba(31, 173, 150, 0.12), 0 0 15px rgba(31, 173, 150, 0.05);
+    transform: translateY(-2px);
+    border-color: rgba(31, 173, 150, 0.2);
+}
+
+.card:active {
+    transform: scale(0.97) translateY(0);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 /* ── Date navigation row (prev / label / next) ── */
@@ -339,8 +358,9 @@ main {
 }
 
 .macro-card:hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, .07);
-    transform: translateY(-2px);
+    box-shadow: 0 10px 40px rgba(31, 173, 150, 0.15), 0 0 20px rgba(31, 173, 150, 0.08);
+    transform: translateY(-4px);
+    border-color: rgba(31, 173, 150, 0.3);
 }
 
 .macro-header {
@@ -1513,18 +1533,21 @@ main {
     }
 }
 
-/* ── Desktop breakpoint overrides ── */
-@media (min-width: 640px) {
-    .macros-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-
+/* ── Desktop Navigation Breakpoint ── */
+@media (min-width: 769px) {
     .mobile-nav {
         display: none !important;
     }
 
     nav {
         display: flex !important;
+    }
+}
+
+/* ── Desktop Layout Breakpoint overrides ── */
+@media (min-width: 640px) {
+    .macros-grid {
+        grid-template-columns: repeat(4, 1fr);
     }
 
     .profile-grid {
@@ -1536,15 +1559,19 @@ main {
     }
 }
 
-/* ── Mobile breakpoint overrides ── */
-@media (max-width: 639px) {
+/* ── Tablet / Mobile Navigation Breakpoint ── */
+@media (max-width: 768px) {
     nav {
-        display: none;
+        display: none !important;
     }
 
     .mobile-nav {
-        display: flex;
+        display: flex !important;
     }
+}
+
+/* ── Mobile Layout Breakpoint overrides ── */
+@media (max-width: 639px) {
 
     .macros-grid {
         grid-template-columns: 1fr 1fr;
@@ -2108,6 +2135,18 @@ main {
     border-radius: 12px;
     padding: .65rem .75rem;
     backdrop-filter: blur(4px);
+    transition: box-shadow 0.25s ease, transform 0.2s ease, border-color 0.25s ease;
+    cursor: pointer;
+}
+
+.mp-req-card:hover {
+    box-shadow: 0 4px 15px rgba(31, 173, 150, 0.1);
+    transform: translateY(-2px);
+    border-color: rgba(31, 173, 150, 0.3);
+}
+
+.mp-req-card:active {
+    transform: scale(0.96);
 }
 
 [data-theme="dark"] .mp-req-card {
@@ -2168,14 +2207,22 @@ main {
     gap: 1rem;
     align-items: flex-start;
     animation: slideUp .35s ease both;
-    transition: box-shadow 0.22s ease, transform 0.22s ease,
-        border-color 0.22s ease, background-color 0.3s ease;
+    transition: 
+        box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+        transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.25s ease, 
+        background-color 0.3s ease;
+    cursor: pointer;
 }
 
 .mp-meal-card:hover {
-    box-shadow: 0 8px 28px rgba(0, 0, 0, .1);
-    transform: translateY(-2px);
-    border-color: rgba(31, 173, 150, .2);
+    box-shadow: 0 10px 40px rgba(31, 173, 150, 0.15), 0 0 20px rgba(31, 173, 150, 0.08);
+    transform: translateY(-4px);
+    border-color: rgba(31, 173, 150, 0.3);
+}
+
+.mp-meal-card:active {
+    transform: scale(0.97) translateY(0);
 }
 
 .mp-meal-num {
@@ -2306,7 +2353,6 @@ main {
 }
 
 .mp-plan-summary {
-    card: inherit;
     background: var(--entry-bg);
     border: 1px solid var(--border-color);
     border-radius: 18px;
@@ -2315,6 +2361,18 @@ main {
     flex-wrap: wrap;
     gap: .75rem;
     margin-bottom: 1.25rem;
+    transition: box-shadow 0.25s ease, transform 0.2s ease, border-color 0.25s ease;
+    cursor: pointer;
+}
+
+.mp-plan-summary:hover {
+    box-shadow: 0 5px 20px rgba(31, 173, 150, 0.1);
+    transform: translateY(-2px);
+    border-color: rgba(31, 173, 150, 0.25);
+}
+
+.mp-plan-summary:active {
+    transform: scale(0.98);
 }
 
 .mp-sum-pill {
@@ -4473,4 +4531,18 @@ body.auth-open {
 .auth-menu-item.danger:hover {
     background: rgba(248, 113, 113, .1);
     color: #f87171;
+}.gym-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (min-width: 900px) {
+  .gym-grid {
+    grid-template-columns: 1fr 380px;
+  }
+}
+.heatmap-card {
+  position: sticky;
+  top: 1.5rem;
 }
