@@ -1247,10 +1247,7 @@ function saveProfile() {
   if (banner) {
     banner.style.transition = "opacity 0.3s ease";
     banner.style.opacity = "0";
-    setTimeout(() => {
-      banner.remove();
-      navigate("dashboard");
-    }, 320);
+    setTimeout(() => banner.remove(), 320);
   }
 }
 
@@ -1329,6 +1326,7 @@ function applyGoals(cal, pro, carb, fat) {
   const g = { calories: cal, protein: pro, carbs: carb, fat: fat };
   saveDefaultGoals(g);
   showToast("Applied to today & future days!");
+  navigate("dashboard");
 }
 
 // Shows a modal overlay by adding the 'open' class
@@ -1436,6 +1434,9 @@ function checkFirstTimeUser() {
       profilePage.insertBefore(banner, profilePage.firstChild);
     }
     setTimeout(() => navigate("profile"), 80);
+  } else {
+    // Returning user — go straight to the dashboard
+    setTimeout(() => navigate("dashboard"), 80);
   }
 }
 checkFirstTimeUser();
@@ -7888,10 +7889,7 @@ window.saveProfile_ = function (p) {
       if (banner) {
         banner.style.transition = "opacity 0.3s ease";
         banner.style.opacity = "0";
-        setTimeout(() => {
-          banner.remove();
-          navigate("dashboard");
-        }, 320);
+        setTimeout(() => banner.remove(), 320);
       }
     }, 1000);
   };
