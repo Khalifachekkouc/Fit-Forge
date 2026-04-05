@@ -129,6 +129,7 @@ header {
     display: flex;
     align-items: center;
     gap: .5rem;
+    margin-right: auto;
 }
 
 .logo svg {
@@ -2542,7 +2543,6 @@ main {
     justify-content: center;
     color: var(--text-muted);
     flex-shrink: 0;
-    margin-left: auto;
     transition: background 0.18s ease, border-color 0.18s ease,
         color 0.18s ease, transform 0.12s ease;
 }
@@ -4431,6 +4431,7 @@ body.auth-open {
 /* ── User button in header when logged in ── */
 .auth-user-wrap {
     position: relative;
+    margin-left: auto;
 }
 
 .auth-user-btn {
