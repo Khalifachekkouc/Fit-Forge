@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=Outfit:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="styling.css">
   <link rel="icon" type="image/png" href="icon-192.png">
   <link rel="alternate icon" type="image/png" href="icon-180.png">
@@ -13,7 +16,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="FitForge">
   <meta name="mobile-web-app-capable" content="yes">
- 
+
   <!-- Apple Touch Icons (PNG required — iOS ignores SVG) -->
   <link rel="apple-touch-icon" href="icon-180.png">
 
@@ -26,833 +29,1115 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <title>FitForge</title>
 </head>
-<body> 
-<!-- ── Sticky top navigation header ── -->
-<header>
-  <div class="header-inner">
-    <div class="logo">
-      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      <span class="logo-text">Fit<span>Forge</span></span>
-    </div>
-    <nav>
-      <button class="nav-btn active" onclick="navigate('dashboard')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-        Dashboard
-      </button>
-      <button class="nav-btn" onclick="navigate('meals')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
-        Meals
-      </button>
-      <button class="nav-btn" onclick="navigate('programs')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-        Programs
-      </button>
-      <button class="nav-btn" onclick="navigate('gym')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></svg>
-        Gym
-      </button>
-      <button class="nav-btn" onclick="navigate('progress')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Progress
-      </button>
-      <button class="nav-btn" onclick="navigate('records')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-        Records
-      </button>
-      <button class="nav-btn" onclick="navigate('profile')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        Profile
-      </button>
-    </nav>
-    <button class="dark-toggle" id="dark-toggle-btn" onclick="toggleDarkMode()" title="Toggle dark mode" aria-label="Toggle dark mode">
-      <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-      <svg class="icon-sun"  xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-    </button>
-  </div>
-</header>
 
-
-<!-- ── Page content── -->
-<main>
-  <!-- Dashboard page: daily macro summary, water tracker, food log -->
-  <div id="page-dashboard" class="page active">
-    <div class="date-nav card">
-      <button class="icon-btn" onclick="changeDay(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <div style="text-align:center">
-        <h2 id="dash-date-label">Today</h2>
-        <p id="dash-weekday" class="text-muted"></p>
+<body>
+  <!-- ── Sticky top navigation header ── -->
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+        <span class="logo-text">Fit<span>Forge</span></span>
       </div>
-      <button class="icon-btn" id="dash-fwd-btn" onclick="changeDay(1)">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+      <nav>
+        <button class="nav-btn active" onclick="navigate('dashboard')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="7" height="9" x="3" y="3" rx="1" />
+            <rect width="7" height="5" x="14" y="3" rx="1" />
+            <rect width="7" height="9" x="14" y="12" rx="1" />
+            <rect width="7" height="5" x="3" y="16" rx="1" />
+          </svg>
+          Dashboard
+        </button>
+        <button class="nav-btn" onclick="navigate('meals')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+            <path d="M7 2v20" />
+            <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7" />
+          </svg>
+          Meals
+        </button>
+        <button class="nav-btn" onclick="navigate('programs')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4" />
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+          </svg>
+          Programs
+        </button>
+        <button class="nav-btn" onclick="navigate('gym')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4" />
+          </svg>
+          Gym
+        </button>
+        <button class="nav-btn" onclick="navigate('progress')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+          Progress
+        </button>
+      </nav>
+      <button class="dark-toggle" id="dark-toggle-btn" onclick="toggleDarkMode()" title="Toggle dark mode"
+        aria-label="Toggle dark mode">
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="5" />
+          <line x1="12" y1="1" x2="12" y2="3" />
+          <line x1="12" y1="21" x2="12" y2="23" />
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+          <line x1="1" y1="12" x2="3" y2="12" />
+          <line x1="21" y1="12" x2="23" y2="12" />
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+        </svg>
       </button>
     </div>
+  </header>
 
-    <div id="dash-lock-banner" style="display:none"></div>
 
-    <!-- Smart Messages Panel -->
-    <div id="smart-messages-panel" class="smart-messages-panel" style="display:none"></div>
+  <!-- ── Page content── -->
+  <main>
+    <!-- Dashboard page: daily macro summary, water tracker, food log -->
+    <div id="page-dashboard" class="page active">
+      <div class="date-nav card">
+        <button class="icon-btn" onclick="changeDay(-1)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <div style="text-align:center">
+          <h2 id="dash-date-label">Today</h2>
+          <p id="dash-weekday" class="text-muted"></p>
+        </div>
+        <button class="icon-btn" id="dash-fwd-btn" onclick="changeDay(1)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </button>
+      </div>
 
-    <div class="section-header">
-      <h2 class="section-title">Daily Summary</h2>
-      <button class="btn btn-outline" onclick="openModal('edit-goals-modal')">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        Edit Goals
-      </button>
-    </div>
+      <div id="dash-lock-banner" style="display:none"></div>
 
-    <div class="macros-grid" id="macros-grid"></div>
+      <!-- Smart Messages Panel -->
+      <div id="smart-messages-panel" class="smart-messages-panel" style="display:none"></div>
 
-    <div class="card water-card" id="water-card">
-      <div class="water-card-inner">
-        <div class="water-card-header">
-          <div class="water-card-title-row">
-            <span class="water-icon">💧</span>
-            <div>
-              <div class="water-card-label">Water Intake</div>
-              <div class="water-amount-row">
-                <span class="water-consumed" id="water-consumed-display">0</span>
-                <span class="water-sep"> / </span>
-                <span class="water-goal-display" id="water-goal-display">2450</span>
-                <span class="water-unit"> ml</span>
+      <div class="section-header">
+        <h2 class="section-title">Daily Summary</h2>
+        <button class="btn btn-outline" onclick="openModal('edit-goals-modal')">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+          </svg>
+          Edit Goals
+        </button>
+      </div>
+
+      <div class="macros-grid" id="macros-grid"></div>
+
+      <div class="card water-card" id="water-card">
+        <div class="water-card-inner">
+          <div class="water-card-header">
+            <div class="water-card-title-row">
+              <span class="water-icon">💧</span>
+              <div>
+                <div class="water-card-label">Water Intake</div>
+                <div class="water-amount-row">
+                  <span class="water-consumed" id="water-consumed-display">0</span>
+                  <span class="water-sep"> / </span>
+                  <span class="water-goal-display" id="water-goal-display">2450</span>
+                  <span class="water-unit"> ml</span>
+                </div>
               </div>
             </div>
+            <div class="water-pct-badge" id="water-pct-badge">0%</div>
           </div>
-          <div class="water-pct-badge" id="water-pct-badge">0%</div>
-        </div>
 
-        <div class="water-bar-track">
-          <div class="water-bar-fill" id="water-bar-fill" style="width:0%"></div>
-        </div>
-
-        <div class="water-footer">
-          <div class="water-remaining" id="water-remaining-text">
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-            <span id="water-remaining-label">2450 ml left</span>
+          <div class="water-bar-track">
+            <div class="water-bar-fill" id="water-bar-fill" style="width:0%"></div>
           </div>
-          <div class="water-btn-group">
-            <button class="water-cancel-btn" id="water-cancel-btn" onclick="cancelWater(250)" title="Cancel last cup">
-              −250 ml
-            </button>
-            <button class="water-add-btn" id="water-add-btn" onclick="addWater(250)">
-              +250 ml
-            </button>
+
+          <div class="water-footer">
+            <div class="water-remaining" id="water-remaining-text">
+              <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+              </svg>
+              <span id="water-remaining-label">2450 ml left</span>
+            </div>
+            <div class="water-btn-group">
+              <button class="water-cancel-btn" id="water-cancel-btn" onclick="cancelWater(250)" title="Cancel last cup">
+                −250 ml
+              </button>
+              <button class="water-add-btn" id="water-add-btn" onclick="addWater(250)">
+                +250 ml
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div class="card food-log-card">
-      <div class="section-header">
-        <h2 class="section-title">Food Log</h2>
-        <button class="btn btn-primary" id="add-food-btn" onclick="openModal('add-food-modal')">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-          Add Food
+      <div class="card food-log-card">
+        <div class="section-header">
+          <h2 class="section-title">Food Log</h2>
+          <button class="btn btn-primary" id="add-food-btn" onclick="openModal('add-food-modal')">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Add Food
+          </button>
+        </div>
+        <div id="food-entries" class="food-entries"></div>
+      </div>
+    </div>
+    <!-- Gym page: workout type chips and exercise log -->
+    <div id="page-gym" class="page">
+      <div class="date-nav card">
+        <button class="icon-btn" onclick="changeGymDay(-1)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <div style="text-align:center">
+          <h2 id="gym-date-label">Today</h2>
+          <p id="gym-weekday" class="text-muted"></p>
+        </div>
+        <button class="icon-btn" id="gym-fwd-btn" onclick="changeGymDay(1)">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
         </button>
       </div>
-      <div id="food-entries" class="food-entries"></div>
-    </div>
-  </div>
-  <!-- Gym page: workout type chips and exercise log -->
-  <div id="page-gym" class="page">
-    <div class="date-nav card">
-      <button class="icon-btn" onclick="changeGymDay(-1)">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-      </button>
-      <div style="text-align:center">
-        <h2 id="gym-date-label">Today</h2>
-        <p id="gym-weekday" class="text-muted"></p>
-      </div>
-      <button class="icon-btn" id="gym-fwd-btn" onclick="changeGymDay(1)">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
-      </button>
-    </div>
 
-    <div id="gym-lock-banner" style="display:none"></div>
+      <div id="gym-lock-banner" style="display:none"></div>
 
-    <div class="card" style="padding:1.25rem; margin-bottom:1.5rem;">
-      <div class="section-header" style="margin-bottom:.75rem">
-        <div class="flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></svg>
-          <h2 class="section-title">Workout Type</h2>
-        </div>
-      </div>
-      <div class="muscle-chips" id="muscle-chips"></div>
-      <p id="muscle-group-label" class="text-muted mt-2" style="display:none"></p>
-    </div>
-
-    <div class="card" style="padding:1.25rem; margin-bottom:1.5rem;">
-      <div class="section-header">
-        <h2 class="section-title">Exercises</h2>
-        <button class="btn btn-primary" id="add-exercise-btn" onclick="openModal('add-exercise-modal')">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-          Add Exercise
-        </button>
-      </div>
-      <div id="exercises-container"></div>
-    </div>
-  </div>
-  <!-- Progress page: chart tabs for weight, calories, macros and strength -->
-  <div id="page-progress" class="page">
-    <div class="prog-page-header">
-      <div class="prog-page-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-      </div>
-      <div>
-        <h1 class="prog-page-title">Progress Tracker</h1>
-        <p class="prog-page-sub">Visualise your weight, nutrition and strength over time</p>
-      </div>
-    </div>
-    <div class="prog-tab-bar">
-      <button class="prog-tab active" id="ptab-calories" onclick="switchProgTab('calories')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-        Calories
-      </button>
-       <button class="prog-tab" id="ptab-protein" onclick="switchProgTab('protein')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M15.45 15.4c-2.13 2.12-4.9 2.86-7.37 2.27L5 21l-2-2 3.33-3.08c-.59-2.47.15-5.24 2.27-7.36 2.87-2.87 7.12-3.44 9.46-1.1 2.34 2.34 1.77 6.59-1.1 9.46v-.53z"/></svg>
-        Protein
-      </button>
-      <button class="prog-tab" id="ptab-carbs" onclick="switchProgTab('carbs')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2v20"/><path d="M8 6c0 0 .5-2 4-2s4 2 4 2"/><path d="M7 10c0 0-1-2 2-3"/><path d="M17 10c0 0 1-2-2-3"/><path d="M7 14c0 0-1-2 2-3"/><path d="M17 14c0 0 1-2-2-3"/><path d="M8 18c0 0 .5-2 4-2s4 2 4 2"/></svg>
-        Carbs
-      </button>
-      <button class="prog-tab" id="ptab-fat" onclick="switchProgTab('fat')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-        Fat
-      </button>
-      <button class="prog-tab" id="ptab-weight" onclick="switchProgTab('weight')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 16 4-4 4 4 4-6"/></svg>
-        Weight
-      </button>
-      <button class="prog-tab" id="ptab-strength" onclick="switchProgTab('strength')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></svg>
-        Strength
-      </button>
-    </div>
-    <div id="prog-panel-weight" class="prog-panel">
-      <div class="prog-chart-card card">
-        <div class="prog-chart-header">
-          <div><h2 class="prog-chart-title">Body Weight</h2><p class="prog-chart-sub">Weight trend from your saved profile history</p></div>
-          <div class="prog-stats-row" id="prog-weight-stats"></div>
-        </div>
-        <div class="prog-chart-wrap"><canvas id="chart-weight"></canvas></div>
-        <div id="prog-weight-empty" class="prog-empty" style="display:none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto .75rem"><path d="M3 3v18h18"/><path d="m7 16 4-4 4 4 4-6"/></svg>
-          <p>Save your profile with different weights over time to see the trend here.</p>
-        </div>
-      </div>
-    </div>
-    <div id="prog-panel-calories" class="prog-panel active">
-      <div class="prog-chart-card card">
-        <div class="prog-chart-header">
-          <div><h2 class="prog-chart-title">Daily Calorie Intake</h2><p class="prog-chart-sub">Logged calories per day vs. your daily goal</p></div>
-          <div class="prog-stats-row" id="prog-cal-stats"></div>
-        </div>
-        <div class="prog-chart-wrap"><canvas id="chart-calories"></canvas></div>
-        <div id="prog-cal-empty" class="prog-empty" style="display:none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto .75rem"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-          <p>Log food in the Dashboard to see your calorie trend here.</p>
-        </div>
-      </div>
-    </div>
-    <div id="prog-panel-strength" class="prog-panel">
-      <div class="prog-chart-card card">
-        <div class="prog-chart-header">
-          <div><h2 class="prog-chart-title">Strength Progress</h2><p class="prog-chart-sub">Weight lifted per exercise over time</p></div>
-          <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
-            <select id="prog-ex-select" class="form-select" style="height:36px;min-width:180px;font-size:.85rem" onchange="renderStrengthChart()">
-              <option value="">Select exercise…</option>
-            </select>
-            <div class="prog-stats-row" id="prog-str-stats"></div>
+      <div class="card" style="padding:1.25rem; margin-bottom:1.5rem;">
+        <div class="section-header" style="margin-bottom:.75rem">
+          <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary)"
+              stroke-width="2" viewBox="0 0 24 24">
+              <path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4" />
+            </svg>
+            <h2 class="section-title">Workout Type</h2>
           </div>
         </div>
-        <div class="prog-chart-wrap"><canvas id="chart-strength"></canvas></div>
-        <div id="prog-str-empty" class="prog-empty" style="display:none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto .75rem"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></svg>
-          <p>Log gym exercises to see strength progress here.</p>
-        </div>
+        <div class="muscle-chips" id="muscle-chips"></div>
+        <p id="muscle-group-label" class="text-muted mt-2" style="display:none"></p>
       </div>
-    </div>
 
-    <div id="prog-panel-protein" class="prog-panel">
-      <div class="prog-chart-card card">
-        <div class="prog-chart-header">
-          <div><h2 class="prog-chart-title">Daily Protein Intake</h2><p class="prog-chart-sub">Logged protein per day vs. your daily goal</p></div>
-          <div class="prog-stats-row" id="prog-protein-stats"></div>
+      <div class="card" style="padding:1.25rem; margin-bottom:1.5rem;">
+        <div class="section-header">
+          <h2 class="section-title">Exercises</h2>
+          <button class="btn btn-primary" id="add-exercise-btn" onclick="openModal('add-exercise-modal')">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2"
+              viewBox="0 0 24 24">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Add Exercise
+          </button>
         </div>
-        <div class="prog-chart-wrap"><canvas id="chart-protein"></canvas></div>
-        <div id="prog-protein-empty" class="prog-empty" style="display:none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto .75rem"><path d="M15.45 15.4c-2.13 2.12-4.9 2.86-7.37 2.27L5 21l-2-2 3.33-3.08c-.59-2.47.15-5.24 2.27-7.36 2.87-2.87 7.12-3.44 9.46-1.1 2.34 2.34 1.77 6.59-1.1 9.46v-.53z"/></svg>
-          <p>Log food in the Dashboard to see your protein trend here.</p>
-        </div>
+        <div id="exercises-container"></div>
       </div>
     </div>
+    <!-- Progress page: chart tabs for weight, calories, macros and strength -->
+    <div id="page-progress" class="page">
+      <div class="prog-page-header">
+        <div class="prog-page-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor"
+            stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="prog-page-title">Progress Tracker</h1>
+          <p class="prog-page-sub">Visualise your weight, nutrition and strength over time</p>
+        </div>
+      </div>
+      <div class="prog-tab-bar">
+        <button class="prog-tab active" id="ptab-calories" onclick="switchProgTab('calories')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor"
+            stroke-width="2" viewBox="0 0 24 24">
+            <path
+              d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+          </svg>
+          Calories
+        </button>
+        <button class="prog-tab" id="ptab-protein" onclick="switchProgTab('protein')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path
+              d="M15.45 15.4c-2.13 2.12-4.9 2.86-7.37 2.27L5 21l-2-2 3.33-3.08c-.59-2.47.15-5.24 2.27-7.36 2.87-2.87 7.12-3.44 9.46-1.1 2.34 2.34 1.77 6.59-1.1 9.46v-.53z" />
+          </svg>
+          Protein
+        </button>
+        <button class="prog-tab" id="ptab-carbs" onclick="switchProgTab('carbs')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M12 2v20" />
+            <path d="M8 6c0 0 .5-2 4-2s4 2 4 2" />
+            <path d="M7 10c0 0-1-2 2-3" />
+            <path d="M17 10c0 0 1-2-2-3" />
+            <path d="M7 14c0 0-1-2 2-3" />
+            <path d="M17 14c0 0 1-2-2-3" />
+            <path d="M8 18c0 0 .5-2 4-2s4 2 4 2" />
+          </svg>
+          Carbs
+        </button>
+        <button class="prog-tab" id="ptab-fat" onclick="switchProgTab('fat')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+          </svg>
+          Fat
+        </button>
+        <button class="prog-tab" id="ptab-weight" onclick="switchProgTab('weight')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor"
+            stroke-width="2" viewBox="0 0 24 24">
+            <path d="M3 3v18h18" />
+            <path d="m7 16 4-4 4 4 4-6" />
+          </svg>
+          Weight
+        </button>
+        <button class="prog-tab" id="ptab-strength" onclick="switchProgTab('strength')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor"
+            stroke-width="2" viewBox="0 0 24 24">
+            <path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4" />
+          </svg>
+          Strength
+        </button>
+      </div>
+      <div id="prog-panel-weight" class="prog-panel">
+        <div class="prog-chart-card card">
+          <div class="prog-chart-header">
+            <div>
+              <h2 class="prog-chart-title">Body Weight</h2>
+              <p class="prog-chart-sub">Weight trend from your saved profile history</p>
+            </div>
+            <div class="prog-stats-row" id="prog-weight-stats"></div>
+          </div>
+          <div class="prog-chart-wrap"><canvas id="chart-weight"></canvas></div>
+          <div id="prog-weight-empty" class="prog-empty" style="display:none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor"
+              stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto .75rem">
+              <path d="M3 3v18h18" />
+              <path d="m7 16 4-4 4 4 4-6" />
+            </svg>
+            <p>Save your profile with different weights over time to see the trend here.</p>
+          </div>
+        </div>
+      </div>
+      <div id="prog-panel-calories" class="prog-panel active">
+        <div class="prog-chart-card card">
+          <div class="prog-chart-header">
+            <div>
+              <h2 class="prog-chart-title">Daily Calorie Intake</h2>
+              <p class="prog-chart-sub">Logged calories per day vs. your daily goal</p>
+            </div>
+            <div class="prog-stats-row" id="prog-cal-stats"></div>
+          </div>
+          <div class="prog-chart-wrap"><canvas id="chart-calories"></canvas></div>
+          <div id="prog-cal-empty" class="prog-empty" style="display:none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor"
+              stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto .75rem">
+              <path
+                d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" />
+            </svg>
+            <p>Log food in the Dashboard to see your calorie trend here.</p>
+          </div>
+        </div>
+      </div>
+      <div id="prog-panel-strength" class="prog-panel">
+        <div class="prog-chart-card card">
+          <div class="prog-chart-header">
+            <div>
+              <h2 class="prog-chart-title">Strength Progress</h2>
+              <p class="prog-chart-sub">Weight lifted per exercise over time</p>
+            </div>
+            <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+              <select id="prog-ex-select" class="form-select" style="height:36px;min-width:180px;font-size:.85rem"
+                onchange="renderStrengthChart()">
+                <option value="">Select exercise…</option>
+              </select>
+              <div class="prog-stats-row" id="prog-str-stats"></div>
+            </div>
+          </div>
+          <div class="prog-chart-wrap"><canvas id="chart-strength"></canvas></div>
+          <div id="prog-str-empty" class="prog-empty" style="display:none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor"
+              stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto .75rem">
+              <path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4" />
+            </svg>
+            <p>Log gym exercises to see strength progress here.</p>
+          </div>
+        </div>
+      </div>
 
-    <div id="prog-panel-carbs" class="prog-panel">
-      <div class="prog-chart-card card">
-        <div class="prog-chart-header">
-          <div><h2 class="prog-chart-title">Daily Carbs Intake</h2><p class="prog-chart-sub">Logged carbohydrates per day vs. your daily goal</p></div>
-          <div class="prog-stats-row" id="prog-carbs-stats"></div>
-        </div>
-        <div class="prog-chart-wrap"><canvas id="chart-carbs"></canvas></div>
-        <div id="prog-carbs-empty" class="prog-empty" style="display:none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto .75rem"><path d="M12 2v20"/><path d="M8 6c0 0 .5-2 4-2s4 2 4 2"/><path d="M7 10c0 0-1-2 2-3"/><path d="M17 10c0 0 1-2-2-3"/><path d="M7 14c0 0-1-2 2-3"/><path d="M17 14c0 0 1-2-2-3"/><path d="M8 18c0 0 .5-2 4-2s4 2 4 2"/></svg>
-          <p>Log food in the Dashboard to see your carbs trend here.</p>
+      <div id="prog-panel-protein" class="prog-panel">
+        <div class="prog-chart-card card">
+          <div class="prog-chart-header">
+            <div>
+              <h2 class="prog-chart-title">Daily Protein Intake</h2>
+              <p class="prog-chart-sub">Logged protein per day vs. your daily goal</p>
+            </div>
+            <div class="prog-stats-row" id="prog-protein-stats"></div>
+          </div>
+          <div class="prog-chart-wrap"><canvas id="chart-protein"></canvas></div>
+          <div id="prog-protein-empty" class="prog-empty" style="display:none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"
+              style="opacity:.25;margin:0 auto .75rem">
+              <path
+                d="M15.45 15.4c-2.13 2.12-4.9 2.86-7.37 2.27L5 21l-2-2 3.33-3.08c-.59-2.47.15-5.24 2.27-7.36 2.87-2.87 7.12-3.44 9.46-1.1 2.34 2.34 1.77 6.59-1.1 9.46v-.53z" />
+            </svg>
+            <p>Log food in the Dashboard to see your protein trend here.</p>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div id="prog-panel-fat" class="prog-panel">
-      <div class="prog-chart-card card">
-        <div class="prog-chart-header">
-          <div><h2 class="prog-chart-title">Daily Fat Intake</h2><p class="prog-chart-sub">Logged fats per day vs. your daily goal</p></div>
-          <div class="prog-stats-row" id="prog-fat-stats"></div>
+      <div id="prog-panel-carbs" class="prog-panel">
+        <div class="prog-chart-card card">
+          <div class="prog-chart-header">
+            <div>
+              <h2 class="prog-chart-title">Daily Carbs Intake</h2>
+              <p class="prog-chart-sub">Logged carbohydrates per day vs. your daily goal</p>
+            </div>
+            <div class="prog-stats-row" id="prog-carbs-stats"></div>
+          </div>
+          <div class="prog-chart-wrap"><canvas id="chart-carbs"></canvas></div>
+          <div id="prog-carbs-empty" class="prog-empty" style="display:none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"
+              style="opacity:.25;margin:0 auto .75rem">
+              <path d="M12 2v20" />
+              <path d="M8 6c0 0 .5-2 4-2s4 2 4 2" />
+              <path d="M7 10c0 0-1-2 2-3" />
+              <path d="M17 10c0 0 1-2-2-3" />
+              <path d="M7 14c0 0-1-2 2-3" />
+              <path d="M17 14c0 0 1-2-2-3" />
+              <path d="M8 18c0 0 .5-2 4-2s4 2 4 2" />
+            </svg>
+            <p>Log food in the Dashboard to see your carbs trend here.</p>
+          </div>
         </div>
-        <div class="prog-chart-wrap"><canvas id="chart-fat"></canvas></div>
-        <div id="prog-fat-empty" class="prog-empty" style="display:none">
-          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="opacity:.25;margin:0 auto .75rem"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-          <p>Log food in the Dashboard to see your fat intake trend here.</p>
-        </div>
       </div>
-    </div>
-  </div>
-  <!-- Records page: auto-updated personal-best lift cards -->
-  <div id="page-records" class="page">
-    <div class="prog-page-header">
-      <div class="prog-page-icon" style="background:linear-gradient(135deg,#f59e0b,#f57a3d)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-      </div>
-      <div>
-        <h1 class="prog-page-title">Personal Records</h1>
-        <p class="prog-page-sub">Your all-time best lifts — auto-updated when you log workouts</p>
-      </div>
-    </div>
-    <div id="records-grid" class="records-grid"></div>
-    <div id="records-empty" class="prog-empty card" style="display:none;padding:2.5rem;text-align:center">
-      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.2;margin:0 auto 1rem;display:block"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-      <p style="margin-bottom:1rem">No personal records yet. Start logging exercises in the Gym tab!</p>
-      <button class="btn btn-primary" onclick="navigate('gym')">Go to Gym</button>
-    </div>
-  </div>
-  <!-- Profile page: body stats form and macro calculator -->
-  <div id="page-profile" class="page">
-    <div class="prog-page-header">
-      <div class="prog-page-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      </div>
-      <div>
-        <h1 class="prog-page-title">Body Profile &amp; Goals</h1>
-        <p class="prog-page-sub">Enter your stats to auto-calculate optimal macronutrient targets</p>
-      </div>
-    </div>
 
-    <div class="profile-grid">
-      <div class="card" style="padding:1.5rem;">
+      <div id="prog-panel-fat" class="prog-panel">
+        <div class="prog-chart-card card">
+          <div class="prog-chart-header">
+            <div>
+              <h2 class="prog-chart-title">Daily Fat Intake</h2>
+              <p class="prog-chart-sub">Logged fats per day vs. your daily goal</p>
+            </div>
+            <div class="prog-stats-row" id="prog-fat-stats"></div>
+          </div>
+          <div class="prog-chart-wrap"><canvas id="chart-fat"></canvas></div>
+          <div id="prog-fat-empty" class="prog-empty" style="display:none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="none" stroke="currentColor"
+              stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"
+              style="opacity:.25;margin:0 auto .75rem">
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+            </svg>
+            <p>Log food in the Dashboard to see your fat intake trend here.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Records page: auto-updated personal-best lift cards -->
+    <div id="page-records" class="page">
+      <div class="prog-page-header">
+        <div class="prog-page-icon" style="background:linear-gradient(135deg,#f59e0b,#f57a3d)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor"
+            stroke-width="2" viewBox="0 0 24 24">
+            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+            <path d="M4 22h16" />
+            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="prog-page-title">Personal Records</h1>
+          <p class="prog-page-sub">Your all-time best lifts — auto-updated when you log workouts</p>
+        </div>
+      </div>
+      <div id="records-grid" class="records-grid"></div>
+      <div id="records-empty" class="prog-empty card" style="display:none;padding:2.5rem;text-align:center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" stroke="currentColor"
+          stroke-width="1.5" viewBox="0 0 24 24" style="opacity:.2;margin:0 auto 1rem;display:block">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+          <path d="M4 22h16" />
+          <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+          <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+          <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+        </svg>
+        <p style="margin-bottom:1rem">No personal records yet. Start logging exercises in the Gym tab!</p>
+        <button class="btn btn-primary" onclick="navigate('gym')">Go to Gym</button>
+      </div>
+    </div>
+    <!-- Profile page: body stats form and macro calculator -->
+    <div id="page-profile" class="page">
+      <div class="prog-page-header">
+        <div class="prog-page-icon" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor"
+            stroke-width="2" viewBox="0 0 24 24">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="prog-page-title">Body Profile &amp; Goals</h1>
+          <p class="prog-page-sub">Enter your stats to auto-calculate optimal macronutrient targets</p>
+        </div>
+      </div>
+
+      <div class="profile-grid">
+        <div class="card" style="padding:1.5rem;">
+          <div class="flex items-center gap-2 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary)"
+              stroke-width="2" viewBox="0 0 24 24">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            <h2 class="section-title">Your Stats</h2>
+          </div>
+          <div class="form-grid-2" style="gap:1.2rem; margin-bottom:1.2rem;">
+            <div class="form-group">
+              <label class="form-label">Height (cm)</label>
+              <input id="p-height" type="number" class="form-input" value="175" min="50" max="300">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Weight (kg)</label>
+              <input id="p-weight" type="number" class="form-input" value="70" min="20" max="400">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Age</label>
+              <input id="p-age" type="number" class="form-input" value="20" min="10" max="120">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Gender</label>
+              <select id="p-gender" class="form-select">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Activity Level</label>
+              <select id="p-activity" class="form-select">
+                <option value="sedentary">Sedentary (little/no exercise)</option>
+                <option value="light">Light (1–2 days/wk)</option>
+                <option value="moderate3">Moderate (3 days/wk)</option>
+                <option value="moderate5" selected>Moderate (5 days/wk)</option>
+                <option value="high">Active (6–7 days/wk)</option>
+                <option value="athlete">Athlete (2× daily / hard)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Primary Goal</label>
+              <select id="p-goal" class="form-select">
+                <option value="lose_fat">Lose Fat</option>
+                <option value="maintain" selected>Maintain Weight</option>
+                <option value="build_muscle">Build Muscle</option>
+              </select>
+            </div>
+          </div>
+          <hr class="divider">
+          <button class="submit-btn" onclick="saveProfile()">
+            Save &amp; Calculate
+          </button>
+        </div>
+
+        <div class="card results-card">
+          <div class="flex items-center gap-2 mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary)"
+              stroke-width="2" viewBox="0 0 24 24">
+              <rect width="16" height="20" x="4" y="2" rx="2" ry="2" />
+              <line x1="8" x2="16" y1="6" y2="6" />
+              <line x1="8" x2="16" y1="10" y2="10" />
+              <line x1="8" x2="12" y1="14" y2="14" />
+            </svg>
+            <h2 class="section-title">Recommended Goals</h2>
+          </div>
+          <div id="calc-result">
+            <div class="no-calc">
+              <div class="icon-wrap">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5"
+                  viewBox="0 0 24 24">
+                  <rect width="16" height="20" x="4" y="2" rx="2" />
+                  <line x1="8" x2="16" y1="6" y2="6" />
+                  <line x1="8" x2="16" y1="10" y2="10" />
+                  <line x1="8" x2="12" y1="14" y2="14" />
+                </svg>
+              </div>
+              <strong>No calculations yet</strong>
+              <span>Fill out your stats and hit calculate to see your optimal macros.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Programs page: AI-style workout plan generator -->
+    <div id="page-programs" class="page">
+      <div class="prog-page-header">
+        <div class="prog-page-icon" style="background:linear-gradient(135deg,#f57a3d,#e85d04)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor"
+            stroke-width="2" viewBox="0 0 24 24">
+            <path d="M9 11l3 3L22 4" />
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="prog-page-title">Workout Programs</h1>
+          <p class="prog-page-sub">Each plan targets a different muscle zone — no two exercises overlap</p>
+        </div>
+      </div>
+      <div class="card" style="padding:1.5rem; margin-bottom:1.5rem;">
         <div class="flex items-center gap-2 mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <h2 class="section-title">Your Stats</h2>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#1fad96" stroke-width="2"
+            viewBox="0 0 24 24">
+            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          <h2 class="section-title">Your Profile</h2>
         </div>
-        <div class="form-grid-2" style="gap:1.2rem; margin-bottom:1.2rem;">
-          <div class="form-group">
-            <label class="form-label">Height (cm)</label>
-            <input id="p-height" type="number" class="form-input" value="175" min="50" max="300">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Weight (kg)</label>
-            <input id="p-weight" type="number" class="form-input" value="70" min="20" max="400">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Age</label>
-            <input id="p-age" type="number" class="form-input" value="20" min="10" max="120">
-          </div>
+        <div class="wp-profile-grid">
           <div class="form-group">
             <label class="form-label">Gender</label>
-            <select id="p-gender" class="form-select">
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Activity Level</label>
-            <select id="p-activity" class="form-select">
-              <option value="sedentary">Sedentary (little/no exercise)</option>
-              <option value="light">Light (1–2 days/wk)</option>
-              <option value="moderate3">Moderate (3 days/wk)</option>
-              <option value="moderate5" selected>Moderate (5 days/wk)</option>
-              <option value="high">Active (6–7 days/wk)</option>
-              <option value="athlete">Athlete (2× daily / hard)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Primary Goal</label>
-            <select id="p-goal" class="form-select">
-              <option value="lose_fat">Lose Fat</option>
-              <option value="maintain" selected>Maintain Weight</option>
-              <option value="build_muscle">Build Muscle</option>
-            </select>
-          </div>
-        </div>
-        <hr class="divider">
-        <button class="submit-btn" onclick="saveProfile()">
-          Save &amp; Calculate
-        </button>
-      </div>
-
-      <div class="card results-card">
-        <div class="flex items-center gap-2 mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="8" x2="16" y1="10" y2="10"/><line x1="8" x2="12" y1="14" y2="14"/></svg>
-          <h2 class="section-title">Recommended Goals</h2>
-        </div>
-        <div id="calc-result">
-          <div class="no-calc">
-            <div class="icon-wrap">
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><rect width="16" height="20" x="4" y="2" rx="2"/><line x1="8" x2="16" y1="6" y2="6"/><line x1="8" x2="16" y1="10" y2="10"/><line x1="8" x2="12" y1="14" y2="14"/></svg>
+            <div class="wp-toggle-group" id="wp-gender-group">
+              <button class="wp-toggle active" data-val="male" onclick="wpSetToggle('gender','male')">♂ Male</button>
+              <button class="wp-toggle" data-val="female" onclick="wpSetToggle('gender','female')">♀ Female</button>
             </div>
-            <strong>No calculations yet</strong>
-            <span>Fill out your stats and hit calculate to see your optimal macros.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fitness Level</label>
+            <div class="wp-toggle-group" id="wp-level-group">
+              <button class="wp-toggle active" data-val="beginner"
+                onclick="wpSetToggle('level','beginner')">Beginner</button>
+              <button class="wp-toggle" data-val="intermediate"
+                onclick="wpSetToggle('level','intermediate')">Intermediate</button>
+              <button class="wp-toggle" data-val="advanced" onclick="wpSetToggle('level','advanced')">Advanced</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Goal</label>
+            <div class="wp-toggle-group" id="wp-goal-group">
+              <button class="wp-toggle active" data-val="build_muscle" onclick="wpSetToggle('goal','build_muscle')">💪
+                Build Muscle</button>
+              <button class="wp-toggle" data-val="lose_fat" onclick="wpSetToggle('goal','lose_fat')">🔥 Lose
+                Fat</button>
+              <button class="wp-toggle" data-val="maintain" onclick="wpSetToggle('goal','maintain')">⚡ Maintain
+                Fitness</button>
+              <button class="wp-toggle" data-val="strength" onclick="wpSetToggle('goal','strength')">🏆 Increase
+                Strength</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Muscle Group Focus</label>
+            <div class="wp-toggle-group" id="wp-muscle-group">
+              <button class="wp-toggle active" data-val="chest" onclick="wpSetToggle('muscle','chest')">Chest</button>
+              <button class="wp-toggle" data-val="back" onclick="wpSetToggle('muscle','back')">Back</button>
+              <button class="wp-toggle" data-val="legs" onclick="wpSetToggle('muscle','legs')">Legs</button>
+              <button class="wp-toggle" data-val="shoulders"
+                onclick="wpSetToggle('muscle','shoulders')">Shoulders</button>
+              <button class="wp-toggle" data-val="arms" onclick="wpSetToggle('muscle','arms')">Arms</button>
+              <button class="wp-toggle" data-val="core" onclick="wpSetToggle('muscle','core')">Core / Abs</button>
+              <button class="wp-toggle" data-val="glutes" onclick="wpSetToggle('muscle','glutes')">Glutes</button>
+            </div>
           </div>
         </div>
+        <div style="margin-top:1.5rem;">
+          <button class="btn btn-primary" style="height:48px;padding:0 1.75rem;font-size:.95rem;"
+            onclick="generateWorkoutPlan()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor"
+              stroke-width="2" viewBox="0 0 24 24">
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            Generate Workout Plan
+          </button>
+        </div>
       </div>
+      <div id="wp-plan-output"></div>
     </div>
-  </div>
-  <!-- Programs page: AI-style workout plan generator -->
-  <div id="page-programs" class="page">
-    <div class="prog-page-header">
-      <div class="prog-page-icon" style="background:linear-gradient(135deg,#f57a3d,#e85d04)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-      </div>
-      <div>
-        <h1 class="prog-page-title">Workout Programs</h1>
-        <p class="prog-page-sub">Each plan targets a different muscle zone — no two exercises overlap</p>
-      </div>
-    </div>
-    <div class="card" style="padding:1.5rem; margin-bottom:1.5rem;">
-      <div class="flex items-center gap-2 mb-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="#1fad96" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <h2 class="section-title">Your Profile</h2>
-      </div>
-      <div class="wp-profile-grid">
-        <div class="form-group">
-          <label class="form-label">Gender</label>
-          <div class="wp-toggle-group" id="wp-gender-group">
-            <button class="wp-toggle active" data-val="male" onclick="wpSetToggle('gender','male')">♂ Male</button>
-            <button class="wp-toggle" data-val="female" onclick="wpSetToggle('gender','female')">♀ Female</button>
-          </div>
+    <!-- Meals page: personalised daily meal plan -->
+    <div id="page-meals" class="page">
+      <div class="prog-page-header">
+        <div class="prog-page-icon" style="background:linear-gradient(135deg,#1fad96,#0e8f7d)">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+            <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+            <path d="M7 2v20" />
+            <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7" />
+          </svg>
         </div>
-        <div class="form-group">
-          <label class="form-label">Fitness Level</label>
-          <div class="wp-toggle-group" id="wp-level-group">
-            <button class="wp-toggle active" data-val="beginner" onclick="wpSetToggle('level','beginner')">Beginner</button>
-            <button class="wp-toggle" data-val="intermediate" onclick="wpSetToggle('level','intermediate')">Intermediate</button>
-            <button class="wp-toggle" data-val="advanced" onclick="wpSetToggle('level','advanced')">Advanced</button>
-          </div>
+        <div style="flex:1">
+          <h1 class="prog-page-title">Smart Meal Program</h1>
+          <p class="prog-page-sub">Personalized daily meal plan based on your fitness goal</p>
         </div>
-        <div class="form-group">
-          <label class="form-label">Goal</label>
-          <div class="wp-toggle-group" id="wp-goal-group">
-            <button class="wp-toggle active" data-val="build_muscle" onclick="wpSetToggle('goal','build_muscle')">💪 Build Muscle</button>
-            <button class="wp-toggle" data-val="lose_fat" onclick="wpSetToggle('goal','lose_fat')">🔥 Lose Fat</button>
-            <button class="wp-toggle" data-val="maintain" onclick="wpSetToggle('goal','maintain')">⚡ Maintain Fitness</button>
-            <button class="wp-toggle" data-val="strength" onclick="wpSetToggle('goal','strength')">🏆 Increase Strength</button>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Muscle Group Focus</label>
-          <div class="wp-toggle-group" id="wp-muscle-group">
-            <button class="wp-toggle active" data-val="chest" onclick="wpSetToggle('muscle','chest')">Chest</button>
-            <button class="wp-toggle" data-val="back" onclick="wpSetToggle('muscle','back')">Back</button>
-            <button class="wp-toggle" data-val="legs" onclick="wpSetToggle('muscle','legs')">Legs</button>
-            <button class="wp-toggle" data-val="shoulders" onclick="wpSetToggle('muscle','shoulders')">Shoulders</button>
-            <button class="wp-toggle" data-val="arms" onclick="wpSetToggle('muscle','arms')">Arms</button>
-            <button class="wp-toggle" data-val="core" onclick="wpSetToggle('muscle','core')">Core / Abs</button>
-            <button class="wp-toggle" data-val="glutes" onclick="wpSetToggle('muscle','glutes')">Glutes</button>
-          </div>
+        <button class="btn btn-outline mp-regen-btn" onclick="mpGeneratePlan()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor"
+            stroke-width="2" viewBox="0 0 24 24">
+            <polyline points="23 4 23 10 17 10" />
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+          </svg>
+          Regenerate
+        </button>
+      </div>
+      <div class="card mp-goal-card">
+        <div class="mp-goal-label">Select Your Goal</div>
+        <div class="mp-goal-chips" id="mp-goal-chips">
+          <button class="mp-goal-chip active" data-goal="weight_gain" onclick="mpSetGoal('weight_gain')">
+            <span class="mp-chip-icon">📈</span>
+            <span class="mp-chip-text">Weight Gain</span>
+          </button>
+          <button class="mp-goal-chip" data-goal="build_muscle" onclick="mpSetGoal('build_muscle')">
+            <span class="mp-chip-icon">💪</span>
+            <span class="mp-chip-text">Build Muscle</span>
+          </button>
+          <button class="mp-goal-chip" data-goal="lose_weight" onclick="mpSetGoal('lose_weight')">
+            <span class="mp-chip-icon">🔥</span>
+            <span class="mp-chip-text">Lose Weight</span>
+          </button>
+          <button class="mp-goal-chip" data-goal="maintain" onclick="mpSetGoal('maintain')">
+            <span class="mp-chip-icon">⚡</span>
+            <span class="mp-chip-text">Maintain Fitness</span>
+          </button>
         </div>
       </div>
-      <div style="margin-top:1.5rem;">
-        <button class="btn btn-primary" style="height:48px;padding:0 1.75rem;font-size:.95rem;" onclick="generateWorkoutPlan()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Generate Workout Plan
+      <div class="mp-target-banner" id="mp-target-banner"></div>
+      <div id="mp-plan-output"></div>
+      <div id="mp-log-all-bar" style="display:none" class="mp-log-all-bar">
+        <button id="mp-log-all-btn" class="btn btn-primary" style="height:48px;padding:0 2rem;font-size:.95rem"
+          onclick="mpLogAllMeals()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor"
+            stroke-width="2" viewBox="0 0 24 24">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+            <polyline points="7 3 7 8 15 8" />
+          </svg>
+          Log All Meals to Food Log
         </button>
       </div>
     </div>
-    <div id="wp-plan-output"></div>
-  </div>
-  <!-- Meals page: personalised daily meal plan -->
-  <div id="page-meals" class="page">
-    <div class="prog-page-header">
-      <div class="prog-page-icon" style="background:linear-gradient(135deg,#1fad96,#0e8f7d)">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
-      </div>
-      <div style="flex:1">
-        <h1 class="prog-page-title">Smart Meal Program</h1>
-        <p class="prog-page-sub">Personalized daily meal plan based on your fitness goal</p>
-      </div>
-      <button class="btn btn-outline mp-regen-btn" onclick="mpGeneratePlan()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-        Regenerate
-      </button>
-    </div>
-    <div class="card mp-goal-card">
-      <div class="mp-goal-label">Select Your Goal</div>
-      <div class="mp-goal-chips" id="mp-goal-chips">
-        <button class="mp-goal-chip active" data-goal="weight_gain" onclick="mpSetGoal('weight_gain')">
-          <span class="mp-chip-icon">📈</span>
-          <span class="mp-chip-text">Weight Gain</span>
-        </button>
-        <button class="mp-goal-chip" data-goal="build_muscle" onclick="mpSetGoal('build_muscle')">
-          <span class="mp-chip-icon">💪</span>
-          <span class="mp-chip-text">Build Muscle</span>
-        </button>
-        <button class="mp-goal-chip" data-goal="lose_weight" onclick="mpSetGoal('lose_weight')">
-          <span class="mp-chip-icon">🔥</span>
-          <span class="mp-chip-text">Lose Weight</span>
-        </button>
-        <button class="mp-goal-chip" data-goal="maintain" onclick="mpSetGoal('maintain')">
-          <span class="mp-chip-icon">⚡</span>
-          <span class="mp-chip-text">Maintain Fitness</span>
-        </button>
-      </div>
-    </div>
-    <div class="mp-target-banner" id="mp-target-banner"></div>
-    <div id="mp-plan-output"></div>
-    <div id="mp-log-all-bar" style="display:none" class="mp-log-all-bar">
-      <button id="mp-log-all-btn" class="btn btn-primary" style="height:48px;padding:0 2rem;font-size:.95rem" onclick="mpLogAllMeals()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        Log All Meals to Food Log
-      </button>
-    </div>
-  </div>
-</main>
-<!-- ── Fixed bottom navigation bar (mobile only) ── -->
-<nav class="mobile-nav">
-  <button class="mobile-nav-btn active" onclick="navigate('dashboard')">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
-    Dashboard
-  </button>
-  <button class="mobile-nav-btn" onclick="navigate('meals')">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7"/></svg>
-    Meals
-  </button>
-  <button class="mobile-nav-btn" onclick="navigate('programs')">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-    Programs
-  </button>
-
-  <button class="mobile-nav-btn" onclick="navigate('gym')">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4"/></svg>
-    Gym
-  </button>
-  <button class="mobile-nav-btn" onclick="navigate('progress')">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-    Progress
-  </button>
-  <button class="mobile-nav-btn" onclick="navigate('records')">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-    Records
-  </button>
-</nav>
-<!-- ── Add Food modal ── -->
-<div id="add-food-modal" class="modal-overlay" onclick="overlayClose(event,'add-food-modal')">
-  <div class="modal" style="position:relative">
-    <button class="modal-close" onclick="closeModal('add-food-modal')">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </main>
+  <!-- ── Fixed bottom navigation bar (mobile only) ── -->
+  <nav class="mobile-nav">
+    <button class="mobile-nav-btn active" onclick="navigate('dashboard')">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <rect width="7" height="9" x="3" y="3" rx="1" />
+        <rect width="7" height="5" x="14" y="3" rx="1" />
+        <rect width="7" height="9" x="14" y="12" rx="1" />
+        <rect width="7" height="5" x="3" y="16" rx="1" />
+      </svg>
+      Dashboard
     </button>
-    <div class="modal-title">Log Food</div>
-    <div class="form-group" style="margin-bottom:1rem">
-      <label class="form-label">Food Name</label>
-      <input id="f-name" class="form-input" placeholder="e.g. Chicken Breast">
-      <span id="f-name-err" class="error-text" style="display:none">Name is required</span>
-    </div>
-    <div class="form-grid-2" style="margin-bottom:.75rem">
-        <div class="form-group"><label class="form-label">Calories</label><input id="f-cal" type="number" class="form-input"
-          value="0" min="0">
+    <button class="mobile-nav-btn" onclick="navigate('meals')">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2" />
+        <path d="M7 2v20" />
+        <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3zm0 0v7" />
+      </svg>
+      Meals
+    </button>
+    <button class="mobile-nav-btn" onclick="navigate('programs')">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M9 11l3 3L22 4" />
+        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+      </svg>
+      Programs
+    </button>
+
+    <button class="mobile-nav-btn" onclick="navigate('gym')">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path d="M6 5v14M18 5v14M2 9h4M18 9h4M2 15h4M18 15h4" />
+      </svg>
+      Gym
+    </button>
+    <button class="mobile-nav-btn" onclick="navigate('progress')">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+      </svg>
+      Progress
+    </button>
+  </nav>
+  <!-- ── Add Food modal ── -->
+  <div id="add-food-modal" class="modal-overlay" onclick="overlayClose(event,'add-food-modal')">
+    <div class="modal" style="position:relative">
+      <button class="modal-close" onclick="closeModal('add-food-modal')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+      <div class="modal-title">Log Food</div>
+      <div class="form-group" style="margin-bottom:1rem">
+        <label class="form-label">Food Name</label>
+        <input id="f-name" class="form-input" placeholder="e.g. Chicken Breast">
+        <span id="f-name-err" class="error-text" style="display:none">Name is required</span>
+      </div>
+      <div class="form-grid-2" style="margin-bottom:.75rem">
+        <div class="form-group"><label class="form-label">Calories</label><input id="f-cal" type="number"
+            class="form-input" value="0" min="0">
         </div>
         <div class="form-group"><label class="form-label">Protein (g)</label><input id="f-pro" type="number"
-          class="form-input" value="0" min="0">
+            class="form-input" value="0" min="0">
         </div>
         <div class="form-group"><label class="form-label">Carbs (g)</label><input id="f-carb" type="number"
-          class="form-input" value="0" min="0">
+            class="form-input" value="0" min="0">
         </div>
-        <div class="form-group"><label class="form-label">Fat (g)</label><input id="f-fat" type="number" class="form-input"
-          value="0" min="0">
+        <div class="form-group"><label class="form-label">Fat (g)</label><input id="f-fat" type="number"
+            class="form-input" value="0" min="0">
         </div>
-    </div>
+      </div>
 
-    <div class="qty-calc-wrapper">
-      <button class="qty-calc-toggle" id="qty-calc-toggle-btn" onclick="toggleQtyCalc()" type="button">
-        <span class="qty-calc-toggle-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/></svg>
-        </span>
-        <span>Calculate from label (per 100g / 100ml)</span>
-        <svg class="qty-calc-chevron" id="qty-calc-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
-      </button>
+      <div class="qty-calc-wrapper">
+        <button class="qty-calc-toggle" id="qty-calc-toggle-btn" onclick="toggleQtyCalc()" type="button">
+          <span class="qty-calc-toggle-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor"
+              stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+              <rect x="4" y="2" width="16" height="20" rx="2" />
+              <line x1="8" y1="6" x2="16" y2="6" />
+              <line x1="8" y1="10" x2="16" y2="10" />
+              <line x1="8" y1="14" x2="12" y2="14" />
+            </svg>
+          </span>
+          <span>Calculate from label (per 100g / 100ml)</span>
+          <svg class="qty-calc-chevron" id="qty-calc-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+            fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+            viewBox="0 0 24 24">
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </button>
 
-      <div class="qty-calc-panel" id="qty-calc-panel">
-        <div class="qty-calc-inner">
-          <p class="qty-calc-hint">Enter the nutrition values from the food label, then set how much you consumed.</p>
+        <div class="qty-calc-panel" id="qty-calc-panel">
+          <div class="qty-calc-inner">
+            <p class="qty-calc-hint">Enter the nutrition values from the food label, then set how much you consumed.</p>
 
-          <div class="qty-calc-amounts">
-            <div class="form-group">
-              <label class="form-label">Base Amount (g or ml)</label>
-              <input id="qc-base" type="number" class="form-input" value="100" min="1" placeholder="e.g. 100">
+            <div class="qty-calc-amounts">
+              <div class="form-group">
+                <label class="form-label">Base Amount (g or ml)</label>
+                <input id="qc-base" type="number" class="form-input" value="100" min="1" placeholder="e.g. 100">
+              </div>
+              <div class="qty-calc-arrow">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--text-muted)"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Consumed Amount</label>
+                <input id="qc-consumed" type="number" class="form-input" min="0" placeholder="e.g. 350">
+              </div>
             </div>
-            <div class="qty-calc-arrow">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+
+            <p class="qty-calc-section-label">Nutrition per base amount</p>
+            <div class="form-grid-2" style="margin-bottom:.75rem">
+              <div class="form-group"><label class="form-label">Calories</label><input id="qc-cal" type="number"
+                  class="form-input" value="0" min="0"></div>
+              <div class="form-group"><label class="form-label">Protein (g)</label><input id="qc-pro" type="number"
+                  class="form-input" value="0" min="0"></div>
+              <div class="form-group"><label class="form-label">Carbs (g)</label><input id="qc-carb" type="number"
+                  class="form-input" value="0" min="0"></div>
+              <div class="form-group"><label class="form-label">Fat (g)</label><input id="qc-fat" type="number"
+                  class="form-input" value="0" min="0"></div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Consumed Amount</label>
-              <input id="qc-consumed" type="number" class="form-input" min="0" placeholder="e.g. 350">
+
+            <button class="qty-calc-btn" onclick="runQtyCalc()" type="button">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor"
+                stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path
+                  d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18" />
+              </svg>
+              Calculate &amp; Fill Values
+            </button>
+
+            <div class="qty-calc-result" id="qty-calc-result" style="display:none">
+              <div class="qty-calc-result-label">Calculated result</div>
+              <div class="qty-calc-result-chips" id="qty-calc-result-chips"></div>
             </div>
-          </div>
-
-          <p class="qty-calc-section-label">Nutrition per base amount</p>
-          <div class="form-grid-2" style="margin-bottom:.75rem">
-            <div class="form-group"><label class="form-label">Calories</label><input id="qc-cal" type="number" class="form-input" value="0" min="0"></div>
-            <div class="form-group"><label class="form-label">Protein (g)</label><input id="qc-pro" type="number" class="form-input" value="0" min="0"></div>
-            <div class="form-group"><label class="form-label">Carbs (g)</label><input id="qc-carb" type="number" class="form-input" value="0" min="0"></div>
-            <div class="form-group"><label class="form-label">Fat (g)</label><input id="qc-fat" type="number" class="form-input" value="0" min="0"></div>
-          </div>
-
-          <button class="qty-calc-btn" onclick="runQtyCalc()" type="button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2v-4M9 21H5a2 2 0 0 1-2-2v-4m0 0h18"/></svg>
-            Calculate &amp; Fill Values
-          </button>
-
-          <div class="qty-calc-result" id="qty-calc-result" style="display:none">
-            <div class="qty-calc-result-label">Calculated result</div>
-            <div class="qty-calc-result-chips" id="qty-calc-result-chips"></div>
           </div>
         </div>
       </div>
-    </div>
 
-    <button class="submit-btn" onclick="addFood()">Log Entry</button>
+      <button class="submit-btn" onclick="addFood()">Log Entry</button>
+    </div>
   </div>
-</div>
-<!-- ── Edit Goals modal ── -->
-<div id="edit-goals-modal" class="modal-overlay" onclick="overlayClose(event,'edit-goals-modal')">
-  <div class="modal" style="position:relative">
-    <button class="modal-close" onclick="closeModal('edit-goals-modal')">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </button>
-    <div id="edit-goals-title" class="modal-title">Edit Goals for Today</div>
-    <div class="form-grid-2" style="margin-bottom:.75rem">
+  <!-- ── Edit Goals modal ── -->
+  <div id="edit-goals-modal" class="modal-overlay" onclick="overlayClose(event,'edit-goals-modal')">
+    <div class="modal" style="position:relative">
+      <button class="modal-close" onclick="closeModal('edit-goals-modal')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+      <div id="edit-goals-title" class="modal-title">Edit Goals for Today</div>
+      <div class="form-grid-2" style="margin-bottom:.75rem">
         <div class="form-group"><label class="form-label">Calories (kcal)</label><input id="g-cal" type="number"
-          class="form-input" value="2000">
+            class="form-input" value="2000">
         </div>
         <div class="form-group"><label class="form-label">Protein (g)</label><input id="g-pro" type="number"
-          class="form-input" value="150">
+            class="form-input" value="150">
         </div>
         <div class="form-group"><label class="form-label">Carbs (g)</label><input id="g-carb" type="number"
-          class="form-input" value="200">
+            class="form-input" value="200">
         </div>
-        <div class="form-group"><label class="form-label">Fat (g)</label><input id="g-fat" type="number" class="form-input"
-          value="65">
+        <div class="form-group"><label class="form-label">Fat (g)</label><input id="g-fat" type="number"
+            class="form-input" value="65">
         </div>
+      </div>
+      <button class="submit-btn" onclick="saveGoals()">Save Goals</button>
     </div>
-    <button class="submit-btn" onclick="saveGoals()">Save Goals</button>
   </div>
-</div>
-<!-- ── Add Exercise modal ── -->
-<div id="add-exercise-modal" class="modal-overlay" onclick="overlayClose(event,'add-exercise-modal')">
-  <div class="modal" style="position:relative">
-    <button class="modal-close" onclick="closeModal('add-exercise-modal')">
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
-    </button>
-    <div class="modal-title">Add Exercise</div>
-    <div class="form-group" style="margin-bottom:1rem">
-      <label class="form-label">Exercise Name</label>
-      <input id="e-name" class="form-input" placeholder="e.g. Lat Pulldown" list="exercise-suggestions">
-      <datalist id="exercise-suggestions"></datalist>
-      <span id="e-name-err" class="error-text" style="display:none">Name is required</span>
-    </div>
-    <div class="form-grid-3" style="margin-bottom:1rem">
+  <!-- ── Add Exercise modal ── -->
+  <div id="add-exercise-modal" class="modal-overlay" onclick="overlayClose(event,'add-exercise-modal')">
+    <div class="modal" style="position:relative">
+      <button class="modal-close" onclick="closeModal('add-exercise-modal')">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+      <div class="modal-title">Add Exercise</div>
+      <div class="form-group" style="margin-bottom:1rem">
+        <label class="form-label">Exercise Name</label>
+        <input id="e-name" class="form-input" placeholder="e.g. Lat Pulldown" list="exercise-suggestions">
+        <datalist id="exercise-suggestions"></datalist>
+        <span id="e-name-err" class="error-text" style="display:none">Name is required</span>
+      </div>
+      <div class="form-grid-3" style="margin-bottom:1rem">
         <div class="form-group"><label class="form-label">Sets</label><input id="e-sets" type="number"
-          class="form-input form-input-sm" value="3" min="1">
+            class="form-input form-input-sm" value="3" min="1">
         </div>
         <div class="form-group"><label class="form-label">Reps</label><input id="e-reps" type="number"
-          class="form-input form-input-sm" value="10" min="1">
+            class="form-input form-input-sm" value="10" min="1">
         </div>
-        <div class="form-group"><label class="form-label">Weight (kg)</label><input id="e-weight" type="number" step="0.5"
-          class="form-input form-input-sm" value="0" min="0">
-        </div>
-    </div>
-    <div class="form-group" style="margin-bottom:.5rem">
-      <label class="form-label">Notes <span class="text-muted">(optional)</span></label>
-      <input id="e-notes" class="form-input" placeholder="e.g. Close grip, slow eccentric">
-    </div>
-    <button class="submit-btn" onclick="addExercise()">Add Exercise</button>
-  </div>
-</div>
-<!-- ── Toast notification container ── -->
-<div class="toast-container" id="toast-container"></div>
-<!-- ── Mobile Undo Toast (Meals & Programs, mobile only) ── -->
-<div id="mobile-undo-toast" role="status" aria-live="polite">
-  <span class="mut-msg">
-    <span class="mut-msg-icon">✓</span>
-    <span id="mut-msg-text">Item added</span>
-  </span>
-  <button class="mut-undo-btn" id="mut-undo-btn" onclick="mobileUndoAction()">UNDO</button>
-  <div class="mut-progress" id="mut-progress"></div>
-</div>
-<!-- ── Auth Gate Overlay ── -->
-<div id="auth-gate">
-  <!-- Left visual panel -->
-  <div class="auth-visual">
-    <div class="auth-visual-bg-letter">F</div>
-    <div class="auth-ekg">
-      <svg viewBox="0 0 800 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <polyline points="0,60 160,60 200,60 230,10 270,110 300,20 330,60 400,60 440,60 480,60 520,60 560,60 600,60 800,60"
-          stroke="#1fad96" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </div>
-    <div class="auth-visual-inner">
-      <div class="auth-visual-tag">
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Track. Train. Transform.
-      </div>
-      <div class="auth-visual-headline">
-        Your body.<br><em>Your forge.</em>
-      </div>
-      <div class="auth-visual-stats">
-        <div class="auth-stat-item">
-          <span class="auth-stat-num">7+</span>
-          <span class="auth-stat-label">Tracking Metrics</span>
-        </div>
-        <div class="auth-stat-item">
-          <span class="auth-stat-num">∞</span>
-          <span class="auth-stat-label">Workout Plans</span>
-        </div>
-        <div class="auth-stat-item">
-          <span class="auth-stat-num">24/7</span>
-          <span class="auth-stat-label">Progress Sync</span>
+        <div class="form-group"><label class="form-label">Weight (kg)</label><input id="e-weight" type="number"
+            step="0.5" class="form-input form-input-sm" value="0" min="0">
         </div>
       </div>
+      <div class="form-group" style="margin-bottom:.5rem">
+        <label class="form-label">Notes <span class="text-muted">(optional)</span></label>
+        <input id="e-notes" class="form-input" placeholder="e.g. Close grip, slow eccentric">
+      </div>
+      <button class="submit-btn" onclick="addExercise()">Add Exercise</button>
     </div>
   </div>
-
-  <!-- Right form panel -->
-  <div class="auth-form-panel">
-    <!-- Brand -->
-    <div class="auth-brand">
-      <div class="auth-brand-icon">
-        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M6 12h12"/><path d="M9 9v6"/><path d="M15 9v6"/></svg>
+  <!-- ── Toast notification container ── -->
+  <div class="toast-container" id="toast-container"></div>
+  <!-- ── Mobile Undo Toast (Meals & Programs, mobile only) ── -->
+  <div id="mobile-undo-toast" role="status" aria-live="polite">
+    <span class="mut-msg">
+      <span class="mut-msg-icon">✓</span>
+      <span id="mut-msg-text">Item added</span>
+    </span>
+    <button class="mut-undo-btn" id="mut-undo-btn" onclick="mobileUndoAction()">UNDO</button>
+    <div class="mut-progress" id="mut-progress"></div>
+  </div>
+  <!-- ── Auth Gate Overlay ── -->
+  <div id="auth-gate">
+    <!-- Left visual panel -->
+    <div class="auth-visual">
+      <div class="auth-visual-bg-letter">F</div>
+      <div class="auth-ekg">
+        <svg viewBox="0 0 800 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polyline
+            points="0,60 160,60 200,60 230,10 270,110 300,20 330,60 400,60 440,60 480,60 520,60 560,60 600,60 800,60"
+            stroke="#1fad96" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
       </div>
-      <span class="auth-brand-name">Fit<span>Forge</span></span>
+      <div class="auth-visual-inner">
+        <div class="auth-visual-tag">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" stroke="currentColor"
+            stroke-width="2.5" viewBox="0 0 24 24">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
+          Track. Train. Transform.
+        </div>
+        <div class="auth-visual-headline">
+          Your body.<br><em>Your forge.</em>
+        </div>
+        <div class="auth-visual-stats">
+          <div class="auth-stat-item">
+            <span class="auth-stat-num">7+</span>
+            <span class="auth-stat-label">Tracking Metrics</span>
+          </div>
+          <div class="auth-stat-item">
+            <span class="auth-stat-num">∞</span>
+            <span class="auth-stat-label">Workout Plans</span>
+          </div>
+          <div class="auth-stat-item">
+            <span class="auth-stat-num">24/7</span>
+            <span class="auth-stat-label">Progress Sync</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Tab switcher -->
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tab-login"  onclick="authSwitchTab('login')">Sign In</button>
-      <button class="auth-tab"        id="tab-signup" onclick="authSwitchTab('signup')">New Account</button>
-    </div>
-
-    <!-- LOGIN -->
-    <div class="auth-panel active" id="panel-login">
-      <h2 class="auth-heading">Welcome back</h2>
-      <p class="auth-sub">Sign in and pick up right where you left off.</p>
-
-      <div class="auth-banner" id="login-banner"></div>
-
-      <div class="auth-form-group">
-        <label class="auth-label">Email</label>
-        <input type="email" class="auth-input" id="login-email" placeholder="you@example.com" autocomplete="email">
-        <span class="auth-error" id="login-email-err"></span>
-      </div>
-      <div class="auth-form-group">
-        <label class="auth-label">Password</label>
-        <div class="auth-input-wrap">
-          <input type="password" class="auth-input" id="login-password" placeholder="••••••••" autocomplete="current-password">
-          <button type="button" class="auth-pw-toggle" onclick="authTogglePw('login-password',this)" aria-label="Show password">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
+    <!-- Right form panel -->
+    <div class="auth-form-panel">
+      <!-- Brand -->
+      <div class="auth-brand">
+        <div class="auth-brand-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <path d="M6 12h12" />
+            <path d="M9 9v6" />
+            <path d="M15 9v6" />
+          </svg>
         </div>
-        <span class="auth-error" id="login-pw-err"></span>
+        <span class="auth-brand-name">Fit<span>Forge</span></span>
       </div>
-      <div class="auth-forgot">
-        <button onclick="authSwitchTab('reset')">Forgot password?</button>
-      </div>
-      <button class="auth-submit" id="login-btn" onclick="authLogin()">
-        <span>Sign In</span>
-      </button>
-    </div>
 
-    <!-- SIGN UP -->
-    <div class="auth-panel" id="panel-signup">
-      <h2 class="auth-heading">Start forging</h2>
-      <p class="auth-sub">Create your account and sync your fitness data everywhere.</p>
-
-      <div class="auth-banner" id="signup-banner"></div>
-
-      <div class="auth-form-group">
-        <label class="auth-label">Display Name</label>
-        <input type="text" class="auth-input" id="signup-name" placeholder="Your name" autocomplete="name">
-        <span class="auth-error" id="signup-name-err"></span>
+      <!-- Tab switcher -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="authSwitchTab('login')">Sign In</button>
+        <button class="auth-tab" id="tab-signup" onclick="authSwitchTab('signup')">New Account</button>
       </div>
-      <div class="auth-form-group">
-        <label class="auth-label">Email</label>
-        <input type="email" class="auth-input" id="signup-email" placeholder="you@example.com" autocomplete="email">
-        <span class="auth-error" id="signup-email-err"></span>
-      </div>
-      <div class="auth-form-group">
-        <label class="auth-label">Password</label>
-        <div class="auth-input-wrap">
-          <input type="password" class="auth-input" id="signup-password" placeholder="Min. 8 characters" autocomplete="new-password" oninput="authPwStrength(this.value)">
-          <button type="button" class="auth-pw-toggle" onclick="authTogglePw('signup-password',this)" aria-label="Show password">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
+
+      <!-- LOGIN -->
+      <div class="auth-panel active" id="panel-login">
+        <h2 class="auth-heading">Welcome back</h2>
+        <p class="auth-sub">Sign in and pick up right where you left off.</p>
+
+        <div class="auth-banner" id="login-banner"></div>
+
+        <div class="auth-form-group">
+          <label class="auth-label">Email</label>
+          <input type="email" class="auth-input" id="login-email" placeholder="you@example.com" autocomplete="email">
+          <span class="auth-error" id="login-email-err"></span>
         </div>
-        <div class="pw-strength-wrap" id="pw-strength-wrap" style="display:none">
-          <div class="pw-strength-bar"><div class="pw-strength-fill" id="pw-strength-fill"></div></div>
-          <span class="pw-strength-label" id="pw-strength-label"></span>
+        <div class="auth-form-group">
+          <label class="auth-label">Password</label>
+          <div class="auth-input-wrap">
+            <input type="password" class="auth-input" id="login-password" placeholder="••••••••"
+              autocomplete="current-password">
+            <button type="button" class="auth-pw-toggle" onclick="authTogglePw('login-password',this)"
+              aria-label="Show password">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </div>
+          <span class="auth-error" id="login-pw-err"></span>
         </div>
-        <span class="auth-error" id="signup-pw-err"></span>
-      </div>
-      <div class="auth-form-group">
-        <label class="auth-label">Confirm Password</label>
-        <div class="auth-input-wrap">
-          <input type="password" class="auth-input" id="signup-confirm" placeholder="Repeat password" autocomplete="new-password">
-          <button type="button" class="auth-pw-toggle" onclick="authTogglePw('signup-confirm',this)" aria-label="Show password">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
+        <div class="auth-forgot">
+          <button onclick="authSwitchTab('reset')">Forgot password?</button>
         </div>
-        <span class="auth-error" id="signup-confirm-err"></span>
+        <button class="auth-submit" id="login-btn" onclick="authLogin()">
+          <span>Sign In</span>
+        </button>
       </div>
-      <button class="auth-submit" id="signup-btn" onclick="authSignup()">
-        <span>Create Account</span>
-      </button>
-    </div>
 
-    <!-- RESET PASSWORD -->
-    <div class="auth-panel" id="panel-reset">
-      <button class="auth-reset-back" onclick="authSwitchTab('login')">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
-        Back to Sign In
-      </button>
-      <h2 class="auth-heading">Reset Password</h2>
-      <p class="auth-sub">Enter your email and we'll send a reset link right away.</p>
+      <!-- SIGN UP -->
+      <div class="auth-panel" id="panel-signup">
+        <h2 class="auth-heading">Start forging</h2>
+        <p class="auth-sub">Create your account and sync your fitness data everywhere.</p>
 
-      <div class="auth-banner" id="reset-banner"></div>
+        <div class="auth-banner" id="signup-banner"></div>
 
-      <div class="auth-form-group">
-        <label class="auth-label">Email</label>
-        <input type="email" class="auth-input" id="reset-email" placeholder="you@example.com" autocomplete="email">
-        <span class="auth-error" id="reset-email-err"></span>
+        <div class="auth-form-group">
+          <label class="auth-label">Display Name</label>
+          <input type="text" class="auth-input" id="signup-name" placeholder="Your name" autocomplete="name">
+          <span class="auth-error" id="signup-name-err"></span>
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label">Email</label>
+          <input type="email" class="auth-input" id="signup-email" placeholder="you@example.com" autocomplete="email">
+          <span class="auth-error" id="signup-email-err"></span>
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label">Password</label>
+          <div class="auth-input-wrap">
+            <input type="password" class="auth-input" id="signup-password" placeholder="Min. 8 characters"
+              autocomplete="new-password" oninput="authPwStrength(this.value)">
+            <button type="button" class="auth-pw-toggle" onclick="authTogglePw('signup-password',this)"
+              aria-label="Show password">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </div>
+          <div class="pw-strength-wrap" id="pw-strength-wrap" style="display:none">
+            <div class="pw-strength-bar">
+              <div class="pw-strength-fill" id="pw-strength-fill"></div>
+            </div>
+            <span class="pw-strength-label" id="pw-strength-label"></span>
+          </div>
+          <span class="auth-error" id="signup-pw-err"></span>
+        </div>
+        <div class="auth-form-group">
+          <label class="auth-label">Confirm Password</label>
+          <div class="auth-input-wrap">
+            <input type="password" class="auth-input" id="signup-confirm" placeholder="Repeat password"
+              autocomplete="new-password">
+            <button type="button" class="auth-pw-toggle" onclick="authTogglePw('signup-confirm',this)"
+              aria-label="Show password">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor"
+                stroke-width="2" viewBox="0 0 24 24">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </div>
+          <span class="auth-error" id="signup-confirm-err"></span>
+        </div>
+        <button class="auth-submit" id="signup-btn" onclick="authSignup()">
+          <span>Create Account</span>
+        </button>
       </div>
-      <button class="auth-submit" id="reset-btn" onclick="authResetPassword()">
-        <span>Send Reset Link</span>
-      </button>
+
+      <!-- RESET PASSWORD -->
+      <div class="auth-panel" id="panel-reset">
+        <button class="auth-reset-back" onclick="authSwitchTab('login')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor"
+            stroke-width="2.5" viewBox="0 0 24 24">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          Back to Sign In
+        </button>
+        <h2 class="auth-heading">Reset Password</h2>
+        <p class="auth-sub">Enter your email and we'll send a reset link right away.</p>
+
+        <div class="auth-banner" id="reset-banner"></div>
+
+        <div class="auth-form-group">
+          <label class="auth-label">Email</label>
+          <input type="email" class="auth-input" id="reset-email" placeholder="you@example.com" autocomplete="email">
+          <span class="auth-error" id="reset-email-err"></span>
+        </div>
+        <button class="auth-submit" id="reset-btn" onclick="authResetPassword()">
+          <span>Send Reset Link</span>
+        </button>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- ── Firebase SDK ── -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<!-- ──  Logic ── -->
-<script src="scriptt.js"></script>
+  <!-- ── Firebase SDK ── -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- ──  Logic ── -->
+  <script src="scriptt.js"></script>
 </body>
+
 </html>
