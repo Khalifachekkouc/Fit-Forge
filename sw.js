@@ -1,5 +1,5 @@
 // sw.js — FitForge Service Worker
-const CACHE_NAME = "fitforge-v13";
+const CACHE_NAME = "fitforge-v14";
 
 const ASSETS_TO_CACHE = [
   "./",
