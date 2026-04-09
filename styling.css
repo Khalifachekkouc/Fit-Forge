@@ -1,4 +1,4 @@
-/* ── CSS Custom Properties (light theme defaults) ── */
+/* ── light theme ── */
 :root {
     --bg-color: #eef2f7;
     --card-color: rgba(255, 255, 255, 0.82);
@@ -17,10 +17,10 @@
     --modal-bg: rgba(255, 255, 255, 0.90);
     --scroll-thumb: rgba(100, 116, 139, .25);
 
-    /* Glass system tokens */
+    /* Glass system */
     --glass-bg-light: rgba(255, 255, 255, 0.82);
     --glass-border-light: rgba(255, 255, 255, 0.70);
-    --glass-shadow-light: 0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0,0,0,0.06);
+    --glass-shadow-light: 0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.06);
     --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
     --glass-blur: blur(20px) saturate(180%);
 
@@ -55,7 +55,7 @@
     /* Glass system tokens (dark) */
     --glass-bg-light: rgba(255, 255, 255, 0.09);
     --glass-border-light: rgba(255, 255, 255, 0.13);
-    --glass-shadow-light: 0 8px 32px rgba(0, 0, 0, 0.40), 0 2px 6px rgba(0,0,0,0.25);
+    --glass-shadow-light: 0 8px 32px rgba(0, 0, 0, 0.40), 0 2px 6px rgba(0, 0, 0, 0.25);
     --glass-inner-glow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
     --glass-blur: blur(20px) saturate(180%);
 }
@@ -226,12 +226,34 @@ main {
 }
 
 /* ── Fixed floating nav bar (mobile only) ── */
+/*
+ * Scroll animation uses CSS custom properties:
+ *   --nav-slide   : vertical offset in px (0 = fully visible, positive = slides down/hidden)
+ *   --nav-scale   : overall scale factor  (1 = full size)
+ *   --nav-opacity : opacity              (1 = fully opaque)
+ * JS writes these via el.style.setProperty() so the transition
+ * handles all easing — no class toggling needed.
+ */
 .mobile-nav {
     display: none;
     position: fixed;
     bottom: 1.5rem;
     left: 50%;
-    transform: translateX(-50%);
+
+    /* Layer: centering + scroll-driven slide/scale */
+    --nav-slide: 0px;
+    --nav-scale: 1;
+    --nav-opacity: 1;
+    transform: translateX(-50%) translateY(var(--nav-slide)) scale(var(--nav-scale));
+
+    /* Smooth, GPU-composited transition (0.28s matches Instagram feel) */
+    transition:
+        transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+        padding 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: var(--nav-opacity);
+    will-change: transform, opacity;
+
     width: calc(100% - 2.5rem);
     max-width: 400px;
     border-radius: 999px;
@@ -246,6 +268,11 @@ main {
     align-items: center;
 }
 
+/* Compact state — slightly less padding when scrolling down slowly */
+.mobile-nav.nav-compact {
+    padding: 0.3rem 1rem;
+}
+
 .mobile-nav-btn {
     display: flex;
     flex-direction: column;
@@ -258,15 +285,32 @@ main {
     background: transparent;
     cursor: pointer;
     color: var(--text-muted);
-    transition: color 0.18s ease, background 0.18s ease, transform 0.12s ease;
+    /* Keep icon transition separate so tap feedback still feels snappy */
+    transition:
+        color 0.18s ease,
+        background 0.18s ease,
+        transform 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+        height 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+        font-size 0.28s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: 'DM Sans', sans-serif;
     font-size: 10px;
     font-weight: 500;
     gap: 2px;
 }
 
+/* Compact icon size */
+.nav-compact .mobile-nav-btn {
+    height: 46px;
+    font-size: 9px;
+}
+
+.nav-compact .mobile-nav-btn svg {
+    width: 17px;
+    height: 17px;
+}
+
 .mobile-nav-btn:active {
-    transform: none;
+    transform: scale(0.92);
 }
 
 .mobile-nav-btn.active {
@@ -276,6 +320,8 @@ main {
 .mobile-nav-btn svg {
     width: 20px;
     height: 20px;
+    transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+        height 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ── Page sections — hidden by default, shown when .active ── */

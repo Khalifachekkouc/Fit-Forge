@@ -8306,3 +8306,97 @@ if ("serviceWorker" in navigator) {
       .catch((err) => console.error("[SW] Registration failed:", err));
   });
 }
+
+// ── Bottom Navbar Scroll Animation ─────────────────────────────────────────
+// Scroll down → nav shrinks. Scroll up → nav restores. Never disappears.
+(function initNavScrollAnimation() {
+  const nav = document.querySelector(".mobile-nav");
+  if (!nav) return;
+
+  // ── Tuning ───────────────────────────────────────────────────────────────
+  const COMPACT_SCALE = 0.88; // how much to shrink on scroll-down
+  const COMPACT_OPACITY = 0.78; // slight fade when compact
+  const EASE = "cubic-bezier(0.4, 0, 0.2, 1)";
+  const DUR = "0.28s";
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // Inject transition inline so the global `* { transition }` reset can't override it
+  nav.style.transition = [
+    `transform ${DUR} ${EASE}`,
+    `opacity   ${DUR} ${EASE}`,
+    `padding   ${DUR} ${EASE}`,
+  ].join(", ");
+  nav.style.willChange = "transform, opacity";
+
+  // Buttons and icons animate too
+  nav.querySelectorAll(".mobile-nav-btn").forEach((btn) => {
+    btn.style.transition = [
+      `height    ${DUR} ${EASE}`,
+      `font-size ${DUR} ${EASE}`,
+    ].join(", ");
+    btn.querySelectorAll("svg").forEach((svg) => {
+      svg.style.transition = `width ${DUR} ${EASE}, height ${DUR} ${EASE}`;
+    });
+  });
+
+  let lastScrollY = window.scrollY;
+  let ticking = false;
+  let isCompact = false;
+
+  function setCompact(compact) {
+    if (isCompact === compact) return;
+    isCompact = compact;
+
+    const btns = nav.querySelectorAll(".mobile-nav-btn");
+
+    if (compact) {
+      nav.style.transform = `translateX(-50%) scale(${COMPACT_SCALE})`;
+      nav.style.opacity = String(COMPACT_OPACITY);
+      nav.style.padding = "0.25rem 1rem";
+      btns.forEach((btn) => {
+        btn.style.height = "42px";
+        btn.style.fontSize = "9px";
+        btn.querySelectorAll("svg").forEach((svg) => {
+          svg.style.width = "16px";
+          svg.style.height = "16px";
+        });
+      });
+    } else {
+      nav.style.transform = "translateX(-50%) scale(1)";
+      nav.style.opacity = "1";
+      nav.style.padding = "0.5rem 1rem";
+      btns.forEach((btn) => {
+        btn.style.height = "56px";
+        btn.style.fontSize = "10px";
+        btn.querySelectorAll("svg").forEach((svg) => {
+          svg.style.width = "20px";
+          svg.style.height = "20px";
+        });
+      });
+    }
+  }
+
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+
+    requestAnimationFrame(() => {
+      ticking = false;
+      const currentY = window.scrollY;
+      const delta = currentY - lastScrollY; // positive = scrolling down
+      lastScrollY = currentY;
+
+      if (currentY <= 4) {
+        setCompact(false); // always full-size at top
+      } else if (delta > 0) {
+        setCompact(true); // scrolling down → shrink
+      } else if (delta < 0) {
+        setCompact(false); // scrolling up → restore
+      }
+    });
+  }
+
+  window.addEventListener("scroll", onScroll, { passive: true });
+  document.addEventListener("scroll", onScroll, { passive: true });
+})();
+// ── End Bottom Navbar Scroll Animation ─────────────────────────────────────
