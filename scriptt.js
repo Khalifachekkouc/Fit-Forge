@@ -8691,12 +8691,179 @@ function openDaySummary(dateStr) {
   navigate("day-summary");
 }
 
+function checkStreakCondition(dStr) {
+  const goals = getGoals(dStr);
+  const gymDay = getGymDay(dStr);
+  const isWorkout = gymDay && gymDay.exercises && gymDay.exercises.length > 0;
+
+  const foodLog = getFoodLog(dStr) || [];
+  const cals = foodLog.reduce((s, e) => s + e.calories, 0);
+  const isDiet = goals.calories > 0 && cals >= (goals.calories * 0.9);
+
+  const waterGoal = calcWaterGoal();
+  const water = getWaterIntake(dStr);
+  const isWater = waterGoal > 0 && water >= waterGoal;
+
+  let met = 0;
+  if (isWorkout) met++;
+  if (isDiet) met++;
+  if (isWater) met++;
+  
+  return met >= 2;
+}
+
+function computeStreak() {
+  let dateObj = new Date();
+  
+  let streak = 0;
+  let todayMet = checkStreakCondition(fmt(dateObj));
+  if (todayMet) streak++;
+  
+  dateObj.setDate(dateObj.getDate() - 1);
+  if (!todayMet && !checkStreakCondition(fmt(dateObj))) {
+      return 0; // Missed today AND yesterday = streak is fully 0
+  }
+  
+  // Loop backward starting from yesterday
+  while (true) {
+      if (checkStreakCondition(fmt(dateObj))) {
+          streak++;
+          dateObj.setDate(dateObj.getDate() - 1);
+      } else {
+          break;
+      }
+  }
+  return streak;
+}
+
+const STREAK_MESSAGES = [
+  "You've completed {n} days, you're on the right track!",
+  "A solid {n}-day streak. Keep pushing your limits!",
+  "{n} days of discipline. The results are compounding.",
+  "Unstoppable! {n} consecutive days of action.",
+  "That makes {n} days. Keep carving your best self.",
+  "Streak of {n} active days. You're building a machine.",
+  "Consistency is key! {n} days down.",
+  "{n} days of pure dedication. Don't break the chain!",
+  "Day {n} conquered. Momentum is your superpower.",
+  "Another day, another victory! {n} days strong.",
+  "Your streak hits {n}! Stay hungry, stay focused.",
+  "{n} days in a row! The grind never stops.",
+  "Look at you! {n} days of unbroken progress.",
+  "Commitment level: {n} days. Outstanding.",
+  "You're on fire! {n} days of crushing your goals.",
+  "Success is rented. You've paid for {n} days straight.",
+  "Don't look back. {n} days of forward motion.",
+  "Building the ultimate habit: {n} days and counting.",
+  "{n} days. This is what transformation looks like.",
+  "Consistency over everything. {n} days marked.",
+  "No excuses for {n} days. True discipline.",
+  "{n} straight days of prioritizing your health.",
+  "Keep fueling the fire! {n} days active.",
+  "That’s {n} days! The hardest part is starting.",
+  "You've shown up for {n} days. Respect the process.",
+  "Nothing can stop you. {n} days of execution.",
+  "Habit formed! Look at those {n} days.",
+  "Day {n} logged. You are beating the old you.",
+  "{n} days of sweat and unwavering consistency.",
+  "Your streak is at {n}. Make tomorrow count too.",
+  "{n} days in the bank. Don't lose this energy.",
+  "Stay savage. {n} days of holding the line.",
+  "Every single day matters. {n} days down.",
+  "{n} consecutive victories over laziness.",
+  "You are sculpting a better life. {n} days.",
+  "Incredible focus! A {n}-day winning streak.",
+  "You're making this look easy. {n} days in a row.",
+  "Dedication is an action. You've done it for {n} days.",
+  "{n} days of choosing progress over comfort.",
+  "The momentum is real. You're at {n} days.",
+  "Don't let the fire die! {n} days of action.",
+  "{n} days. Your future self is cheering you on.",
+  "A masterful {n}-day run. Keep the rhythm.",
+  "You've crushed exactly {n} consecutive days.",
+  "{n} days. One day at a time, you're winning.",
+  "Iron sharpens iron. {n} days of sharpening.",
+  "Unbreakable! {n} days of solid effort.",
+  "This is your lifestyle now. {n} days deep.",
+  "{n} days of keeping the promise to yourself.",
+  "You are defying the odds. {n} days straight.",
+  "A perfect streak of {n} days. Fantastic work.",
+  "Leveling up every day! {n} days achieved.",
+  "{n} days. Proving to yourself what you're capable of.",
+  "No days off from progress! {n} on the board.",
+  "You've locked in {n} days! Stay consistent.",
+  "This streak of {n} days is evidence of your power.",
+  "{n} days! You are writing an epic comeback story.",
+  "A beautiful {n}-day streak. Embrace the grind.",
+  "{n} days. The mirror reflects this discipline.",
+  "You are unstoppable today. {n} days running.",
+  "Consistency builds legends. Great work for {n} days.",
+  "You're an absolute machine! {n} days logged.",
+  "Don't break it now! You're {n} days in.",
+  "{n} days of investing in yourself.",
+  "The only way is up. {n} days of climbing.",
+  "You've got that winner's mindset. {n} days.",
+  "{n} consecutive acts of self-improvement.",
+  "You're out-working everyone. {n} days straight.",
+  "{n} days! Let's make it another one tomorrow.",
+  "The fire is burning bright. {n}-day streak!"
+];
+
+function updateStreakUI() {
+  const chip = document.getElementById("streak-chip");
+  if (!chip) return;
+
+  const streak = computeStreak();
+  
+  if (streak === 0) {
+      chip.className = "streak-ribbon"; // hide
+      chip.classList.remove("active");
+      chip.innerHTML = "";
+      return;
+  }
+
+  let icon = "🔥";
+  let classes = ["streak-ribbon", "active"];
+  
+  if (streak >= 3) classes.push("streak-3");
+  if (streak >= 7) classes.push("streak-7");
+  if (streak >= 30) {
+      classes.push("streak-30");
+      icon = "🏆";
+  }
+
+  chip.className = classes.join(" ");
+  
+  // Stable pseudo-random message selection so it doesn't flicker on re-renders
+  const todayVal = new Date().getDate();
+  const seed = streak + (todayVal * 13);
+  const msgTemplate = STREAK_MESSAGES[seed % STREAK_MESSAGES.length];
+  const msgText = msgTemplate.replace(/{n}/g, streak);
+  
+  chip.innerHTML = `<span class="flame" style="flex-shrink:0">${icon}</span> <span>${msgText}</span>`;
+  
+  // Show Smart Milestone messages just once when they open dashboard on a milestone day
+  const lsKey = `milestone_seen_${streak}`;
+  if ((streak === 3 || streak === 7 || streak === 30 || streak % 10 === 0) && !localStorage.getItem(lsKey) && checkStreakCondition(fmt(new Date()))) {
+      localStorage.setItem(lsKey, "true");
+      setTimeout(() => {
+          if (typeof renderSmartMessage === "function") {
+              // Hacky way to inject to the smart panel, but fitforge uses an array inside renderDashboard usually.
+              // Let's just create a toast if we can, or append to panel.
+              showToast(`🎉 Milestone Reached: ${streak} Day Streak! Pure discipline!`, "success");
+          } else {
+              showToast(`🎉 Incredible! ${streak} Day Gamification Streak!`, "success");
+          }
+      }, 500);
+  }
+}
+
 // Hook into initial dashboard render to ensure calendar is ready if navigated to
 const _origRenderDashCal = window.renderDashboard;
 window.renderDashboard = function() {
   if (typeof _origRenderDashCal === "function") _origRenderDashCal();
-  // Ensure calendar grid exists if on calendar page
   if (currentPage === "calendar") renderCalendar();
+  updateStreakUI();
 };
 
 const _origNavigateCal = window.navigate;

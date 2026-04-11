@@ -5010,3 +5010,86 @@ body.auth-open {
     border-radius: 50%;
     background: var(--accent-color);
 }
+
+/* ── Gamification Streak System ── */
+.streak-ribbon {
+    display: none;
+    align-items: center;
+    gap: .75rem;
+    padding: .85rem 1rem;
+    border-radius: 16px;
+    font-size: .875rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    background: var(--entry-bg);
+    border: 1px solid transparent;
+    color: var(--text-color);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.streak-ribbon.active {
+    display: flex !important;
+}
+
+@keyframes streakFlame {
+    0% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 1px rgba(255, 120, 0, 0));
+    }
+
+    50% {
+        transform: scale(1.15);
+        filter: drop-shadow(0 0 6px rgba(255, 120, 0, 0.8));
+    }
+
+    100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 1px rgba(255, 120, 0, 0));
+    }
+}
+
+.streak-ribbon .flame {
+    animation: streakFlame 2s ease-in-out infinite;
+    display: inline-block;
+    font-size: 1.1rem;
+}
+
+/* Miletones */
+.streak-ribbon.streak-3 {
+    background: linear-gradient(90deg, rgba(227, 106, 48, 0.15), rgba(237, 142, 91, 0.15));
+    border-color: rgba(237, 142, 91, 0.4);
+    color: #ffd0a6;
+}
+
+@keyframes streakPulseInner {
+    0% {
+        box-shadow: inset 0 0 2px rgba(237, 142, 91, 0.4);
+    }
+
+    50% {
+        box-shadow: inset 0 0 12px rgba(237, 142, 91, 0.8);
+    }
+
+    100% {
+        box-shadow: inset 0 0 2px rgba(237, 142, 91, 0.4);
+    }
+}
+
+.streak-ribbon.streak-7 {
+    background: linear-gradient(90deg, rgba(227, 106, 48, 0.25), rgba(237, 142, 91, 0.25));
+    border-color: rgba(237, 142, 91, 0.6);
+    color: #fff;
+    animation: streakPulseInner 2s infinite;
+}
+
+.streak-ribbon.streak-30 {
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.25), rgba(255, 140, 0, 0.25));
+    border-color: rgba(255, 215, 0, 0.8);
+    color: #ffe600;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
