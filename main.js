@@ -15,19 +15,6 @@
   };
 
   firebase.initializeApp(firebaseConfig);
-
-  // Enable offline persistence
-  firebase.firestore().enablePersistence()
-    .catch((err) => {
-      if (err.code === 'failed-precondition') {
-        console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
-      } else if (err.code === 'unimplemented') {
-        console.warn('The current browser does not support all of the features required to enable persistence.');
-      } else {
-        console.warn('Error enabling Firestore persistence:', err);
-      }
-    });
-
   const auth = firebase.auth();
 
   let currentUser = null;

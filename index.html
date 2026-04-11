@@ -492,16 +492,22 @@
       <div class="card glass-card" style="padding: 1.25rem;">
         <div class="calendar-header">
           <button class="icon-btn" onclick="changeCalendarMonth(-1)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+              stroke-width="2" viewBox="0 0 24 24">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
           </button>
           <div style="text-align:center">
             <h2 id="calendar-month-label" style="font-size: 1.1rem; font-weight: 700; margin:0">Month Year</h2>
           </div>
           <button class="icon-btn" onclick="changeCalendarMonth(1)">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor"
+              stroke-width="2" viewBox="0 0 24 24">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
           </button>
         </div>
-        
+
         <div class="calendar-weekdays">
           <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
         </div>
@@ -515,9 +521,13 @@
     <div id="page-day-summary" class="page">
       <div class="summary-header card glass-card">
         <button class="icon-btn" onclick="navigate('calendar')" style="margin-right: auto; color: var(--accent-color);">
-           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor"
+            stroke-width="2" viewBox="0 0 24 24">
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
         </button>
-        <h2 id="summary-date-label" style="font-size:1.1rem; margin:0; position:absolute; left:50%; transform:translateX(-50%)">Date</h2>
+        <h2 id="summary-date-label"
+          style="font-size:1.1rem; margin:0; position:absolute; left:50%; transform:translateX(-50%)">Date</h2>
       </div>
 
       <div class="section-header" style="margin-top: 1.25rem;">
@@ -535,27 +545,37 @@
           <!-- Calories -->
           <div class="summary-prog-item">
             <div class="summary-prog-label"><span>Calories</span><span id="sum-cal-text">0 / 0</span></div>
-            <div class="summary-bar-bg"><div class="summary-bar-fill fill-cal" id="sum-cal-bar" style="width:0%"></div></div>
+            <div class="summary-bar-bg">
+              <div class="summary-bar-fill fill-cal" id="sum-cal-bar" style="width:0%"></div>
+            </div>
           </div>
           <!-- Protein -->
           <div class="summary-prog-item">
             <div class="summary-prog-label"><span>Protein</span><span id="sum-pro-text">0 / 0g</span></div>
-            <div class="summary-bar-bg"><div class="summary-bar-fill fill-pro" id="sum-pro-bar" style="width:0%"></div></div>
+            <div class="summary-bar-bg">
+              <div class="summary-bar-fill fill-pro" id="sum-pro-bar" style="width:0%"></div>
+            </div>
           </div>
           <!-- Carbs -->
           <div class="summary-prog-item">
             <div class="summary-prog-label"><span>Carbs</span><span id="sum-carb-text">0 / 0g</span></div>
-            <div class="summary-bar-bg"><div class="summary-bar-fill fill-carb" id="sum-carb-bar" style="width:0%"></div></div>
+            <div class="summary-bar-bg">
+              <div class="summary-bar-fill fill-carb" id="sum-carb-bar" style="width:0%"></div>
+            </div>
           </div>
           <!-- Fat -->
           <div class="summary-prog-item">
             <div class="summary-prog-label"><span>Fat</span><span id="sum-fat-text">0 / 0g</span></div>
-            <div class="summary-bar-bg"><div class="summary-bar-fill fill-fat" id="sum-fat-bar" style="width:0%"></div></div>
+            <div class="summary-bar-bg">
+              <div class="summary-bar-fill fill-fat" id="sum-fat-bar" style="width:0%"></div>
+            </div>
           </div>
           <!-- Water -->
           <div class="summary-prog-item">
             <div class="summary-prog-label"><span>Water</span><span id="sum-wat-text">0 / 0 ml</span></div>
-            <div class="summary-bar-bg"><div class="summary-bar-fill fill-wat" id="sum-wat-bar" style="width:0%"></div></div>
+            <div class="summary-bar-bg">
+              <div class="summary-bar-fill fill-wat" id="sum-wat-bar" style="width:0%"></div>
+            </div>
           </div>
         </div>
       </div>
