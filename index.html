@@ -179,13 +179,20 @@
               </svg>
               <span id="water-remaining-label">2450 ml left</span>
             </div>
-            <div class="water-btn-group">
-              <button class="water-cancel-btn" id="water-cancel-btn" onclick="cancelWater(250)" title="Cancel last cup">
-                −250 ml
-              </button>
-              <button class="water-add-btn" id="water-add-btn" onclick="addWater(250)">
-                +250 ml
-              </button>
+            <div class="water-btn-group" id="water-btn-group">
+              <div class="water-view-default">
+                <button class="water-cancel-btn" id="water-cancel-btn" onclick="cancelWater(250)" title="Undo last cup">
+                  −250 ml
+                </button>
+                <button class="water-add-btn" id="water-add-btn">
+                  +250 ml
+                </button>
+              </div>
+              <div id="water-quick-menu" class="water-view-quick">
+                <button class="wq-item" onclick="addWater(250); hideWaterQuickMenu();">+250ml</button>
+                <button class="wq-item" onclick="addWater(500); hideWaterQuickMenu();">+500ml</button>
+                <button class="wq-item" onclick="addWater(1000); hideWaterQuickMenu();">+1L</button>
+              </div>
             </div>
           </div>
         </div>
@@ -252,6 +259,23 @@
             </svg>
             Add Exercise
           </button>
+        </div>
+        <div id="smart-suggestion-container" class="smart-suggestion-card" style="display:none">
+          <div class="ss-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor"
+              stroke-width="2.5" viewBox="0 0 24 24">
+              <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+          </div>
+          <div class="ss-content">
+            <div class="ss-title">Smart Suggestion</div>
+            <div class="ss-text" id="ss-text">You trained this muscle recently. Want to repeat the same workout?</div>
+          </div>
+          <div class="ss-actions">
+            <button class="btn btn-ghost btn-sm" onclick="closeSmartSuggestion()">No</button>
+            <button class="btn btn-primary btn-sm" id="ss-confirm-btn">Yes, Repeat</button>
+          </div>
         </div>
         <div id="exercises-container"></div>
       </div>
@@ -459,6 +483,81 @@
         </div>
       </div>
     </div>
+
+    <!-- ── Calendar Page ── -->
+    <div id="page-calendar" class="page">
+      <div class="card glass-card" style="padding: 1.25rem;">
+        <div class="calendar-header">
+          <button class="icon-btn" onclick="changeCalendarMonth(-1)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <div style="text-align:center">
+            <h2 id="calendar-month-label" style="font-size: 1.1rem; font-weight: 700; margin:0">Month Year</h2>
+          </div>
+          <button class="icon-btn" onclick="changeCalendarMonth(1)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        
+        <div class="calendar-weekdays">
+          <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+        </div>
+        <div class="calendar-grid" id="calendar-grid">
+          <!-- Calendar days injected by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Daily Overview Summary Page ── -->
+    <div id="page-day-summary" class="page">
+      <div class="summary-header card glass-card">
+        <button class="btn-icon" onclick="navigate('calendar')" style="margin-right: auto; color: var(--accent-color);">
+           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <h2 id="summary-date-label" style="font-size:1.1rem; margin:0; position:absolute; left:50%; transform:translateX(-50%)">Date</h2>
+      </div>
+
+      <div class="section-header" style="margin-top: 1.25rem;">
+        <h2 class="section-title">Workout Summary</h2>
+      </div>
+      <div id="summary-workouts" class="card glass-card" style="padding: 1rem;">
+        <!-- Workout items injected here -->
+      </div>
+
+      <div class="section-header" style="margin-top:1.5rem">
+        <h2 class="section-title">Nutrition & Water</h2>
+      </div>
+      <div class="card glass-card" style="padding: 1.25rem;">
+        <div class="summary-progress-bars">
+          <!-- Calories -->
+          <div class="summary-prog-item">
+            <div class="summary-prog-label"><span>Calories</span><span id="sum-cal-text">0 / 0</span></div>
+            <div class="summary-bar-bg"><div class="summary-bar-fill fill-cal" id="sum-cal-bar" style="width:0%"></div></div>
+          </div>
+          <!-- Protein -->
+          <div class="summary-prog-item">
+            <div class="summary-prog-label"><span>Protein</span><span id="sum-pro-text">0 / 0g</span></div>
+            <div class="summary-bar-bg"><div class="summary-bar-fill fill-pro" id="sum-pro-bar" style="width:0%"></div></div>
+          </div>
+          <!-- Carbs -->
+          <div class="summary-prog-item">
+            <div class="summary-prog-label"><span>Carbs</span><span id="sum-carb-text">0 / 0g</span></div>
+            <div class="summary-bar-bg"><div class="summary-bar-fill fill-carb" id="sum-carb-bar" style="width:0%"></div></div>
+          </div>
+          <!-- Fat -->
+          <div class="summary-prog-item">
+            <div class="summary-prog-label"><span>Fat</span><span id="sum-fat-text">0 / 0g</span></div>
+            <div class="summary-bar-bg"><div class="summary-bar-fill fill-fat" id="sum-fat-bar" style="width:0%"></div></div>
+          </div>
+          <!-- Water -->
+          <div class="summary-prog-item">
+            <div class="summary-prog-label"><span>Water</span><span id="sum-wat-text">0 / 0 ml</span></div>
+            <div class="summary-bar-bg"><div class="summary-bar-fill fill-wat" id="sum-wat-bar" style="width:0%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Records page: auto-updated personal-best lift cards -->
     <div id="page-records" class="page">
       <div class="prog-page-header">

@@ -4659,3 +4659,354 @@ body.auth-open {
     position: sticky;
     top: 1.5rem;
 }
+
+/* ── Smart Suggestion Card ── */
+.smart-suggestion-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--card-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    animation: ssSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: var(--shadow-sm);
+}
+
+@keyframes ssSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.ss-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: var(--accent-bg);
+    color: var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.ss-content {
+    flex: 1;
+}
+
+.ss-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 2px;
+}
+
+.ss-text {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.3;
+}
+
+.ss-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.75rem;
+    height: 32px;
+}
+
+/* ── Water Quick Add Menu (Morphing) ── */
+.water-btn-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    min-height: 42px;
+}
+
+.water-view-default,
+.water-view-quick {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.water-view-quick {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+    height: 100%;
+    display: none;
+    opacity: 0;
+    transform: scale(0.95);
+    pointer-events: none;
+    gap: 0.35rem;
+    /* Reduced gap */
+}
+
+/* State Toggles */
+.water-btn-group.quick-mode .water-view-default {
+    opacity: 0;
+    transform: scale(0.95);
+    pointer-events: none;
+}
+
+.water-btn-group.quick-mode .water-view-quick {
+    display: flex;
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+.wq-item {
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    border: none;
+    padding: .48rem 0.8rem;
+    /* Slightly reduced horizontal padding */
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: .82rem;
+    /* Slightly reduced font size */
+    font-weight: 700;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.1s, background 0.15s, box-shadow 0.15s;
+    text-align: center;
+    box-shadow: 0 2px 10px rgba(56, 189, 248, .3);
+    flex-shrink: 1;
+    /* Allow shrinking to prevent overflow */
+}
+
+.wq-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(56, 189, 248, .4);
+}
+
+.wq-item:active {
+    transform: scale(0.96);
+}
+
+/* Floating Feedback */
+.water-float-msg {
+    position: absolute;
+    pointer-events: none;
+    color: var(--accent-color);
+    font-weight: 700;
+    font-size: 0.85rem;
+    animation: waterFloatFade 1.2s forwards;
+    z-index: 1000;
+}
+
+@keyframes waterFloatFade {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-40px);
+        opacity: 0;
+    }
+}
+
+/* ── Calendar Page ── */
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.35rem;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-main);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    position: relative;
+}
+
+.calendar-day.empty {
+    cursor: default;
+}
+
+.calendar-day:not(.empty):hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.calendar-day:not(.empty):active {
+    transform: scale(0.9);
+}
+
+/* Trained indicator - iOS Style subtle dot */
+.calendar-day.trained::after {
+    content: '';
+    position: absolute;
+    bottom: 12%;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent-color);
+}
+
+.calendar-day.today {
+    background: rgba(31, 173, 150, 0.15);
+    color: var(--accent-color);
+}
+
+/* ── Daily Overview Summary Page ── */
+.summary-header {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    position: relative;
+    justify-content: center;
+}
+
+.summary-progress-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.summary-prog-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.summary-prog-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.summary-bar-bg {
+    width: 100%;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 99px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.summary-bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Shiny Glass Edge Reflection */
+.summary-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.02) 100%);
+    border-radius: 99px 99px 0 0;
+    pointer-events: none;
+}
+
+/* Softer gradients for the glossy base */
+.fill-cal {
+    background: linear-gradient(135deg, #e36a30, #ed8e5b) !important;
+}
+
+.fill-pro {
+    background: linear-gradient(135deg, #0e9cb8, #2ac2e0) !important;
+}
+
+.fill-carb {
+    background: linear-gradient(135deg, #7c4bdb, #9b7de0) !important;
+}
+
+.fill-fat {
+    background: linear-gradient(135deg, #dfab12, #ebd05b) !important;
+}
+
+.fill-wat {
+    background: linear-gradient(135deg, #028fcb, #2baeee) !important;
+}
+
+.summary-empty-text {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    text-align: center;
+    padding: 1rem;
+}
+
+/* Calendar Multi-Dots */
+.calendar-dots {
+    display: flex;
+    gap: 3px;
+    position: absolute;
+    bottom: 12%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.calendar-day::after {
+    display: none !important; /* Remove the single dot pseudo-element */
+}
+
+.dot-food {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #f57a3d;
+}
+
+.dot-gym {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--accent-color);
+}

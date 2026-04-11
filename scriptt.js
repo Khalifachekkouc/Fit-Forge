@@ -297,6 +297,10 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Body Profile
         </button>
+        <button class="auth-menu-item" onclick="authGoToCalendar()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>
+          Calendar
+        </button>
         <button class="auth-menu-item" onclick="authGoToRecords()">
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
           Personal Records
@@ -347,6 +351,11 @@
   window.authGoToProfile = function () {
     closeUserMenu();
     if (typeof navigate === "function") navigate("profile");
+  };
+
+  window.authGoToCalendar = function () {
+    closeUserMenu();
+    if (typeof navigate === "function") navigate("calendar");
   };
 
   window.authGoToRecords = function () {
@@ -939,9 +948,17 @@ function setMuscleGroup(mg) {
   }
   const dateStr = fmt(gymDate);
   const wd = getGymDay(dateStr);
+  const prevMg = wd.muscleGroup;
   wd.muscleGroup = mg;
   saveGymDay(dateStr, wd);
   renderGym();
+
+  // Smart Suggestion: Check for recent workouts of this type (if not already logged)
+  if (mg && mg !== prevMg && (!wd.exercises || wd.exercises.length === 0)) {
+    checkRecentWorkout(mg);
+  } else {
+    closeSmartSuggestion();
+  }
 }
 
 // Generates the exercise table rows with inline edit panels
@@ -7751,11 +7768,25 @@ function addWater(ml) {
   const newVal = current + ml;
   saveWaterIntake(dateStr, newVal);
 
+  // Animation & Visual Feedback
   const consumedEl = document.getElementById("water-consumed-display");
   if (consumedEl) {
     consumedEl.classList.remove("pulse");
     void consumedEl.offsetWidth;
     consumedEl.classList.add("pulse");
+  }
+
+  // Floating Message Feedback
+  const btn = document.getElementById("water-add-btn");
+  if (btn) {
+    const rect = btn.getBoundingClientRect();
+    const msg = document.createElement("div");
+    msg.className = "water-float-msg";
+    msg.textContent = `+${ml}ml added 💧`;
+    msg.style.left = `${rect.left + rect.width / 2}px`;
+    msg.style.top = `${rect.top - 10}px`;
+    document.body.appendChild(msg);
+    setTimeout(() => msg.remove(), 1200);
   }
 
   renderWaterCard();
@@ -8399,4 +8430,280 @@ if ("serviceWorker" in navigator) {
   window.addEventListener("scroll", onScroll, { passive: true });
   document.addEventListener("scroll", onScroll, { passive: true });
 })();
+// ── Smart Workout Suggestion Logic ──────────────────────────────────────────
+
+// Checks the last 10 days for a workout of the matching muscle group
+function checkRecentWorkout(mg) {
+  const today = new Date();
+  const gymData = load(KEYS.gym) || {};
+  let foundDate = null;
+  let foundWorkout = null;
+
+  // Iterate backwards from 1 to 10 days ago
+  for (let i = 1; i <= 10; i++) {
+    const d = addDays(today, -i);
+    const ds = fmt(d);
+    const wd = gymData[ds];
+    if (
+      wd &&
+      wd.muscleGroup === mg &&
+      wd.exercises &&
+      wd.exercises.length > 0
+    ) {
+      foundDate = ds;
+      foundWorkout = wd;
+      break; // Found the most recent one
+    }
+  }
+
+  const container = document.getElementById("smart-suggestion-container");
+  if (foundDate && container) {
+    const text = document.getElementById("ss-text");
+    if (text) {
+      const dateLabel = new Date(foundDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
+      text.innerHTML = `You trained <strong>${mg}</strong> on ${dateLabel}. Want to repeat the same exercises?`;
+    }
+
+    const confirmBtn = document.getElementById("ss-confirm-btn");
+    if (confirmBtn) {
+      confirmBtn.onclick = () => repeatWorkout(foundDate);
+    }
+
+    container.style.display = "flex";
+  } else {
+    closeSmartSuggestion();
+  }
+}
+
+// Clones exercises from a previous workout date to the current gym day
+function repeatWorkout(prevDateStr) {
+  const prevWorkout = getGymDay(prevDateStr);
+  if (!prevWorkout || !prevWorkout.exercises) return;
+
+  const dateStr = fmt(gymDate);
+  const currentWorkout = getGymDay(dateStr);
+
+  // Deep clone exercises and assign new unique IDs
+  const clonedExercises = prevWorkout.exercises.map((ex) => ({
+    ...ex,
+    id: uniqueId(), // Ensure unique ID for the new day
+    notes: ex.notes || "", // Keep notes
+  }));
+
+  currentWorkout.exercises = clonedExercises;
+  saveGymDay(dateStr, currentWorkout);
+  renderGym();
+  closeSmartSuggestion();
+  showToast("Workout loaded! 💪");
+}
+
+function closeSmartSuggestion() {
+  const container = document.getElementById("smart-suggestion-container");
+  if (container) container.style.display = "none";
+}
+// ── Water Quick Add Interaction Logic ────────────────────────────────────────
+
+(function initWaterQuickAdd() {
+  let pressTimer = null;
+  let longPressed = false;
+  const PRESS_DURATION = 450; // Threshold in ms
+
+  function onStart(e) {
+    if (e.type === "touchstart") e.preventDefault(); // Prevent double trigger
+    longPressed = false;
+    clearTimeout(pressTimer);
+    pressTimer = setTimeout(() => {
+      longPressed = true;
+      showWaterQuickMenu();
+    }, PRESS_DURATION);
+  }
+
+  function onEnd(e) {
+    clearTimeout(pressTimer);
+    if (!longPressed) {
+      // It was a short tap
+      addWater(250);
+    }
+  }
+
+  function onCancel() {
+    clearTimeout(pressTimer);
+  }
+
+  // Attach to button (wrapped in logic to ensure it runs when Gym page exists)
+  const btn = document.getElementById("water-add-btn");
+  if (!btn) {
+    // Retry later if dash isn't ready
+    setTimeout(initWaterQuickAdd, 500);
+    return;
+  }
+
+  // Handlers for both Mouse and Touch
+  btn.addEventListener("mousedown", onStart);
+  btn.addEventListener("touchstart", onStart, { passive: false });
+
+  btn.addEventListener("mouseup", onEnd);
+  btn.addEventListener("touchend", onEnd);
+
+  btn.addEventListener("mouseleave", onCancel);
+  btn.addEventListener("touchcancel", onCancel);
+
+  // Global listener to hide menu on outside click
+  document.addEventListener("click", (e) => {
+    const group = document.getElementById("water-btn-group");
+    if (group && !group.contains(e.target)) {
+      hideWaterQuickMenu();
+    }
+  });
+})();
+
+window.showWaterQuickMenu = function () {
+  const group = document.getElementById("water-btn-group");
+  if (group) group.classList.add("quick-mode");
+};
+
+window.hideWaterQuickMenu = function () {
+  const group = document.getElementById("water-btn-group");
+  if (group) group.classList.remove("quick-mode");
+};
 // ── End Bottom Navbar Scroll Animation ─────────────────────────────────────
+
+// ── Calendar & Daily Overview Logic ────────────────────────────────────────
+
+let calCurrentFocus = new Date();
+
+function changeCalendarMonth(offset) {
+  calCurrentFocus.setMonth(calCurrentFocus.getMonth() + offset);
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const monthLabel = document.getElementById("calendar-month-label");
+  const grid = document.getElementById("calendar-grid");
+  if (!monthLabel || !grid) return;
+
+  const y = calCurrentFocus.getFullYear();
+  const m = calCurrentFocus.getMonth();
+  
+  monthLabel.textContent = new Date(y, m).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+
+  const firstDay = new Date(y, m, 1).getDay();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+
+  const todayStr = fmt(new Date());
+  const gymData = load(KEYS.gym) || {};
+
+  let html = "";
+
+  // Filler days for start of month
+  for (let i = 0; i < firstDay; i++) {
+    html += `<div class="calendar-day empty"></div>`;
+  }
+
+  // Actual days
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dObj = new Date(y, m, d);
+    const dStr = fmt(dObj);
+    const wd = gymData[dStr];
+    
+    const isTrained = wd && wd.exercises && wd.exercises.length > 0;
+    const foodEntries = getFoodLog(dStr) || [];
+    const hasFood = foodEntries.length > 0;
+
+    const isTodayFlag = dStr === todayStr;
+    
+    let cls = "calendar-day";
+    if (isTodayFlag) cls += " today";
+
+    html += `
+      <button class="${cls}" onclick="openDaySummary('${dStr}')">
+        <span>${d}</span>
+        <div class="calendar-dots">
+          ${hasFood ? '<span class="dot-food"></span>' : ''}
+          ${isTrained ? '<span class="dot-gym"></span>' : ''}
+        </div>
+      </button>
+    `;
+  }
+
+  grid.innerHTML = html;
+}
+
+function openDaySummary(dateStr) {
+  const dateParts = dateStr.split("-");
+  const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+  
+  // Try to use displayDate if it exists, otherwise fallback
+  let dateLabel = dateStr;
+  try {
+      dateLabel = (typeof displayDate === "function") ? displayDate(dateObj) : dateObj.toLocaleDateString('en-US', {weekday: 'long', month: 'short', day: 'numeric'});
+  } catch(e) {}
+  
+  document.getElementById("summary-date-label").textContent = dateLabel;
+
+  // 1. Workout Summary
+  const wd = getGymDay(dateStr);
+  const exContainer = document.getElementById("summary-workouts");
+  if (wd && wd.exercises && wd.exercises.length > 0) {
+    exContainer.innerHTML = wd.exercises.map(ex => `
+      <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem; font-size:0.9rem;">
+        <span style="font-weight:600; color:var(--text-main)">${escHtml(ex.name)}</span>
+        <span style="color:var(--text-muted)">${ex.sets} × ${ex.reps} ➔ ${ex.weight}kg</span>
+      </div>
+    `).join("");
+  } else {
+    exContainer.innerHTML = `<div class="summary-empty-text">Rest Day</div>`;
+  }
+
+  // 2. Nutrition Summary
+  const goals = getGoals(dateStr);
+  const entries = getFoodLog(dateStr);
+  const totals = entries.reduce(
+    (a, e) => ({
+      cal: a.cal + e.calories,
+      pro: a.pro + e.protein,
+      carb: a.carb + e.carbs,
+      fat: a.fat + e.fat,
+    }),
+    { cal: 0, pro: 0, carb: 0, fat: 0 }
+  );
+
+  const updateProg = (idParams, val, target, unit) => {
+    const pct = target > 0 ? Math.min((val / target) * 100, 100) : 0;
+    document.getElementById(`sum-${idParams}-text`).textContent = `${val} / ${target}${unit}`;
+    const bar = document.getElementById(`sum-${idParams}-bar`);
+    if(bar) bar.style.width = `${pct}%`;
+  };
+
+  updateProg("cal", totals.cal, goals.calories, " kcal");
+  updateProg("pro", totals.pro, goals.protein, "g");
+  updateProg("carb", totals.carb, goals.carbs, "g");
+  updateProg("fat", totals.fat, goals.fat, "g");
+
+  // 3. Water Summary
+  const waterTarget = calcWaterGoal();
+  const waterIntake = getWaterIntake(dateStr);
+  updateProg("wat", waterIntake, waterTarget, " ml");
+
+  navigate("day-summary");
+}
+
+// Hook into initial dashboard render to ensure calendar is ready if navigated to
+const _origRenderDashCal = window.renderDashboard;
+window.renderDashboard = function() {
+  if (typeof _origRenderDashCal === "function") _origRenderDashCal();
+  // Ensure calendar grid exists if on calendar page
+  if (currentPage === "calendar") renderCalendar();
+};
+
+const _origNavigateCal = window.navigate;
+window.navigate = function(page) {
+  _origNavigateCal(page);
+  if (page === "calendar") {
+    calCurrentFocus = new Date();
+    renderCalendar();
+  }
+};
